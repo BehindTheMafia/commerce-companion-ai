@@ -22,10 +22,16 @@ function AuthPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: "/app" });
+    supabase.auth.getSession().then(async ({ data }) => {
+      if (!data.session) return;
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("onboarding_completed")
+        .eq("id", data.session.user.id)
+        .maybeSingle();
+      window.location.href = profile?.onboarding_completed ? "/app" : "/onboarding";
     });
-  }, [navigate]);
+  }, []);
 
   async function handleEmail(e: React.FormEvent) {
     e.preventDefault();
@@ -42,11 +48,13 @@ function AuthPage() {
         });
         if (error) throw error;
         toast.success("¡Cuenta creada! Revisa tu email si es necesario.");
+        setLoading(false);
+        return;
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
       }
-      navigate({ to: "/app" });
+      window.location.href = "/onboarding";
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Error de autenticación");
     } finally {
@@ -57,13 +65,12 @@ function AuthPage() {
   async function handleGoogle() {
     setLoading(true);
     try {
-      const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin + "/auth",
-      });
+      const result = await lovable.auth.signInWithOAuth("google");
       if (result.error) throw result.error;
       if (result.redirected) return;
-      navigate({ to: "/app" });
+      window.location.href = "/onboarding";
     } catch (err) {
+      console.error("Google OAuth error:", err);
       toast.error(err instanceof Error ? err.message : "Error con Google");
       setLoading(false);
     }
