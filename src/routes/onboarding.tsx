@@ -26,7 +26,7 @@ import {
   detectTimezone,
   type Country,
 } from "@/lib/countries";
-import { getSubdomainUrl } from "@/lib/subdomain";
+
 
 export const Route = createFileRoute("/onboarding")({
   component: OnboardingPage,
@@ -246,7 +246,7 @@ function OnboardingPage() {
                 </div>
               </div>
               <p className="text-xs text-muted-foreground">
-                {slug ? getSubdomainUrl(slug) : "Auto-generated from business name"}
+                {slug ? `hyperbeecommerce.vercel.app/go/${slug}` : "Auto-generated from business name"}
               </p>
               {slugAvailable === false && (
                 <p className="text-xs text-destructive">This URL is already taken</p>

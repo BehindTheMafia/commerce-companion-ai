@@ -8,8 +8,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { getSubdomainUrl } from "@/lib/subdomain";
-import { Globe, Copy, Check } from "lucide-react";
+import { Globe, Copy, Check, ExternalLink } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/app/settings")({
   component: SettingsPage,
@@ -53,15 +52,21 @@ function SettingsPage() {
               </div>
               <div>
                 <p className="text-sm font-medium">Tu tienda online</p>
-                <p className="text-xs text-muted-foreground">
-                  {getSubdomainUrl(activeBusiness.slug)}
-                </p>
+                <a
+                  href={`/go/${activeBusiness.slug}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 text-xs text-muted-foreground underline transition-colors hover:text-foreground"
+                >
+                  hyperbeecommerce.vercel.app/go/{activeBusiness.slug}
+                  <ExternalLink className="size-3" />
+                </a>
               </div>
             </div>
             <button
               type="button"
               onClick={() => {
-                navigator.clipboard.writeText(getSubdomainUrl(activeBusiness.slug));
+                navigator.clipboard.writeText(`https://hyperbeecommerce.vercel.app/go/${activeBusiness.slug}`);
                 setCopied(true);
                 setTimeout(() => setCopied(false), 2000);
               }}
