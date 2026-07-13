@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useBusiness } from "@/lib/business-context";
 import { PageHeader } from "@/components/admin/page-header";
+import { ImageUpload } from "@/components/admin/image-upload";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -234,8 +235,8 @@ function ProductForm({
           </div>
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="p-img">URL de imagen</Label>
-          <Input id="p-img" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://..." />
+          <Label>Imagen del producto</Label>
+          <ImageUpload value={imageUrl} onChange={setImageUrl} />
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="p-desc">Descripción</Label>
