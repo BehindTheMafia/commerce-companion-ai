@@ -213,10 +213,13 @@ function BusinessSwitcher() {
     try {
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) throw new Error("No autenticado");
-      const slug =
-        name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") +
-        "-" +
-        Math.random().toString(36).slice(2, 6);
+      const base = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").replace(/-+/g, "-").slice(0, 30);
+      let slug = base;
+      for (let attempt = 0; attempt < 10; attempt++) {
+        const testSlug = attempt === 0 ? base : `${base}-${attempt}`;
+        const { data: existing } = await supabase.from("businesses").select("id").eq("slug", testSlug).maybeSingle();
+        if (!existing) { slug = testSlug; break; }
+      }
       const { data, error } = await supabase
         .from("businesses")
         .insert({ name, slug, created_by: userData.user.id })

@@ -1,5 +1,7 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 import {
   ArrowRight,
   MessageSquare,
@@ -9,12 +11,23 @@ import {
   Zap,
   BarChart3,
 } from "lucide-react";
+import { getSubdomain } from "@/lib/subdomain";
 
 export const Route = createFileRoute("/")({
   component: Landing,
 });
 
 function Landing() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session) {
+        navigate({ to: "/app", replace: true });
+      }
+    });
+  }, [navigate]);
+
   return (
     <div className="min-h-screen bg-background">
       {/* Nav */}

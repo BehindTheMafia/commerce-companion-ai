@@ -68,35 +68,46 @@ function OnboardingPage() {
     setTimezone(detectTimezone());
   }, []);
 
+  async function checkSlug(s: string) {
+    setSlugChecking(true);
+    let candidate = s;
+    for (let attempt = 0; attempt < 10; attempt++) {
+      const testSlug = attempt === 0 ? candidate : `${candidate}-${attempt}`;
+      const { data } = await supabase
+        .from("businesses")
+        .select("id")
+        .eq("slug", testSlug)
+        .maybeSingle();
+      if (!data) {
+        setSlug(testSlug);
+        setSlugAvailable(true);
+        setSlugChecking(false);
+        return;
+      }
+    }
+    setSlugAvailable(false);
+    setSlugChecking(false);
+  }
+
   useEffect(() => {
     if (!businessName.trim()) {
       setSlug("");
       setSlugAvailable(null);
       return;
     }
-    const generated = businessName
+    const base = businessName
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-|-$/g, "")
+      .replace(/-+/g, "-")
       .slice(0, 30);
-    setSlug(generated);
-
-    if (generated.length < 3) {
+    if (base.length < 3) {
+      setSlug(base);
       setSlugAvailable(null);
       return;
     }
-
-    setSlugChecking(true);
-    const timer = setTimeout(async () => {
-      const { data } = await supabase
-        .from("businesses")
-        .select("id")
-        .eq("slug", generated)
-        .maybeSingle();
-      setSlugAvailable(!data);
-      setSlugChecking(false);
-    }, 400);
-    return () => clearTimeout(timer);
+    setSlug(base);
+    checkSlug(base);
   }, [businessName]);
 
   function canContinue(): boolean {
