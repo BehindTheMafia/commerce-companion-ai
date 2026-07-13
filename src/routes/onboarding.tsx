@@ -234,7 +234,7 @@ function OnboardingPage() {
                 </div>
               </div>
               <p className="text-xs text-muted-foreground">
-                {slug ? `${slug}.myplatform.com` : "Auto-generated from business name"}
+                {slug ? `${slug}.commerce-ai.app` : "Auto-generated from business name"}
               </p>
               {slugAvailable === false && (
                 <p className="text-xs text-destructive">This URL is already taken</p>

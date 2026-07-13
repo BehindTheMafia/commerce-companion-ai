@@ -134,7 +134,7 @@ function MovementForm({
         type === "in" ? product.stock + qty :
         type === "out" ? product.stock - qty :
         qty;
-      const { error: pErr } = await supabase.from("products").update({ stock: newStock }).eq("id", productId);
+      const { error: pErr } = await supabase.from("products").update({ stock: newStock }).eq("business_id", activeBusiness.id).eq("id", productId);
       if (pErr) throw pErr;
 
       toast.success("Movimiento registrado");
