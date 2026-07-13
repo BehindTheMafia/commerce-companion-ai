@@ -41,8 +41,9 @@ export function ImageUpload({ value, onChange, className }: Props) {
 
       const data = await res.json();
       onChange(data.url as string);
-    } catch {
-      alert("Error al subir la imagen.");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Error desconocido";
+      alert("Error al subir la imagen: " + msg);
     } finally {
       setUploading(false);
     }
