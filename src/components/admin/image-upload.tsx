@@ -16,6 +16,10 @@ export function ImageUpload({ value, onChange, className }: Props) {
   const [uploading, setUploading] = useState(false);
 
   async function handleFile(file: File) {
+    if (!IK_PUBLIC_KEY) {
+      alert("Error: VITE_IMAGEKIT_PUBLIC_KEY no está configurada");
+      return;
+    }
     setUploading(true);
     try {
       const { token, expire, signature } = await getImageKitAuth();
