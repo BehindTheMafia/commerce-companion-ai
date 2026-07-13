@@ -10,10 +10,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Package, Search } from "lucide-react";
+import { Plus, Package, Search, Pencil } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -29,7 +29,8 @@ function ProductsPage() {
   const { activeBusiness } = useBusiness();
   const qc = useQueryClient();
   const [q, setQ] = useState("");
-  const [open, setOpen] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["products", activeBusiness?.id],
@@ -37,7 +38,7 @@ function ProductsPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("products")
-        .select("id,name,sku,price,sale_price,stock,status,image_url,category:categories(name)")
+        .select("id,name,slug,sku,price,sale_price,stock,status,image_url,description,category_id,category:categories(name)")
         .eq("business_id", activeBusiness!.id)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -58,24 +59,27 @@ function ProductsPage() {
     q ? p.name.toLowerCase().includes(q.toLowerCase()) || (p.sku ?? "").toLowerCase().includes(q.toLowerCase()) : true,
   );
 
+  const editingProduct = editingId ? products.find((p) => p.id === editingId) ?? null : null;
+
   return (
     <div className="mx-auto max-w-7xl p-6">
       <PageHeader
         title="Productos"
         description="Gestiona tu catálogo, precios e inventario."
         action={
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button className="gap-2"><Plus className="size-4" /> Nuevo producto</Button>
-            </DialogTrigger>
-            <ProductForm
-              categories={categories}
-              onDone={() => {
-                setOpen(false);
-                qc.invalidateQueries({ queryKey: ["products"] });
-                qc.invalidateQueries({ queryKey: ["dashboard-stats"] });
-              }}
-            />
+          <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+            <Button className="gap-2" onClick={() => setCreateOpen(true)}><Plus className="size-4" /> Nuevo producto</Button>
+            {createOpen && (
+              <ProductForm
+                categories={categories}
+                onDone={() => {
+                  setCreateOpen(false);
+                  qc.invalidateQueries({ queryKey: ["products"] });
+                  qc.invalidateQueries({ queryKey: ["dashboard-stats"] });
+                }}
+                onCancel={() => setCreateOpen(false)}
+              />
+            )}
           </Dialog>
         }
       />
@@ -91,7 +95,7 @@ function ProductsPage() {
         {isLoading ? (
           <div className="p-12 text-center text-sm text-muted-foreground">Cargando...</div>
         ) : filtered.length === 0 ? (
-          <EmptyState onNew={() => setOpen(true)} />
+          <EmptyState onNew={() => setCreateOpen(true)} />
         ) : (
           <Table>
             <TableHeader>
@@ -102,6 +106,7 @@ function ProductsPage() {
                 <TableHead className="text-right">Precio</TableHead>
                 <TableHead className="text-right">Stock</TableHead>
                 <TableHead>Estado</TableHead>
+                <TableHead className="w-10" />
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -126,12 +131,32 @@ function ProductsPage() {
                   <TableCell>
                     <Badge variant={p.status === "active" ? "default" : "secondary"}>{p.status}</Badge>
                   </TableCell>
+                  <TableCell>
+                    <Button variant="ghost" size="icon" onClick={() => setEditingId(p.id)}>
+                      <Pencil className="size-4" />
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         )}
       </Card>
+
+      <Dialog open={!!editingId} onOpenChange={(o) => { if (!o) setEditingId(null); }}>
+        {editingProduct && (
+          <ProductForm
+            product={editingProduct}
+            categories={categories}
+            onDone={() => {
+              setEditingId(null);
+              qc.invalidateQueries({ queryKey: ["products"] });
+              qc.invalidateQueries({ queryKey: ["dashboard-stats"] });
+            }}
+            onCancel={() => setEditingId(null)}
+          />
+        )}
+      </Dialog>
     </div>
   );
 }
@@ -152,32 +177,35 @@ function EmptyState({ onNew }: { onNew: () => void }) {
 }
 
 function ProductForm({
+  product,
   categories,
   onDone,
+  onCancel,
 }: {
+  product?: { id: string; name: string; sku: string | null; price: number; sale_price: number | null; stock: number; description: string | null; image_url: string | null; category_id: string | null; slug: string };
   categories: Array<{ id: string; name: string }>;
   onDone: () => void;
+  onCancel: () => void;
 }) {
   const { activeBusiness } = useBusiness();
-  const [name, setName] = useState("");
-  const [sku, setSku] = useState("");
-  const [description, setDescription] = useState("");
-  const [price, setPrice] = useState("");
-  const [salePrice, setSalePrice] = useState("");
-  const [stock, setStock] = useState("0");
-  const [categoryId, setCategoryId] = useState<string>("");
-  const [imageUrl, setImageUrl] = useState("");
+  const [name, setName] = useState(product?.name ?? "");
+  const [sku, setSku] = useState(product?.sku ?? "");
+  const [description, setDescription] = useState(product?.description ?? "");
+  const [price, setPrice] = useState(product?.price?.toString() ?? "");
+  const [salePrice, setSalePrice] = useState(product?.sale_price?.toString() ?? "");
+  const [stock, setStock] = useState(product?.stock?.toString() ?? "0");
+  const [categoryId, setCategoryId] = useState<string>(product?.category_id ?? "");
+  const [imageUrl, setImageUrl] = useState(product?.image_url ?? "");
   const [busy, setBusy] = useState(false);
+  const isEdit = !!product;
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!activeBusiness) return;
     setBusy(true);
     try {
-      const { error } = await supabase.from("products").insert({
-        business_id: activeBusiness.id,
+      const payload = {
         name,
-        slug: slugify(name) + "-" + Math.random().toString(36).slice(2, 6),
         sku: sku || null,
         description: description || null,
         price: Number(price || 0),
@@ -185,10 +213,23 @@ function ProductForm({
         stock: parseInt(stock || "0", 10),
         category_id: categoryId || null,
         image_url: imageUrl || null,
-        status: "active",
-      });
-      if (error) throw error;
-      toast.success("Producto creado");
+      };
+
+      if (isEdit) {
+        const { error } = await supabase.from("products").update(payload).eq("id", product.id);
+        if (error) throw error;
+        toast.success("Producto actualizado");
+      } else {
+        const { error } = await supabase.from("products").insert({
+          ...payload,
+          business_id: activeBusiness.id,
+          slug: slugify(name) + "-" + Math.random().toString(36).slice(2, 6),
+          status: "active",
+        });
+        if (error) throw error;
+        toast.success("Producto creado");
+      }
+
       onDone();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Error");
@@ -199,7 +240,7 @@ function ProductForm({
 
   return (
     <DialogContent className="max-w-lg">
-      <DialogHeader><DialogTitle>Nuevo producto</DialogTitle></DialogHeader>
+      <DialogHeader><DialogTitle>{isEdit ? "Editar producto" : "Nuevo producto"}</DialogTitle></DialogHeader>
       <form onSubmit={submit} className="space-y-4">
         <div className="space-y-1.5">
           <Label htmlFor="p-name">Nombre</Label>
@@ -242,8 +283,9 @@ function ProductForm({
           <Label htmlFor="p-desc">Descripción</Label>
           <Textarea id="p-desc" value={description} onChange={(e) => setDescription(e.target.value)} rows={3} />
         </div>
-        <DialogFooter>
-          <Button type="submit" disabled={busy}>Crear</Button>
+        <DialogFooter className="gap-2">
+          <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
+          <Button type="submit" disabled={busy}>{isEdit ? "Guardar" : "Crear"}</Button>
         </DialogFooter>
       </form>
     </DialogContent>
