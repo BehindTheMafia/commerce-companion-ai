@@ -8,6 +8,9 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { getSubdomainUrl } from "@/lib/subdomain";
+import { Globe, Copy, Check } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/app/settings")({
   component: SettingsPage,
@@ -18,6 +21,7 @@ function SettingsPage() {
   const [name, setName] = useState("");
   const [currency, setCurrency] = useState("USD");
   const [busy, setBusy] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (activeBusiness) { setName(activeBusiness.name); setCurrency(activeBusiness.currency); }
@@ -40,6 +44,36 @@ function SettingsPage() {
   return (
     <div className="mx-auto max-w-3xl p-6">
       <PageHeader title="Ajustes" description="Configuración general de tu empresa." />
+
+      {activeBusiness?.slug && (
+        <Card className="mt-6 p-5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="grid size-9 place-items-center rounded-xl bg-primary/10 text-primary">
+                <Globe className="size-4" />
+              </div>
+              <div>
+                <p className="text-sm font-medium">Tu tienda online</p>
+                <p className="text-xs text-muted-foreground">
+                  {getSubdomainUrl(activeBusiness.slug)}
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                navigator.clipboard.writeText(getSubdomainUrl(activeBusiness.slug));
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+              }}
+              className="grid size-8 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            >
+              {copied ? <Check className="size-4 text-success" /> : <Copy className="size-4" />}
+            </button>
+          </div>
+        </Card>
+      )}
+
       <Card className="mt-6 p-6">
         <form onSubmit={save} className="space-y-4">
           <div className="space-y-1.5">

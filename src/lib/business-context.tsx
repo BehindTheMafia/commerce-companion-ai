@@ -26,14 +26,19 @@ export function BusinessProvider({ children }: { children: ReactNode }) {
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["my-businesses"],
     queryFn: async (): Promise<Business[]> => {
-      const { data, error } = await supabase
+      const { data: memberships, error: mErr } = await supabase
         .from("memberships")
-        .select("business:businesses(id,name,slug,logo_url,currency)")
+        .select("business_id")
         .order("created_at", { ascending: true });
-      if (error) throw error;
-      return (data ?? [])
-        .map((row) => row.business as unknown as Business)
-        .filter(Boolean);
+      if (mErr) throw mErr;
+      const ids = memberships.map((m) => m.business_id);
+      if (!ids.length) return [];
+      const { data: businesses, error: bErr } = await supabase
+        .from("businesses")
+        .select("id, name, slug, logo_url, currency")
+        .in("id", ids);
+      if (bErr) throw bErr;
+      return businesses ?? [];
     },
   });
 
