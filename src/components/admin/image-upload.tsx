@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Loader2, Upload, X } from "lucide-react";
+import { getImageKitAuth } from "@/lib/imagekit-auth";
 
 const IK_PUBLIC_KEY = import.meta.env.VITE_IMAGEKIT_PUBLIC_KEY as string;
 
