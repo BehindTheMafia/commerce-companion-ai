@@ -10,7 +10,6 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { getSubdomainUrl } from "@/lib/subdomain";
 import { Globe, Copy, Check } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/app/settings")({
   component: SettingsPage,
