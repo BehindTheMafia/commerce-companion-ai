@@ -18,11 +18,16 @@ export function ImageUpload({ value, onChange, className }: Props) {
   async function handleFile(file: File) {
     setUploading(true);
     try {
+      const { token, expire, signature } = await getImageKitAuth();
+
       const formData = new FormData();
       formData.append("file", file);
       formData.append("fileName", file.name);
       formData.append("publicKey", IK_PUBLIC_KEY);
       formData.append("useUniqueFileName", "true");
+      formData.append("signature", signature);
+      formData.append("token", token);
+      formData.append("expire", String(expire));
 
       const res = await fetch("https://upload.imagekit.io/api/v1/files/upload", {
         method: "POST",
@@ -37,7 +42,7 @@ export function ImageUpload({ value, onChange, className }: Props) {
       const data = await res.json();
       onChange(data.url as string);
     } catch {
-      alert("Error al subir la imagen. Revisa que ImageKit tenga client-side upload habilitado.");
+      alert("Error al subir la imagen.");
     } finally {
       setUploading(false);
     }
