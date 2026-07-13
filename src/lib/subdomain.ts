@@ -1,20 +1,25 @@
 import { supabase } from "@/integrations/supabase/client";
 
-const APP_DOMAINS = [
-  "vercel.app",
+const ROOT_DOMAINS = [
+  "hyperbeecommerce.vercel.app",
   "localhost",
-  "commerce-companion-ai.vercel.app",
 ];
 
 export function getSubdomain(): string | null {
   if (typeof window === "undefined") return null;
-  const host = window.location.hostname;
-  if (host === "localhost" || host === "127.0.0.1") return null;
+  const host = window.location.hostname.toLowerCase();
   const parts = host.split(".");
-  if (parts.length > 2 && parts[0] !== "www") {
-    return parts[0];
-  }
-  return null;
+  if (parts[0] === "www") return null;
+
+  const hasSubdomain = ROOT_DOMAINS.some((root) => {
+    const rootParts = root.split(".");
+    return (
+      parts.length === rootParts.length + 1 &&
+      host.endsWith(root)
+    );
+  });
+
+  return hasSubdomain ? parts[0] : null;
 }
 
 export async function resolveBusinessBySlug(slug: string) {
@@ -29,10 +34,12 @@ export async function resolveBusinessBySlug(slug: string) {
 export function getSubdomainUrl(slug: string): string {
   if (typeof window === "undefined") return `/${slug}`;
   const host = window.location.hostname;
-  if (host === "localhost" || host === "127.0.0.1") {
-    return `${slug}.localhost:${window.location.port}`;
+  const port = window.location.port;
+  if (getSubdomain()) {
+    return `${slug}${host.slice(host.indexOf("."))}`;
   }
-  const parts = host.split(".");
-  const base = parts.slice(-2).join(".");
-  return `${slug}.${base}`;
+  const root = ROOT_DOMAINS.find((d) => host.endsWith(d) || d === "localhost");
+  if (!root) return `${slug}.${host}`;
+  if (root === "localhost") return `${slug}.localhost${port ? ":" + port : ""}`;
+  return `${slug}.${root}`;
 }
