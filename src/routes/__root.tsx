@@ -13,7 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { ImageKitWrapper } from "@/lib/imagekit";
+
 
 function NotFoundComponent() {
   return (
@@ -141,10 +141,8 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ImageKitWrapper>
         <Outlet />
         <Toaster richColors position="top-right" />
-      </ImageKitWrapper>
     </QueryClientProvider>
   );
 }

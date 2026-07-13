@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Image as IKImage } from "@imagekit/react";
+
 
 export const Route = createFileRoute("/go/$slug")({
   component: StorefrontPage,
@@ -162,7 +162,7 @@ function StorefrontPage() {
           {/* Logo / Brand */}
           <div className="flex items-center gap-3 text-center lg:w-auto">
             {business.logo_url && (
-              <IKImage src={business.logo_url} alt="" className="size-7 rounded-lg object-cover ring-1 ring-border/50" />
+              <img src={business.logo_url} alt="" className="size-7 rounded-lg object-cover ring-1 ring-border/50" />
             )}
             <span className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
               {business.name}
@@ -252,7 +252,7 @@ function StorefrontPage() {
           <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-18">
             <div className="flex flex-col items-center text-center">
               {business.logo_url && (
-                <IKImage src={business.logo_url} alt="" className="size-16 rounded-2xl object-cover ring-1 ring-border/50 shadow-sm mb-4" />
+                <img src={business.logo_url} alt="" className="size-16 rounded-2xl object-cover ring-1 ring-border/50 shadow-sm mb-4" />
               )}
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-foreground">
                 {business.name}
@@ -334,7 +334,7 @@ function StorefrontPage() {
           <div className="col-span-1 md:col-span-1">
             <div className="flex items-center gap-2 text-xl font-bold tracking-tight mb-5">
               {business.logo_url && (
-                <IKImage src={business.logo_url} alt="" className="size-6 rounded object-cover ring-1 ring-white/10" />
+                <img src={business.logo_url} alt="" className="size-6 rounded object-cover ring-1 ring-white/10" />
               )}
               {business.name}
             </div>
@@ -429,7 +429,7 @@ function ProductCard({
     <div className="group cursor-pointer">
       <div className="relative aspect-[3/4] bg-muted mb-3 overflow-hidden rounded-lg">
         {product.image_url && !imgError ? (
-          <IKImage
+          <img
             src={product.image_url}
             alt={product.name}
             className="size-full object-cover transition-all duration-500 group-hover:scale-105"
