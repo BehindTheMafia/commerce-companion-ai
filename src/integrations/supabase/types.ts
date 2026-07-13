@@ -588,6 +588,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_my_businesses: {
+        Args: Record<string, never>
+        Returns: {
+          id: string
+          name: string
+          slug: string
+          logo_url: string | null
+          currency: string
+        }[]
+      }
       has_business_role: {
         Args: {
           _business_id: string

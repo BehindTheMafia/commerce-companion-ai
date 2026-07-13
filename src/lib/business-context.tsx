@@ -26,19 +26,9 @@ export function BusinessProvider({ children }: { children: ReactNode }) {
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["my-businesses"],
     queryFn: async (): Promise<Business[]> => {
-      const { data: memberships, error: mErr } = await supabase
-        .from("memberships")
-        .select("business_id")
-        .order("created_at", { ascending: true });
-      if (mErr) throw mErr;
-      const ids = memberships.map((m) => m.business_id);
-      if (!ids.length) return [];
-      const { data: businesses, error: bErr } = await supabase
-        .from("businesses")
-        .select("id, name, slug, logo_url, currency")
-        .in("id", ids);
-      if (bErr) throw bErr;
-      return businesses ?? [];
+      const { data, error } = await supabase.rpc("get_my_businesses");
+      if (error) throw error;
+      return data ?? [];
     },
   });
 
