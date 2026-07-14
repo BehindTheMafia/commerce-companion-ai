@@ -325,57 +325,77 @@ function ProductForm({
   }
 
   return (
-    <DialogContent className="sm:max-w-xl">
-      <DialogHeader>
-        <DialogTitle className="text-lg">{isEdit ? "Editar producto" : "Nuevo producto"}</DialogTitle>
-      </DialogHeader>
-      <form onSubmit={submit} className="space-y-5">
-        <div className="space-y-1.5">
-          <Label htmlFor="p-name">Nombre</Label>
-          <Input id="p-name" value={name} onChange={(e) => setName(e.target.value)} required placeholder="Ej: Camiseta algodon" />
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <Label htmlFor="p-sku">SKU</Label>
-            <Input id="p-sku" value={sku} onChange={(e) => setSku(e.target.value)} placeholder="PROD-001" />
+    <DialogContent className="max-h-[92vh] sm:max-h-[85vh] w-[92vw] sm:w-full overflow-y-auto sm:max-w-xl [&>button]:top-6 [&>button]:right-6 shadow-2xl border-border/40 scrollbar-thin">
+      <div className="px-0.5">
+        <DialogHeader className="pb-5 border-b border-border/30">
+          <DialogTitle className="text-2xl tracking-tight font-semibold">{isEdit ? "Editar producto" : "Nuevo producto"}</DialogTitle>
+          <p className="text-sm text-muted-foreground/80 font-normal mt-1.5 leading-relaxed">
+            {isEdit ? "Actualiza los datos del producto." : "Completa los datos para agregar un nuevo producto a tu catalogo."}
+          </p>
+        </DialogHeader>
+
+        <form onSubmit={submit} className="pt-6 space-y-5">
+          <div className="flex justify-center pb-2">
+            <div className="w-40">
+              <ImageUpload value={imageUrl} onChange={setImageUrl} />
+            </div>
           </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="p-cat">Categoria</Label>
-            <Select value={categoryId} onValueChange={setCategoryId}>
-              <SelectTrigger id="p-cat"><SelectValue placeholder="Sin categoria" /></SelectTrigger>
-              <SelectContent>
-                {categories.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
-              </SelectContent>
-            </Select>
+
+          <div className="space-y-5">
+            <div className="space-y-2">
+              <Label htmlFor="p-name" className="text-sm font-medium tracking-tight">Nombre del producto</Label>
+              <Input id="p-name" value={name} onChange={(e) => setName(e.target.value)} required placeholder="Ej: Camiseta de algodón" className="h-10 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary/50" />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+              <div className="space-y-2">
+                <Label htmlFor="p-sku" className="text-sm font-medium tracking-tight">SKU</Label>
+                <Input id="p-sku" value={sku} onChange={(e) => setSku(e.target.value)} placeholder="PROD-001" className="h-10 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary/50" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="p-cat" className="text-sm font-medium tracking-tight">Categoría</Label>
+                <Select value={categoryId} onValueChange={setCategoryId}>
+                  <SelectTrigger id="p-cat" className="h-10 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary/50">
+                    <SelectValue placeholder="Sin categoría" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
+              <div className="space-y-2">
+                <Label htmlFor="p-price" className="text-sm font-medium tracking-tight">Precio</Label>
+                <Input id="p-price" type="number" step="0.01" min="0" value={price} onChange={(e) => setPrice(e.target.value)} required placeholder="0.00" className="h-10 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary/50" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="p-sale" className="text-sm font-medium tracking-tight">Oferta</Label>
+                <Input id="p-sale" type="number" step="0.01" min="0" value={salePrice} onChange={(e) => setSalePrice(e.target.value)} placeholder="0.00" className="h-10 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary/50" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="p-stock" className="text-sm font-medium tracking-tight">Stock</Label>
+                <Input id="p-stock" type="number" min="0" value={stock} onChange={(e) => setStock(e.target.value)} placeholder="0" className="h-10 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary/50" />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="p-desc" className="text-sm font-medium tracking-tight">Descripción</Label>
+              <Textarea id="p-desc" value={description} onChange={(e) => setDescription(e.target.value)} rows={3} placeholder="Describe los detalles del producto..." className="min-h-[88px] resize-y transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary/50" />
+            </div>
           </div>
-        </div>
-        <div className="grid grid-cols-3 gap-4">
-          <div className="space-y-1.5">
-            <Label htmlFor="p-price">Precio</Label>
-            <Input id="p-price" type="number" step="0.01" min="0" value={price} onChange={(e) => setPrice(e.target.value)} required placeholder="0.00" />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="p-sale">Oferta</Label>
-            <Input id="p-sale" type="number" step="0.01" min="0" value={salePrice} onChange={(e) => setSalePrice(e.target.value)} placeholder="0.00" />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="p-stock">Stock</Label>
-            <Input id="p-stock" type="number" min="0" value={stock} onChange={(e) => setStock(e.target.value)} placeholder="0" />
-          </div>
-        </div>
-        <div className="space-y-1.5">
-          <Label>Imagen</Label>
-          <ImageUpload value={imageUrl} onChange={setImageUrl} />
-        </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="p-desc">Descripcion</Label>
-          <Textarea id="p-desc" value={description} onChange={(e) => setDescription(e.target.value)} rows={3} placeholder="Descripcion del producto..." />
-        </div>
-        <DialogFooter className="gap-2 pt-1">
-          <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
-          <Button type="submit" disabled={busy} className="min-w-[100px]">{busy ? "Guardando..." : isEdit ? "Guardar" : "Crear"}</Button>
-        </DialogFooter>
-      </form>
+
+          <DialogFooter className="gap-3 pt-5 border-t border-border/30">
+            <Button type="button" variant="outline" onClick={onCancel} className="active:scale-[0.97] transition-all duration-150 ease-[cubic-bezier(.22,.61,.36,1)]">
+              Cancelar
+            </Button>
+            <Button type="submit" disabled={busy} className="min-w-[130px] active:scale-[0.97] transition-all duration-150 ease-[cubic-bezier(.22,.61,.36,1)]">
+              {busy ? "Guardando..." : isEdit ? "Guardar cambios" : "Crear producto"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </div>
     </DialogContent>
   );
 }
