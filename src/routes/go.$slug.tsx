@@ -65,14 +65,14 @@ function StorefrontPage() {
       if (error) throw error;
       if (!data) throw new Error("Business not found");
       let whatsapp_phone: string | null = null;
-      try {
-        const wa = await supabase
-          .from("businesses")
-          .select("whatsapp_phone")
-          .eq("id", data.id)
-          .maybeSingle();
-        if (wa.data?.whatsapp_phone) whatsapp_phone = wa.data.whatsapp_phone;
-      } catch { /* column may not exist yet */ }
+      const wa = await supabase
+        .from("businesses")
+        .select("whatsapp_phone")
+        .eq("id", data.id)
+        .maybeSingle();
+      if (!wa.error && wa.data?.whatsapp_phone) {
+        whatsapp_phone = wa.data.whatsapp_phone;
+      }
       return { ...data, whatsapp_phone };
     },
   });
