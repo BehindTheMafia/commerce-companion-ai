@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HyperBee Commerce | Tu Catálogo y Pedidos por WhatsApp</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    
+    <!-- Design System Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        midnight: '#0B0F19',
+                        charcoal: '#374151',
+                        steel: '#64748B',
+                        subtle: '#94A3B8',
+                        cloud: '#F8FAFC',
+                        surface: '#FFFFFF',
+                        border: '#E2E8F0',
+                        primary: {
+                            DEFAULT: '#2563EB',
+                            dark: '#1D4ED8',
+                            light: '#EFF6FF'
+                        },
+                        accent: '#F59E0B',
+                        success: '#22C55E'
+                    },
+                    spacing: {
+                        xs: '4px',
+                        sm: '8px',
+                        md: '16px',
+                        lg: '24px',
+                        xl: '32px',
+                        section: '96px',
+                    },
+                    borderRadius: {
+                        sm: '4px',
+                        md: '8px',
+                        lg: '12px',
+                        xl: '16px',
+                    },
+                    boxShadow: {
+                        'subtle': '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+                        'card': '0 2px 8px -2px rgba(11, 15, 25, 0.05), 0 0 0 1px #E2E8F0',
+                        'float': '0 25px 50px -12px rgba(37, 99, 235, 0.15)',
+                        'success-glow': '0 0 20px 2px rgba(34, 197, 94, 0.4)',
+                    },
+                    letterSpacing: {
+                        display: '-0.04em',
+                    },
+                    animation: {
+                        'marquee': 'marquee 40s linear infinite',
+                        'blob': 'blob 7s infinite alternate',
+                    },
+                    keyframes: {
+                        marquee: {
+                            '0%': { transform: 'translateX(0%)' },
+                            '100%': { transform: 'translateX(-50%)' },
+                        },
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            background-color: #F8FAFC;
+            color: #64748B;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        .text-balance {
+            text-wrap: balance;
+        }
+
+        /* Nav Glass Effect */
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        /* Grid Pattern */
+        .grid-pattern {
+            background-size: 40px 40px;
+            background-image:
+                linear-gradient(to right, rgba(226, 232, 240, 0.6) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(226, 232, 240, 0.6) 1px, transparent 1px);
+            mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+        }
+    </style>
+</head>
+<body class="min-h-screen overflow-x-hidden selection:bg-primary-light selection:text-primary-dark">
+
+    <header class="fixed top-0 left-0 right-0 z-50 h-[64px] glass-nav border-b border-border transition-all duration-300">
+        <div class="max-w-[1280px] mx-auto px-6 h-full flex items-center justify-between">
+            
+            <!-- Logo -->
+            <a href="#" class="flex items-center gap-2 group">
+                <div class="w-8 h-8 bg-primary rounded-md flex items-center justify-center text-white">
+                    <iconify-icon icon="lucide:shopping-bag" width="18" stroke-width="2.5"></iconify-icon>
+                </div>
+                <span class="text-xl font-bold tracking-display font-display text-midnight">HyperBee</span>
+            </a>
+
+            <!-- Desktop Nav -->
+            <nav class="hidden md:flex items-center gap-8">
+                <a href="#how-it-works" class="text-sm font-medium text-steel hover:text-primary transition-colors">Cómo funciona</a>
+                <a href="#features" class="text-sm font-medium text-steel hover:text-primary transition-colors">Beneficios</a>
+                <a href="#pricing" class="text-sm font-medium text-steel hover:text-primary transition-colors">Precios</a>
+            </nav>
+
+            <!-- Actions -->
+            <div class="flex items-center gap-4">
+                <a href="#" class="hidden md:block text-sm font-medium text-midnight hover:text-primary transition-colors">Iniciar sesión</a>
+                <button class="bg-midnight text-white hover:bg-charcoal transition-all duration-300 transform hover:-translate-y-1 font-medium px-4 py-2 rounded-md text-sm shadow-subtle focus:outline-none focus:ring-2 focus:ring-primary/20 focus:ring-offset-2">
+                    Prueba Gratis 15 Días
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="relative pt-section pb-16 lg:pb-section">
+        <!-- Ambient Grid & Blobs -->
+        <div class="absolute inset-0 grid-pattern z-0 opacity-50"></div>
+        <div class="absolute top-20 left-1/2 -translate-x-1/2 w-full max-w-4xl h-[400px] z-0 overflow-hidden pointer-events-none">
+            <div class="absolute top-10 left-20 w-72 h-72 bg-primary-light rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
+            <div class="absolute top-20 right-20 w-72 h-72 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob" style="animation-delay: 2s;"></div>
+        </div>
+
+        <div class="max-w-[1280px] mx-auto px-6 relative z-10 pt-16">
+            <div class="text-center max-w-4xl mx-auto space-y-6 mb-12">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-primary/20 bg-primary-light text-xs font-semibold text-primary">
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                    </span>
+                    Nuevo: Convierte tu WhatsApp en una máquina de ventas ⚡️
+                </div>
+                
+                <h1 class="text-5xl md:text-6xl lg:text-[72px] font-bold text-midnight tracking-display font-display leading-[1.1] text-balance">
+                    Tu catálogo online.<br />Pedidos a tu WhatsApp.
+                </h1>
+                
+                <p class="text-lg text-steel font-sans leading-relaxed max-w-2xl mx-auto">
+                    No vuelvas a responder el precio de cada producto manualmente. Comparte un solo enlace y deja que tus clientes hagan el pedido solos, organizado y directo a tu celular.
+                </p>
+
+                <!-- Beneficios Rápidos -->
+                <ul class="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-4 sm:gap-6 text-sm font-medium text-midnight mt-8">
+                    <li class="flex items-center gap-2"><iconify-icon icon="lucide:check-circle-2" class="text-primary"></iconify-icon> Configura tu tienda en minutos</li>
+                    <li class="flex items-center gap-2"><iconify-icon icon="lucide:check-circle-2" class="text-primary"></iconify-icon> Comparte un solo enlace</li>
+                    <li class="flex items-center gap-2"><iconify-icon icon="lucide:check-circle-2" class="text-primary"></iconify-icon> Pedidos automáticos</li>
+                    <li class="flex items-center gap-2"><iconify-icon icon="lucide:check-circle-2" class="text-primary"></iconify-icon> Sin conocimientos técnicos</li>
+                </ul>
+                
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-6">
+                    <button class="w-full sm:w-auto bg-primary text-white hover:bg-primary-dark transition-all duration-300 transform hover:-translate-y-1 font-medium px-8 py-3.5 rounded-md text-base shadow-subtle flex items-center justify-center gap-2">
+                        Comenzar gratis
+                        <iconify-icon icon="lucide:arrow-right" stroke-width="2"></iconify-icon>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Hero Product Screenshot Placeholder -->
+            <div class="max-w-5xl mx-auto mt-16 relative group">
+                <div class="absolute -inset-1 bg-gradient-to-r from-primary/20 to-blue-400/20 rounded-2xl blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+                <div class="relative bg-surface border border-border rounded-xl shadow-float overflow-hidden flex flex-col items-center">
+                    <!-- Faux Browser Header -->
+                    <div class="w-full h-10 border-b border-border bg-cloud/50 flex items-center px-4 gap-2">
+                        <div class="w-3 h-3 rounded-full bg-[#FF5F56]"></div>
+                        <div class="w-3 h-3 rounded-full bg-[#FFBD2E]"></div>
+                        <div class="w-3 h-3 rounded-full bg-[#27C93F]"></div>
+                        <div class="mx-auto bg-surface border border-border text-xs text-subtle px-4 py-1 rounded-md">app.hyperbee.co</div>
+                    </div>
+                    <!-- Faux Image Placeholder -->
+                    <img src="https://placehold.co/1200x675/F8FAFC/64748B?text=Screenshot:+Dashboard+Principal\n(Muestra+métricas+y+vista+previa+del+catálogo)" alt="Dashboard Screenshot" class="w-full h-auto object-cover" />
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <section class="bg-surface border-y border-border py-10 relative overflow-hidden">
+        <div class="max-w-[1280px] mx-auto px-6 mb-4">
+            <p class="text-xs font-semibold text-subtle uppercase tracking-wider text-center">La plataforma elegida por negocios de todo tipo</p>
+        </div>
+        
+        <div class="flex overflow-hidden relative w-full mask-edges">
+            <div class="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-surface to-transparent z-10"></div>
+            <div class="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-surface to-transparent z-10"></div>
+            
+            <div class="flex w-max animate-marquee hover:[animation-play-state:paused]">
+                <!-- Item Set 1 -->
+                <div class="flex items-center gap-16 px-8 grayscale opacity-60 hover:grayscale-0 transition-all duration-300">
+                    <div class="flex items-center gap-2 text-lg font-medium font-display text-charcoal"><iconify-icon icon="lucide:shirt" width="24"></iconify-icon> Moda y Ropa</div>
+                    <div class="flex items-center gap-2 text-lg font-medium font-display text-charcoal"><iconify-icon icon="lucide:sparkles" width="24"></iconify-icon> Cosméticos</div>
+                    <div class="flex items-center gap-2 text-lg font-medium font-display text-charcoal"><iconify-icon icon="lucide:wrench" width="24"></iconify-icon> Ferreterías</div>
+                    <div class="flex items-center gap-2 text-lg font-medium font-display text-charcoal"><iconify-icon icon="lucide:pill" width="24"></iconify-icon> Farmacias</div>
+                    <div class="flex items-center gap-2 text-lg font-medium font-display text-charcoal"><iconify-icon icon="lucide:shopping-basket" width="24"></iconify-icon> Pulperías</div>
+                    <div class="flex items-center gap-2 text-lg font-medium font-display text-charcoal"><iconify-icon icon="lucide:laptop" width="24"></iconify-icon> Electrónica</div>
+                </div>
+                <!-- Item Set 2 (Duplicate for smooth loop) -->
+                <div class="flex items-center gap-16 px-8 grayscale opacity-60 hover:grayscale-0 transition-all duration-300">
+                    <div class="flex items-center gap-2 text-lg font-medium font-display text-charcoal"><iconify-icon icon="lucide:shirt" width="24"></iconify-icon> Moda y Ropa</div>
+                    <div class="flex items-center gap-2 text-lg font-medium font-display text-charcoal"><iconify-icon icon="lucide:sparkles" width="24"></iconify-icon> Cosméticos</div>
+                    <div class="flex items-center gap-2 text-lg font-medium font-display text-charcoal"><iconify-icon icon="lucide:wrench" width="24"></iconify-icon> Ferreterías</div>
+                    <div class="flex items-center gap-2 text-lg font-medium font-display text-charcoal"><iconify-icon icon="lucide:pill" width="24"></iconify-icon> Farmacias</div>
+                    <div class="flex items-center gap-2 text-lg font-medium font-display text-charcoal"><iconify-icon icon="lucide:shopping-basket" width="24"></iconify-icon> Pulperías</div>
+                    <div class="flex items-center gap-2 text-lg font-medium font-display text-charcoal"><iconify-icon icon="lucide:laptop" width="24"></iconify-icon> Electrónica</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="how-it-works" class="py-section bg-cloud border-b border-border">
+        <div class="max-w-[1280px] mx-auto px-6">
+            <div class="text-center mb-20">
+                <h2 class="text-3xl md:text-4xl font-bold text-midnight tracking-display font-display mb-4">De la creación al pedido en 4 simples pasos</h2>
+                <p class="text-steel font-sans max-w-2xl mx-auto">Un flujo diseñado para eliminar la fricción entre tú y tus ventas. Descubre cómo funciona todo el proceso.</p>
+            </div>
+
+            <div class="space-y-24">
+                <!-- Step 1 -->
+                <div class="flex flex-col md:flex-row items-center gap-12 lg:gap-20">
+                    <div class="w-full md:w-1/2 space-y-6">
+                        <div class="w-12 h-12 rounded-xl bg-primary-light text-primary flex items-center justify-center font-display font-bold text-xl border border-primary/20">1</div>
+                        <h3 class="text-2xl md:text-3xl font-bold text-midnight font-display tracking-display">Crea y organiza tu catálogo</h3>
+                        <p class="text-steel text-base leading-relaxed">Añade productos con sus fotos, descripciones y precios. Agrupa todo por categorías y destaca las ofertas. Nuestro panel administrativo es tan fácil de usar que tendrás tu tienda lista hoy mismo.</p>
+                    </div>
+                    <div class="w-full md:w-1/2 relative">
+                        <div class="bg-surface border border-border rounded-xl shadow-card overflow-hidden">
+                            <img src="https://placehold.co/800x600/F1F5F9/475569?text=Screenshot:+Gesti%C3%B3n+de+Productos\n(Panel+Administrativo)" alt="Gestión de Productos" class="w-full h-auto" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="flex flex-col md:flex-row-reverse items-center gap-12 lg:gap-20">
+                    <div class="w-full md:w-1/2 space-y-6">
+                        <div class="w-12 h-12 rounded-xl bg-primary-light text-primary flex items-center justify-center font-display font-bold text-xl border border-primary/20">2</div>
+                        <h3 class="text-2xl md:text-3xl font-bold text-midnight font-display tracking-display">Comparte un único enlace</h3>
+                        <p class="text-steel text-base leading-relaxed">Olvídate de enviar PDF pesados o fotos sueltas por chat. Coloca tu enlace de HyperBee en tu biografía de Instagram, TikTok o envíalo directamente por WhatsApp. Tu negocio disponible a un clic.</p>
+                    </div>
+                    <div class="w-full md:w-1/2 relative">
+                        <div class="bg-surface border border-border rounded-xl shadow-card overflow-hidden">
+                            <img src="https://placehold.co/800x600/F1F5F9/475569?text=Screenshot:+Perfil+de+Instagram/WhatsApp\n(Mostrando+el+link+de+la+tienda)" alt="Compartir Link" class="w-full h-auto" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="flex flex-col md:flex-row items-center gap-12 lg:gap-20">
+                    <div class="w-full md:w-1/2 space-y-6">
+                        <div class="w-12 h-12 rounded-xl bg-primary-light text-primary flex items-center justify-center font-display font-bold text-xl border border-primary/20">3</div>
+                        <h3 class="text-2xl md:text-3xl font-bold text-midnight font-display tracking-display">Tus clientes eligen solos</h3>
+                        <p class="text-steel text-base leading-relaxed">Una experiencia de compra fluida en móviles. Tus clientes navegan, seleccionan variantes y suman al carrito sin necesidad de crear cuentas ni descargar aplicaciones adicionales.</p>
+                    </div>
+                    <div class="w-full md:w-1/2 relative">
+                        <div class="bg-surface border border-border rounded-xl shadow-card overflow-hidden p-6 bg-cloud flex justify-center">
+                             <!-- Representando una vista móvil -->
+                            <img src="https://placehold.co/375x812/FFFFFF/64748B?text=Screenshot:+Checkout+M%C3%B3vil\n(Cat%C3%A1logo+y+Carrito)" alt="Vista Móvil Catálogo" class="rounded-3xl border-8 border-midnight shadow-float max-h-[500px] w-auto" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="flex flex-col md:flex-row-reverse items-center gap-12 lg:gap-20">
+                    <div class="w-full md:w-1/2 space-y-6">
+                        <div class="w-12 h-12 rounded-xl bg-success/10 text-success flex items-center justify-center font-display font-bold text-xl border border-success/20">4</div>
+                        <h3 class="text-2xl md:text-3xl font-bold text-midnight font-display tracking-display">Recibe el pedido listo</h3>
+                        <p class="text-steel text-base leading-relaxed">El cliente presiona "Enviar Pedido" y tú recibes un mensaje automático en tu WhatsApp con todos los detalles: artículos, cantidades, datos del cliente y el total a cobrar. Solo confirmas y despachas.</p>
+                    </div>
+                    <div class="w-full md:w-1/2 relative">
+                        <div class="bg-surface border border-border rounded-xl shadow-card overflow-hidden">
+                            <img src="https://placehold.co/800x600/F1F5F9/22C55E?text=Screenshot:+Mensaje+generado+en+WhatsApp\n(Lista+de+pedido+estructurada)" alt="Pedido en WhatsApp" class="w-full h-auto" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="features" class="py-section bg-surface">
+        <div class="max-w-[1280px] mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-midnight tracking-display font-display mb-4">Todo lo que necesitas para profesionalizar tus ventas</h2>
+                <p class="text-steel font-sans max-w-2xl mx-auto">Herramientas poderosas integradas en una interfaz simple y limpia.</p>
+            </div>
+
+            <!-- Bento Grid Layout using Image Placeholders -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[minmax(340px,auto)]">
+                
+                <!-- Feature 1: Catálogo (Col Span 2) -->
+                <div class="md:col-span-2 bg-cloud border border-border rounded-xl p-8 shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden flex flex-col justify-between group">
+                    <div class="relative z-10 max-w-lg mb-8">
+                        <div class="w-10 h-10 rounded-lg bg-primary-light text-primary flex items-center justify-center mb-4">
+                            <iconify-icon icon="lucide:layout-grid" width="20" stroke-width="2"></iconify-icon>
+                        </div>
+                        <h3 class="text-xl font-bold text-midnight font-display tracking-display mb-2">Tu catálogo trabajando 24/7</h3>
+                        <p class="text-steel text-sm leading-relaxed">Presenta tus productos con profesionalismo. Múltiples imágenes, descripciones completas y organización impecable para que tus clientes encuentren lo que buscan sin ayuda.</p>
+                    </div>
+                    <div class="relative mt-auto w-full rounded-t-lg overflow-hidden border-t border-x border-border shadow-md">
+                        <img src="https://placehold.co/800x400/FFFFFF/475569?text=Screenshot:+Vista+Desktop+del+Cat%C3%A1logo\n(Grid+de+productos)" alt="Vista de Catálogo Web" class="w-full object-cover object-top h-64 transform group-hover:scale-[1.02] transition-transform duration-500" />
+                    </div>
+                </div>
+
+                <!-- Feature 2: Frictionless Checkout -->
+                <div class="bg-cloud border border-border rounded-xl p-8 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col relative overflow-hidden group">
+                    <div class="w-10 h-10 rounded-lg bg-red-50 text-red-500 flex items-center justify-center mb-4">
+                        <iconify-icon icon="lucide:mouse-pointer-click" width="20" stroke-width="2"></iconify-icon>
+                    </div>
+                    <h3 class="text-xl font-bold text-midnight font-display tracking-display mb-2">Checkout sin fricción</h3>
+                    <p class="text-steel text-sm leading-relaxed mb-6">Formularios optimizados para conversiones. Pedimos solo los datos necesarios para concretar la venta.</p>
+                    <div class="mt-auto w-full rounded-t-lg overflow-hidden border-t border-x border-border shadow-md">
+                         <img src="https://placehold.co/400x300/FFFFFF/475569?text=Screenshot:+Formulario+de+Checkout" alt="Checkout" class="w-full object-cover object-top transform group-hover:scale-[1.02] transition-transform duration-500" />
+                    </div>
+                </div>
+
+                <!-- Feature 3: WhatsApp Automation -->
+                <div class="bg-cloud border border-border rounded-xl p-8 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col relative overflow-hidden group">
+                    <div class="w-10 h-10 rounded-lg bg-green-50 text-success flex items-center justify-center mb-4">
+                        <iconify-icon icon="lucide:message-square" width="20" stroke-width="2"></iconify-icon>
+                    </div>
+                    <h3 class="text-xl font-bold text-midnight font-display tracking-display mb-2">Integración nativa</h3>
+                    <p class="text-steel text-sm leading-relaxed mb-6">Todos los datos del carrito se formatean perfectamente en un mensaje estructurado y listo para enviarse a tu número.</p>
+                    <div class="mt-auto w-full rounded-t-lg overflow-hidden border-t border-x border-border shadow-md">
+                         <img src="https://placehold.co/400x300/F0FDF4/166534?text=Screenshot:+Resumen+en+WhatsApp" alt="Mensaje WhatsApp" class="w-full object-cover object-top transform group-hover:scale-[1.02] transition-transform duration-500" />
+                    </div>
+                </div>
+
+                <!-- Feature 4: Management (Col Span 2) -->
+                <div class="md:col-span-2 bg-cloud border border-border rounded-xl p-8 shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden flex flex-col justify-between group">
+                    <div class="relative z-10 max-w-lg mb-8">
+                        <div class="w-10 h-10 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center mb-4">
+                            <iconify-icon icon="lucide:sliders-horizontal" width="20" stroke-width="2"></iconify-icon>
+                        </div>
+                        <h3 class="text-xl font-bold text-midnight font-display tracking-display mb-2">Gestión centralizada</h3>
+                        <p class="text-steel text-sm leading-relaxed">Actualiza precios, oculta productos agotados, crea nuevas categorías y modifica la apariencia de tu tienda desde un solo lugar.</p>
+                    </div>
+                    <div class="relative mt-auto w-full rounded-t-lg overflow-hidden border-t border-x border-border shadow-md">
+                        <img src="https://placehold.co/800x400/FFFFFF/475569?text=Screenshot:+Dashboard+de+M%C3%A9tricas+y+Gesti%C3%B3n" alt="Gestión de tienda" class="w-full object-cover object-top h-64 transform group-hover:scale-[1.02] transition-transform duration-500" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="pricing" class="py-section bg-cloud border-y border-border">
+        <div class="max-w-[1280px] mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-midnight tracking-display font-display mb-4">Planes simples y transparentes</h2>
+                <p class="text-steel font-sans max-w-2xl mx-auto">Comienza gratis hoy mismo. Escala a un plan de pago solo cuando estés listo para crecer.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                
+                <!-- Free Tier -->
+                <div class="bg-surface border border-border rounded-2xl p-8 shadow-sm flex flex-col">
+                    <div class="mb-6">
+                        <h3 class="text-xl font-bold text-midnight font-display mb-2">Prueba Gratuita</h3>
+                        <p class="text-sm text-steel">Perfecto para conocer la plataforma.</p>
+                    </div>
+                    <div class="mb-8">
+                        <div class="flex items-baseline gap-1">
+                            <span class="text-4xl font-bold text-midnight font-display">15 Días</span>
+                        </div>
+                        <p class="text-xs text-subtle mt-1 font-medium">No requiere tarjeta de crédito</p>
+                    </div>
+                    <ul class="space-y-4 mb-8 flex-1">
+                        <li class="flex items-start gap-3 text-sm text-charcoal">
+                            <iconify-icon icon="lucide:check" class="text-success mt-0.5" width="18"></iconify-icon> Acceso completo a todas las funciones
+                        </li>
+                        <li class="flex items-start gap-3 text-sm text-charcoal">
+                            <iconify-icon icon="lucide:check" class="text-success mt-0.5" width="18"></iconify-icon> Crea tu catálogo sin límites
+                        </li>
+                        <li class="flex items-start gap-3 text-sm text-charcoal">
+                            <iconify-icon icon="lucide:check" class="text-success mt-0.5" width="18"></iconify-icon> Recibe pedidos reales en WhatsApp
+                        </li>
+                    </ul>
+                    <button class="w-full bg-cloud text-midnight border border-border hover:border-subtle hover:bg-surface transition-all duration-300 font-medium px-4 py-3 rounded-lg text-sm">
+                        Comenzar gratis
+                    </button>
+                </div>
+
+                <!-- Basic Tier -->
+                <div class="bg-surface border border-border rounded-2xl p-8 shadow-sm flex flex-col">
+                    <div class="mb-6">
+                        <h3 class="text-xl font-bold text-midnight font-display mb-2">Plan Básico</h3>
+                        <p class="text-sm text-steel">Para negocios en crecimiento activo.</p>
+                    </div>
+                    <div class="mb-8">
+                        <div class="flex items-baseline gap-1">
+                            <span class="text-4xl font-bold text-midnight font-display">C$ 1,000</span>
+                            <span class="text-steel font-medium">/mes</span>
+                        </div>
+                    </div>
+                    <ul class="space-y-4 mb-8 flex-1">
+                        <li class="flex items-start gap-3 text-sm text-charcoal">
+                            <iconify-icon icon="lucide:check" class="text-success mt-0.5" width="18"></iconify-icon> Catálogo web y página de tienda
+                        </li>
+                        <li class="flex items-start gap-3 text-sm text-charcoal">
+                            <iconify-icon icon="lucide:check" class="text-success mt-0.5" width="18"></iconify-icon> Productos y categorías ilimitadas
+                        </li>
+                        <li class="flex items-start gap-3 text-sm text-charcoal">
+                            <iconify-icon icon="lucide:check" class="text-success mt-0.5" width="18"></iconify-icon> Carrito de compras integrado
+                        </li>
+                        <li class="flex items-start gap-3 text-sm text-charcoal">
+                            <iconify-icon icon="lucide:check" class="text-success mt-0.5" width="18"></iconify-icon> Enrutamiento de pedidos a WhatsApp
+                        </li>
+                        <li class="flex items-start gap-3 text-sm text-charcoal">
+                            <iconify-icon icon="lucide:check" class="text-success mt-0.5" width="18"></iconify-icon> Panel administrativo completo
+                        </li>
+                    </ul>
+                    <button class="w-full bg-cloud text-midnight border border-border hover:border-subtle hover:bg-surface transition-all duration-300 font-medium px-4 py-3 rounded-lg text-sm">
+                        Comenzar ahora
+                    </button>
+                </div>
+
+                <!-- Advanced Tier (Highlighted) -->
+                <div class="bg-midnight border-2 border-primary rounded-2xl p-8 shadow-float flex flex-col relative transform md:-translate-y-2">
+                    <div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-primary text-white text-xs font-bold uppercase tracking-wider py-1 px-3 rounded-full">
+                        Más Recomendado
+                    </div>
+                    <div class="mb-6">
+                        <h3 class="text-xl font-bold text-white font-display mb-2">Plan Avanzado</h3>
+                        <p class="text-subtle text-sm">Para operaciones de alto volumen.</p>
+                    </div>
+                    <div class="mb-8">
+                        <div class="flex items-baseline gap-1">
+                            <span class="text-4xl font-bold text-white font-display">C$ 1,500</span>
+                            <span class="text-subtle font-medium">/mes</span>
+                        </div>
+                    </div>
+                    <ul class="space-y-4 mb-8 flex-1">
+                        <li class="flex items-start gap-3 text-sm text-cloud">
+                            <iconify-icon icon="lucide:check" class="text-primary-light mt-0.5" width="18"></iconify-icon> Todo lo del plan Básico incluido
+                        </li>
+                        <li class="flex items-start gap-3 text-sm text-cloud">
+                            <iconify-icon icon="lucide:check" class="text-primary-light mt-0.5" width="18"></iconify-icon> Personalización adicional de marca
+                        </li>
+                        <li class="flex items-start gap-3 text-sm text-cloud">
+                            <iconify-icon icon="lucide:check" class="text-primary-light mt-0.5" width="18"></iconify-icon> Funciones premium de catálogo
+                        </li>
+                        <li class="flex items-start gap-3 text-sm text-cloud">
+                            <iconify-icon icon="lucide:check" class="text-primary-light mt-0.5" width="18"></iconify-icon> Preparado para futuras integraciones
+                        </li>
+                        <li class="flex items-start gap-3 text-sm text-cloud">
+                            <iconify-icon icon="lucide:check" class="text-primary-light mt-0.5" width="18"></iconify-icon> Soporte técnico prioritario
+                        </li>
+                    </ul>
+                    <button class="w-full bg-primary text-white hover:bg-primary-dark transition-all duration-300 font-medium px-4 py-3 rounded-lg text-sm shadow-lg">
+                        Elegir plan
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <section class="py-section bg-surface">
+        <div class="max-w-[1280px] mx-auto px-6">
+            <div class="bg-midnight rounded-2xl p-12 lg:p-20 text-center relative overflow-hidden shadow-float">
+                <!-- Decorative background ring -->
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] border border-charcoal rounded-full opacity-20 pointer-events-none"></div>
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] border border-charcoal rounded-full opacity-40 pointer-events-none"></div>
+                
+                <div class="relative z-10 max-w-2xl mx-auto">
+                    <h2 class="text-4xl md:text-5xl font-bold text-white tracking-display font-display mb-6">
+                        Da el siguiente paso con tu negocio.
+                    </h2>
+                    <p class="text-subtle text-lg mb-10">
+                        Únete a los emprendedores que ya digitalizaron sus ventas. Disfruta 15 días totalmente gratis, configúralo en minutos y empieza a compartir tu enlace hoy mismo.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                        <button class="bg-primary text-white hover:bg-primary-dark transition-all duration-300 transform hover:-translate-y-1 font-medium px-8 py-3 rounded-md text-sm shadow-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-midnight">
+                            Empieza Gratis por 15 Días
+                        </button>
+                        <button class="bg-transparent text-white border border-charcoal hover:border-subtle hover:bg-charcoal/30 transition-all duration-300 font-medium px-8 py-3 rounded-md text-sm">
+                            Contactar Ventas
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-surface border-t border-border pt-16 pb-8">
+        <div class="max-w-[1280px] mx-auto px-6">
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8 mb-16">
+                <div class="col-span-2 lg:col-span-2">
+                    <a href="#" class="flex items-center gap-2 mb-4">
+                        <div class="w-6 h-6 bg-primary rounded flex items-center justify-center text-white">
+                            <iconify-icon icon="lucide:shopping-bag" width="14" stroke-width="2.5"></iconify-icon>
+                        </div>
+                        <span class="text-lg font-bold tracking-display font-display text-midnight">HyperBee</span>
+                    </a>
+                    <p class="text-sm text-steel max-w-xs leading-relaxed">
+                        El software para que comercios y emprendedores gestionen su catálogo online y cierren ventas en WhatsApp fácilmente.
+                    </p>
+                </div>
+                
+                <div>
+                    <h4 class="text-xs font-bold text-midnight uppercase tracking-wider mb-4">Producto</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-sm text-steel hover:text-primary transition-colors">Catálogo web</a></li>
+                        <li><a href="#" class="text-sm text-steel hover:text-primary transition-colors">Pedidos WhatsApp</a></li>
+                        <li><a href="#" class="text-sm text-steel hover:text-primary transition-colors">Panel administrativo</a></li>
+                        <li><a href="#pricing" class="text-sm text-steel hover:text-primary transition-colors">Precios y Planes</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-xs font-bold text-midnight uppercase tracking-wider mb-4">Casos de Uso</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-sm text-steel hover:text-primary transition-colors">Ropa y Moda</a></li>
+                        <li><a href="#" class="text-sm text-steel hover:text-primary transition-colors">Cosméticos y Belleza</a></li>
+                        <li><a href="#" class="text-sm text-steel hover:text-primary transition-colors">Ferreterías</a></li>
+                        <li><a href="#" class="text-sm text-steel hover:text-primary transition-colors">Farmacias</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="text-xs font-bold text-midnight uppercase tracking-wider mb-4">Compañía</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-sm text-steel hover:text-primary transition-colors">Sobre Nosotros</a></li>
+                        <li><a href="#" class="text-sm text-steel hover:text-primary transition-colors">Blog</a></li>
+                        <li><a href="#" class="text-sm text-steel hover:text-primary transition-colors">Soporte técnico</a></li>
+                        <li><a href="#" class="text-sm text-steel hover:text-primary transition-colors">Contacto</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-border pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-xs text-subtle">© 2026 HyperBee Commerce. Todos los derechos reservados.</p>
+                <div class="flex gap-6">
+                    <a href="#" class="text-xs text-subtle hover:text-midnight transition-colors">Políticas de Privacidad</a>
+                    <a href="#" class="text-xs text-subtle hover:text-midnight transition-colors">Términos del Servicio</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>

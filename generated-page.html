@@ -1,0 +1,443 @@
+<html lang="en" class="scroll-smooth"><head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aphoria Beauty | Premium Skincare &amp; Cosmetics</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&amp;family=Montserrat:wght@200;300;400;500&amp;display=swap" rel="stylesheet">
+<style>
+:root {
+--color-black: #1A1A1A;
+--color-gold: #C9A96E;
+--color-cream: #FAF8F5;
+}
+body {
+font-family: 'Montserrat', sans-serif;
+background-color: var(--color-cream);
+color: var(--color-black);
+-webkit-font-smoothing: antialiased;
+}
+h1, h2, h3, h4, h5, h6, .serif {
+font-family: 'Cormorant Garamond', serif;
+}
+/* Custom UI Elements */
+.custom-radio:checked + div {
+border-color: #1A1A1A;
+background-color: #F5F5F5;
+}
+.no-scrollbar::-webkit-scrollbar {
+display: none;
+}
+.no-scrollbar {
+-ms-overflow-style: none;
+scrollbar-width: none;
+}
+details > summary {
+list-style: none;
+}
+details > summary::-webkit-details-marker {
+display: none;
+}
+.glass-panel {
+background: rgba(250, 248, 245, 0.8);
+backdrop-filter: blur(12px);
+-webkit-backdrop-filter: blur(12px);
+}
+</style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <!-- Announcement Bar -->
+    <div class="bg-brand-black text-white text-xs py-2 text-center tracking-wide font-light">
+        <span class="opacity-90">✨ COMPLIMENTARY SHIPPING ON ORDERS +$50 | CODE: <span class="font-medium text-brand-gold">BEAUTY15</span></span>
+    </div>
+
+    <!-- Header -->
+    <header class="sticky top-0 z-50 w-full border-b border-stone-200/60 glass-panel">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+            
+            <!-- Mobile Menu Trigger -->
+            <button class="lg:hidden text-brand-black">
+                <iconify-icon icon="lucide:menu" width="20" stroke-width="1.5"></iconify-icon>
+            </button>
+
+            <!-- Search (Desktop) -->
+            <div class="hidden lg:flex items-center gap-2 w-1/4">
+                <iconify-icon icon="lucide:search" width="18" stroke-width="1.5" class="text-brand-gray"></iconify-icon>
+                <input type="text" placeholder="Search products..." class="bg-transparent text-xs placeholder-brand-gray focus:outline-none w-full font-light">
+            </div>
+
+            <!-- Logo -->
+            <a href="#" class="text-2xl lg:text-3xl serif tracking-tight font-medium text-brand-black text-center w-full lg:w-auto">
+                APHORIA
+            </a>
+
+            <!-- Icons -->
+            <div class="flex items-center justify-end gap-5 w-1/4">
+                <button class="hidden lg:block relative group">
+                    <iconify-icon icon="lucide:heart" width="18" stroke-width="1.5"></iconify-icon>
+                </button>
+                <button class="hidden lg:block">
+                    <iconify-icon icon="lucide:user" width="18" stroke-width="1.5"></iconify-icon>
+                </button>
+                <button class="flex items-center gap-1">
+                    <div class="relative">
+                        <iconify-icon icon="lucide:shopping-bag" width="18" stroke-width="1.5"></iconify-icon>
+                        <span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-brand-black rounded-full text-[8px] text-white flex items-center justify-center">2</span>
+                    </div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Navigation (Desktop) -->
+        <nav class="hidden lg:flex justify-center border-t border-stone-100 py-3">
+            <ul class="flex gap-8 text-xs tracking-widest font-normal text-brand-black/80">
+                <li class="hover:text-brand-gold transition-colors cursor-pointer group relative">
+                    SKINCARE
+                    <div class="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-48 bg-white border border-stone-100 shadow-sm opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 p-4 z-50">
+                        <ul class="space-y-2 text-brand-gray text-[11px] normal-case tracking-normal">
+                            <li class="hover:text-brand-black cursor-pointer">Cleansers</li>
+                            <li class="hover:text-brand-black cursor-pointer">Serums</li>
+                            <li class="hover:text-brand-black cursor-pointer">Moisturizers</li>
+                            <li class="hover:text-brand-black cursor-pointer">Sun Protection</li>
+                        </ul>
+                    </div>
+                </li>
+                <li class="hover:text-brand-gold transition-colors cursor-pointer">BODYCARE</li>
+                <li class="hover:text-brand-gold transition-colors cursor-pointer">MAKEUP</li>
+                <li class="hover:text-brand-gold transition-colors cursor-pointer">SETS</li>
+                <li class="hover:text-brand-gold transition-colors cursor-pointer">NEW IN</li>
+                <li class="text-red-900/80 hover:text-red-900 transition-colors cursor-pointer">SALE</li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="flex-grow">
+        
+        <!-- Product Detail Section -->
+        <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+            
+            <!-- Breadcrumb -->
+            <div class="flex items-center gap-2 text-[10px] uppercase tracking-wider text-brand-gray mb-8">
+                <a href="#" class="hover:text-brand-black">Home</a>
+                <iconify-icon icon="lucide:chevron-right" width="10"></iconify-icon>
+                <a href="#" class="hover:text-brand-black">Skincare</a>
+                <iconify-icon icon="lucide:chevron-right" width="10"></iconify-icon>
+                <span class="text-brand-black">Hydra Glow Serum</span>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
+                
+                <!-- Gallery (Left - 7 cols) -->
+                <div class="lg:col-span-7 flex flex-col gap-4">
+                    <div class="relative w-full aspect-[4/5] bg-[#F0EFED] overflow-hidden rounded-sm group">
+                        <!-- Main Image Placeholder -->
+                        <img src="https://images.unsplash.com/photo-1620916566398-39f1143ab7be?q=80&amp;w=1887&amp;auto=format&amp;fit=crop" alt="Hydra Glow Serum" class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700">
+                        <div class="absolute top-4 left-4 bg-brand-black/5 backdrop-blur-md px-3 py-1 rounded-full">
+                            <span class="text-[10px] font-medium tracking-wide">BESTSELLER</span>
+                        </div>
+                    </div>
+                    <!-- Thumbnails -->
+                    <div class="grid grid-cols-4 gap-4">
+                        <button class="aspect-square bg-[#F0EFED] rounded-sm border border-brand-black overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1620916566398-39f1143ab7be?q=80&amp;w=300&amp;auto=format&amp;fit=crop" class="w-full h-full object-cover">
+                        </button>
+                        <button class="aspect-square bg-[#F0EFED] rounded-sm border border-transparent hover:border-brand-gray/50 overflow-hidden transition-all">
+                             <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/917d6f93-fb36-439a-8c48-884b67b35381_1600w.jpg" class="w-full h-full object-cover opacity-80 hover:opacity-100">
+                        </button>
+                        <button class="aspect-square bg-[#F0EFED] rounded-sm border border-transparent hover:border-brand-gray/50 overflow-hidden transition-all">
+                             <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/4734259a-bad7-422f-981e-ce01e79184f2_1600w.jpg" class="w-full h-full object-cover opacity-80 hover:opacity-100">
+                        </button>
+                        <div class="aspect-square bg-[#F0EFED] rounded-sm border border-transparent flex items-center justify-center cursor-pointer hover:bg-stone-200 transition-colors">
+                            <iconify-icon icon="lucide:play-circle" width="24" class="text-brand-black/60"></iconify-icon>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Info (Right - 5 cols) -->
+                <div class="lg:col-span-5 flex flex-col h-full">
+                    <div class="border-b border-brand-black/10 pb-6 mb-6">
+                        <div class="flex items-center gap-1 text-brand-gold mb-3 text-xs">
+                            <iconify-icon icon="lucide:star" width="12" class="fill-current"></iconify-icon>
+                            <iconify-icon icon="lucide:star" width="12" class="fill-current"></iconify-icon>
+                            <iconify-icon icon="lucide:star" width="12" class="fill-current"></iconify-icon>
+                            <iconify-icon icon="lucide:star" width="12" class="fill-current"></iconify-icon>
+                            <iconify-icon icon="lucide:star" width="12" class="fill-current"></iconify-icon>
+                            <span class="text-brand-gray ml-2 font-light text-[11px] underline cursor-pointer hover:text-brand-black transition-colors">124 Reviews</span>
+                        </div>
+                        
+                        <h1 class="text-4xl lg:text-5xl tracking-tight text-brand-black font-light mb-2">Hydra Glow Serum</h1>
+                        <p class="text-xl font-light text-brand-black">$45.00</p>
+                        
+                        <p class="mt-4 text-sm font-light text-brand-gray leading-relaxed">
+                            A powerful Vitamin C serum enriched with hyaluronic acid to deeply hydrate, brighten complexion, and reduce the appearance of fine lines.
+                        </p>
+                    </div>
+
+                    <!-- Custom Variant Selector -->
+                    <div class="mb-6">
+                        <span class="text-xs font-medium uppercase tracking-wide text-brand-black mb-3 block">Size</span>
+                        <div class="flex gap-3">
+                            <label class="cursor-pointer">
+                                <input type="radio" name="size" class="custom-radio hidden" checked="">
+                                <div class="px-4 py-2 border border-brand-black/20 rounded-md text-xs transition-all hover:border-brand-black/60">
+                                    30ml
+                                </div>
+                            </label>
+                            <label class="cursor-pointer">
+                                <input type="radio" name="size" class="custom-radio hidden">
+                                <div class="px-4 py-2 border border-brand-black/20 rounded-md text-xs transition-all hover:border-brand-black/60">
+                                    50ml (+$20)
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Quantity & Add to Cart -->
+                    <div class="flex gap-4 mb-6">
+                        <!-- Custom Number Input -->
+                        <div class="flex items-center border border-brand-black/20 rounded-md w-24 justify-between px-3">
+                            <button class="text-brand-black/50 hover:text-brand-black transition-colors">
+                                <iconify-icon icon="lucide:minus" width="14"></iconify-icon>
+                            </button>
+                            <span class="text-sm font-light">1</span>
+                            <button class="text-brand-black/50 hover:text-brand-black transition-colors">
+                                <iconify-icon icon="lucide:plus" width="14"></iconify-icon>
+                            </button>
+                        </div>
+                        
+                        <button class="flex-1 bg-brand-black text-white hover:bg-brand-black/90 transition-all rounded-md py-3 text-sm tracking-wide font-medium flex items-center justify-center gap-2">
+                            <span>ADD TO CART</span>
+                            <span class="w-1 h-1 bg-white rounded-full"></span>
+                            <span>$45.00</span>
+                        </button>
+                        
+                        <button class="w-12 flex items-center justify-center border border-brand-black/20 rounded-md hover:border-brand-black transition-colors">
+                            <iconify-icon icon="lucide:heart" width="18"></iconify-icon>
+                        </button>
+                    </div>
+
+                    <!-- Social Proof / Urgency -->
+                    <div class="flex items-center gap-2 bg-stone-100/50 p-3 rounded-md mb-8 border border-stone-200/50">
+                        <div class="relative flex h-2 w-2">
+                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-gold opacity-75"></span>
+                          <span class="relative inline-flex rounded-full h-2 w-2 bg-brand-gold"></span>
+                        </div>
+                        <span class="text-[11px] font-medium text-brand-black/80">12 people are viewing this right now</span>
+                    </div>
+
+                    <!-- Accordions -->
+                    <div class="space-y-0 border-t border-brand-black/10">
+                        <details class="group py-4 border-b border-brand-black/10 cursor-pointer" open="">
+                            <summary class="flex items-center justify-between text-xs font-medium uppercase tracking-wide select-none">
+                                Description
+                                <span class="transition-transform group-open:rotate-180">
+                                    <iconify-icon icon="lucide:chevron-down" width="14"></iconify-icon>
+                                </span>
+                            </summary>
+                            <div class="mt-4 text-sm font-light text-brand-gray leading-relaxed animate-in fade-in slide-in-from-top-2 duration-300">
+                                <p class="mb-2">Experience the ultimate glow. Our Hydra Glow Serum combines 15% pure Vitamin C with Hyaluronic Acid to deliver intense hydration while correcting uneven skin tone.</p>
+                                <ul class="list-disc list-inside space-y-1 ml-1 text-brand-gray/90">
+                                    <li>Boosts radiance immediately</li>
+                                    <li>Visibly reduces dark spots in 4 weeks</li>
+                                    <li>Fragrance-free &amp; non-comedogenic</li>
+                                </ul>
+                            </div>
+                        </details>
+                        
+                        <details class="group py-4 border-b border-brand-black/10 cursor-pointer">
+                            <summary class="flex items-center justify-between text-xs font-medium uppercase tracking-wide select-none">
+                                Ingredients
+                                <span class="transition-transform group-open:rotate-180">
+                                    <iconify-icon icon="lucide:chevron-down" width="14"></iconify-icon>
+                                </span>
+                            </summary>
+                            <div class="mt-4 text-xs font-mono text-brand-gray leading-relaxed">
+                                Aqua/Water, Ascorbic Acid, Glycerin, Dimethicone, Sodium Hyaluronate, Tocopherol, Hydrolyzed Hyaluronic Acid.
+                            </div>
+                        </details>
+
+                        <details class="group py-4 border-b border-brand-black/10 cursor-pointer">
+                            <summary class="flex items-center justify-between text-xs font-medium uppercase tracking-wide select-none">
+                                Shipping &amp; Returns
+                                <span class="transition-transform group-open:rotate-180">
+                                    <iconify-icon icon="lucide:chevron-down" width="14"></iconify-icon>
+                                </span>
+                            </summary>
+                            <div class="mt-4 text-sm font-light text-brand-gray leading-relaxed">
+                                Free shipping on orders over $50. We accept returns within 30 days of purchase for a full refund.
+                            </div>
+                        </details>
+                    </div>
+
+                    <!-- Trust Badges -->
+                    <div class="grid grid-cols-3 gap-2 mt-8 pt-4">
+                        <div class="flex flex-col items-center justify-center text-center gap-2">
+                            <iconify-icon icon="lucide:leaf" width="18" class="text-brand-black/60"></iconify-icon>
+                            <span class="text-[10px] uppercase tracking-wide text-brand-gray">Vegan</span>
+                        </div>
+                        <div class="flex flex-col items-center justify-center text-center gap-2">
+                            <iconify-icon icon="lucide:beaker" width="18" class="text-brand-black/60"></iconify-icon>
+                            <span class="text-[10px] uppercase tracking-wide text-brand-gray">Cruelty Free</span>
+                        </div>
+                        <div class="flex flex-col items-center justify-center text-center gap-2">
+                            <iconify-icon icon="lucide:shield-check" width="18" class="text-brand-black/60"></iconify-icon>
+                            <span class="text-[10px] uppercase tracking-wide text-brand-gray">Dermatologist Tested</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Cross-Sell / Complete Routine -->
+        <section class="border-t border-brand-black/5 bg-white py-16">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between mb-10">
+                    <h2 class="text-2xl lg:text-3xl tracking-tight text-brand-black font-light">Complete Your Routine</h2>
+                    <a href="#" class="text-xs font-medium underline underline-offset-4 decoration-brand-black/30 hover:decoration-brand-black transition-all">Shop All</a>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6 lg:gap-8">
+                    <!-- Product 1 -->
+                    <div class="group cursor-pointer">
+                        <div class="aspect-[3/4] bg-[#F0EFED] mb-4 relative overflow-hidden rounded-sm">
+                            <img src="https://images.unsplash.com/photo-1629198688000-71f23e745b6e?q=80&amp;w=600&amp;auto=format&amp;fit=crop" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                            <button class="absolute bottom-3 right-3 w-8 h-8 bg-white/90 backdrop-blur rounded-full flex items-center justify-center opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+                                <iconify-icon icon="lucide:plus" width="16"></iconify-icon>
+                            </button>
+                        </div>
+                        <h3 class="text-sm font-medium text-brand-black font-serif tracking-tight">Gentle Foam Cleanser</h3>
+                        <p class="text-xs text-brand-gray mt-1">$28.00</p>
+                    </div>
+
+                    <!-- Product 2 -->
+                    <div class="group cursor-pointer">
+                        <div class="aspect-[3/4] bg-[#F0EFED] mb-4 relative overflow-hidden rounded-sm">
+                            <img src="https://images.unsplash.com/photo-1601049541289-9b1b7bbbfe19?q=80&amp;w=600&amp;auto=format&amp;fit=crop" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                            <button class="absolute bottom-3 right-3 w-8 h-8 bg-white/90 backdrop-blur rounded-full flex items-center justify-center opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+                                <iconify-icon icon="lucide:plus" width="16"></iconify-icon>
+                            </button>
+                        </div>
+                        <h3 class="text-sm font-medium text-brand-black font-serif tracking-tight">Revital Eye Cream</h3>
+                        <p class="text-xs text-brand-gray mt-1">$38.00</p>
+                    </div>
+
+                    <!-- Product 3 -->
+                    <div class="group cursor-pointer">
+                        <div class="aspect-[3/4] bg-[#F0EFED] mb-4 relative overflow-hidden rounded-sm">
+                            <img src="https://images.unsplash.com/photo-1616683693504-3ea7e9ad6fec?q=80&amp;w=600&amp;auto=format&amp;fit=crop" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                            <button class="absolute bottom-3 right-3 w-8 h-8 bg-white/90 backdrop-blur rounded-full flex items-center justify-center opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+                                <iconify-icon icon="lucide:plus" width="16"></iconify-icon>
+                            </button>
+                        </div>
+                        <h3 class="text-sm font-medium text-brand-black font-serif tracking-tight">Daily Mineral SPF</h3>
+                        <p class="text-xs text-brand-gray mt-1">$32.00</p>
+                    </div>
+
+                    <!-- Product 4 -->
+                    <div class="group cursor-pointer">
+                        <div class="aspect-[3/4] bg-[#F0EFED] mb-4 relative overflow-hidden rounded-sm">
+                            <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/c543a9e1-f226-4ced-80b0-feb8445a75b9_1600w.jpg" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                            <button class="absolute bottom-3 right-3 w-8 h-8 bg-white/90 backdrop-blur rounded-full flex items-center justify-center opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+                                <iconify-icon icon="lucide:plus" width="16"></iconify-icon>
+                            </button>
+                        </div>
+                        <h3 class="text-sm font-medium text-brand-black font-serif tracking-tight">The Essentials Set</h3>
+                        <p class="text-xs text-brand-gray mt-1"><span class="line-through mr-1 opacity-50">$106</span> $85.00</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Review Snippet -->
+        <section class="py-16 bg-brand-cream border-t border-brand-black/5">
+            <div class="max-w-4xl mx-auto px-6 text-center">
+                <div class="flex justify-center gap-1 text-brand-gold mb-6">
+                    <iconify-icon icon="lucide:star" width="16" class="fill-current"></iconify-icon>
+                    <iconify-icon icon="lucide:star" width="16" class="fill-current"></iconify-icon>
+                    <iconify-icon icon="lucide:star" width="16" class="fill-current"></iconify-icon>
+                    <iconify-icon icon="lucide:star" width="16" class="fill-current"></iconify-icon>
+                    <iconify-icon icon="lucide:star" width="16" class="fill-current"></iconify-icon>
+                </div>
+                <h3 class="text-2xl lg:text-3xl font-serif italic font-light leading-snug mb-6">"This serum completely changed my skin texture in just two weeks. It's lightweight, absorbs instantly, and the glow is real."</h3>
+                <div class="flex flex-col items-center gap-1">
+                    <span class="text-xs font-semibold uppercase tracking-wider">Maria G.</span>
+                    <span class="text-[10px] text-brand-gray flex items-center gap-1">
+                        <iconify-icon icon="lucide:check-circle" width="10"></iconify-icon> Verified Buyer
+                    </span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Newsletter -->
+        <section class="py-20 border-t border-brand-black/5">
+            <div class="max-w-lg mx-auto px-6 text-center">
+                <h2 class="text-2xl tracking-tight mb-2">Join the Club</h2>
+                <p class="text-sm text-brand-gray font-light mb-6">Unlock 15% off your first order plus exclusive access to new launches.</p>
+                <form class="flex flex-col sm:flex-row gap-3">
+                    <input type="email" placeholder="Enter your email" class="flex-1 bg-transparent border border-brand-black/20 rounded-md px-4 py-3 text-sm focus:outline-none focus:border-brand-black transition-colors font-light">
+                    <button type="button" class="bg-brand-black text-white px-8 py-3 rounded-md text-sm font-medium tracking-wide hover:bg-brand-black/90 transition-colors">SUBSCRIBE</button>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-brand-black text-white pt-16 pb-8">
+        <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8 mb-16">
+            <div class="col-span-1 md:col-span-1">
+                <a href="#" class="text-2xl serif tracking-tight font-medium block mb-6">APHORIA</a>
+                <p class="text-xs text-white/60 font-light leading-relaxed mb-6">
+                    Redefining beauty with clean, effective ingredients. Luxury skincare accessible to everyone.
+                </p>
+                <div class="flex gap-4">
+                    <a href="#" class="text-white/60 hover:text-white transition-colors"><iconify-icon icon="lucide:instagram" width="18"></iconify-icon></a>
+                    <a href="#" class="text-white/60 hover:text-white transition-colors"><iconify-icon icon="lucide:facebook" width="18"></iconify-icon></a>
+                    <a href="#" class="text-white/60 hover:text-white transition-colors"><iconify-icon icon="lucide:twitter" width="18"></iconify-icon></a>
+                </div>
+            </div>
+            
+            <div>
+                <h4 class="text-xs font-semibold uppercase tracking-widest mb-6">Shop</h4>
+                <ul class="space-y-3 text-xs font-light text-white/60">
+                    <li><a href="#" class="hover:text-white transition-colors">Skincare</a></li>
+                    <li><a href="#" class="hover:text-white transition-colors">Bodycare</a></li>
+                    <li><a href="#" class="hover:text-white transition-colors">Makeup</a></li>
+                    <li><a href="#" class="hover:text-white transition-colors">Sets &amp; Gifts</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="text-xs font-semibold uppercase tracking-widest mb-6">Support</h4>
+                <ul class="space-y-3 text-xs font-light text-white/60">
+                    <li><a href="#" class="hover:text-white transition-colors">Contact Us</a></li>
+                    <li><a href="#" class="hover:text-white transition-colors">FAQ</a></li>
+                    <li><a href="#" class="hover:text-white transition-colors">Shipping</a></li>
+                    <li><a href="#" class="hover:text-white transition-colors">Returns</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="text-xs font-semibold uppercase tracking-widest mb-6">Legal</h4>
+                <ul class="space-y-3 text-xs font-light text-white/60">
+                    <li><a href="#" class="hover:text-white transition-colors">Privacy Policy</a></li>
+                    <li><a href="#" class="hover:text-white transition-colors">Terms of Service</a></li>
+                    <li><a href="#" class="hover:text-white transition-colors">Cookie Policy</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="max-w-7xl mx-auto px-6 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p class="text-[10px] text-white/40 font-light">© 2024 Aphoria Beauty. All rights reserved.</p>
+            <div class="flex gap-3 grayscale opacity-40">
+                <iconify-icon icon="lucide:credit-card" width="20"></iconify-icon>
+                <iconify-icon icon="lucide:wallet" width="20"></iconify-icon>
+            </div>
+        </div>
+    </footer>
+
+
+</body></html>

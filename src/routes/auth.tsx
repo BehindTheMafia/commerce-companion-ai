@@ -2,10 +2,17 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/animate-ui/components/buttons/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
+import {
+  Tabs,
+  TabsList,
+  TabsTab,
+  TabsPanels,
+  TabsPanel,
+} from "@/components/ui/tabs";
 import { Sparkles, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -97,8 +104,8 @@ function AuthPage() {
       </div>
 
       <div className="flex items-center justify-center p-6">
-        <Card className="w-full max-w-md border-border/60 p-8 shadow-sm">
-          <div className="mb-6 md:hidden">
+        <Card className="w-full max-w-md border-border/60 shadow-sm overflow-hidden">
+          <div className="p-6 pb-0 md:hidden">
             <Link to="/" className="flex items-center gap-2">
               <div className="grid size-8 place-items-center rounded-xl bg-primary text-primary-foreground">
                 <Sparkles className="size-4" />
@@ -106,83 +113,140 @@ function AuthPage() {
               <span className="text-base font-semibold tracking-tight">Commerce AI</span>
             </Link>
           </div>
-          <h1 className="text-2xl font-semibold tracking-tight">
-            {mode === "signin" ? "Bienvenido de vuelta" : "Crea tu cuenta"}
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {mode === "signin"
-              ? "Ingresa a tu panel de Commerce AI."
-              : "Empieza gratis en menos de un minuto."}
-          </p>
 
-          <Button
-            onClick={handleGoogle}
-            variant="outline"
-            className="mt-6 w-full gap-2"
-            disabled={loading}
+          <Tabs
+            defaultValue="signin"
+            onValueChange={(v) => setMode(v as "signin" | "signup")}
           >
-            <GoogleIcon />
-            Continuar con Google
-          </Button>
-
-          <div className="my-6 flex items-center gap-3 text-xs text-muted-foreground">
-            <span className="h-px flex-1 bg-border" />o<span className="h-px flex-1 bg-border" />
-          </div>
-
-          <form onSubmit={handleEmail} className="space-y-4">
-            {mode === "signup" && (
-              <div className="space-y-1.5">
-                <Label htmlFor="fullName">Nombre completo</Label>
-                <Input
-                  id="fullName"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  required
-                  placeholder="Ana Martínez"
-                />
-              </div>
-            )}
-            <div className="space-y-1.5">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                autoComplete="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                placeholder="tu@empresa.com"
-              />
+            <div className="px-6 pt-4">
+              <TabsList className="w-full">
+                <TabsTab value="signin" className="flex-1">Ingresar</TabsTab>
+                <TabsTab value="signup" className="flex-1">Registrarse</TabsTab>
+              </TabsList>
             </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="password">Contraseña</Label>
-              <Input
-                id="password"
-                type="password"
-                autoComplete={mode === "signup" ? "new-password" : "current-password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={6}
-                placeholder="Mínimo 6 caracteres"
-              />
-            </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading && <Loader2 className="mr-2 size-4 animate-spin" />}
-              {mode === "signin" ? "Ingresar" : "Crear cuenta"}
-            </Button>
-          </form>
 
-          <p className="mt-6 text-center text-sm text-muted-foreground">
-            {mode === "signin" ? "¿No tienes cuenta?" : "¿Ya tienes cuenta?"}{" "}
-            <button
-              type="button"
-              className="font-medium text-primary hover:underline"
-              onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
-            >
-              {mode === "signin" ? "Regístrate" : "Ingresa"}
-            </button>
-          </p>
+            <TabsPanels>
+              <TabsPanel value="signin">
+                <div className="p-6 pt-4">
+                  <h1 className="text-2xl font-semibold tracking-tight">Bienvenido de vuelta</h1>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Ingresa a tu panel de Commerce AI.
+                  </p>
+
+                  <Button
+                    onClick={handleGoogle}
+                    variant="outline"
+                    className="mt-6 w-full gap-2"
+                    disabled={loading}
+                  >
+                    <GoogleIcon />
+                    Continuar con Google
+                  </Button>
+
+                  <div className="my-6 flex items-center gap-3 text-xs text-muted-foreground">
+                    <span className="h-px flex-1 bg-border" />o<span className="h-px flex-1 bg-border" />
+                  </div>
+
+                  <form onSubmit={handleEmail} className="space-y-4">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="si-email">Email</Label>
+                      <Input
+                        id="si-email"
+                        type="email"
+                        autoComplete="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        placeholder="tu@empresa.com"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="si-password">Contraseña</Label>
+                      <Input
+                        id="si-password"
+                        type="password"
+                        autoComplete="current-password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        minLength={6}
+                        placeholder="Mínimo 6 caracteres"
+                      />
+                    </div>
+                    <Button type="submit" className="w-full" disabled={loading}>
+                      {loading && <Loader2 className="mr-2 size-4 animate-spin" />}
+                      Ingresar
+                    </Button>
+                  </form>
+                </div>
+              </TabsPanel>
+
+              <TabsPanel value="signup">
+                <div className="p-6 pt-4">
+                  <h1 className="text-2xl font-semibold tracking-tight">Crea tu cuenta</h1>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Empieza gratis en menos de un minuto.
+                  </p>
+
+                  <Button
+                    onClick={handleGoogle}
+                    variant="outline"
+                    className="mt-6 w-full gap-2"
+                    disabled={loading}
+                  >
+                    <GoogleIcon />
+                    Continuar con Google
+                  </Button>
+
+                  <div className="my-6 flex items-center gap-3 text-xs text-muted-foreground">
+                    <span className="h-px flex-1 bg-border" />o<span className="h-px flex-1 bg-border" />
+                  </div>
+
+                  <form onSubmit={handleEmail} className="space-y-4">
+                    <div className="space-y-1.5">
+                      <Label htmlFor="su-name">Nombre completo</Label>
+                      <Input
+                        id="su-name"
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        required
+                        placeholder="Ana Martínez"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="su-email">Email</Label>
+                      <Input
+                        id="su-email"
+                        type="email"
+                        autoComplete="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        placeholder="tu@empresa.com"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label htmlFor="su-password">Contraseña</Label>
+                      <Input
+                        id="su-password"
+                        type="password"
+                        autoComplete="new-password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        minLength={6}
+                        placeholder="Mínimo 6 caracteres"
+                      />
+                    </div>
+                    <Button type="submit" className="w-full" disabled={loading}>
+                      {loading && <Loader2 className="mr-2 size-4 animate-spin" />}
+                      Crear cuenta
+                    </Button>
+                  </form>
+                </div>
+              </TabsPanel>
+            </TabsPanels>
+          </Tabs>
         </Card>
       </div>
     </div>
