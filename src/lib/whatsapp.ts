@@ -1,6 +1,6 @@
 function formatPrice(price: number): string {
   return price.toLocaleString("es-ES", {
-    minimumFractionDigits: 0,
+    minimumFractionDigits: 2,
   });
 }
 
@@ -24,26 +24,41 @@ export function buildWhatsAppMessage(
   customer: CustomerInfo,
 ): string {
   const lines: string[] = [];
-  lines.push(`🛒 *Pedido - ${businessName}*`);
+  const sep = "─".repeat(30);
+
+  lines.push(`🏪 *${businessName.toUpperCase()}*`);
+  lines.push(`📋 *Nuevo Pedido*`);
+  lines.push(sep);
   lines.push("");
 
+  lines.push(`*${"Producto".padEnd(22)} Cant.  Total*`);
+
   items.forEach((item) => {
-    lines.push(
-      `• ${item.name} x${item.quantity} — $${formatPrice(item.price * item.quantity)}`,
-    );
+    const name = item.name.length > 20
+      ? item.name.slice(0, 18) + ".."
+      : item.name;
+    const line = `${name.padEnd(22)} ${String(item.quantity).padStart(3)}   $${formatPrice(item.price * item.quantity)}`;
+    lines.push(line);
   });
 
   lines.push("");
-  lines.push(`*Total: $${formatPrice(subtotal)}*`);
+  lines.push(sep);
+  lines.push(`*TOTAL*${" ".repeat(17)}$${formatPrice(subtotal)}`);
   lines.push("");
-  lines.push("━━━━━━━━━━━━");
-  lines.push("👤 *Cliente*");
-  lines.push(`Nombre: ${customer.name}`);
-  lines.push(`Teléfono: ${customer.phone}`);
-  lines.push(`Dirección: ${customer.address}`);
+  lines.push(sep);
+  lines.push("");
+
+  lines.push("👤 *DATOS DEL CLIENTE*");
+  lines.push(`   Nombre:    ${customer.name}`);
+  lines.push(`   Teléfono:  ${customer.phone}`);
+  lines.push(`   Dirección: ${customer.address}`);
   if (customer.notes) {
-    lines.push(`Notas: ${customer.notes}`);
+    lines.push(`   Notas:     ${customer.notes}`);
   }
+
+  lines.push("");
+  lines.push(sep);
+  lines.push("✅ *Gracias por tu preferencia*");
 
   return lines.join("\n");
 }
