@@ -10,7 +10,7 @@ CREATE OR REPLACE FUNCTION create_order(
   p_customer_phone TEXT,
   p_customer_address TEXT,
   p_notes TEXT DEFAULT NULL,
-  p_items JSONB
+  p_items JSONB DEFAULT '[]'::JSONB
 ) RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
