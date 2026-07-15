@@ -99,8 +99,7 @@ function Landing() {
             </Link>
             <Link to="/auth">
               <motion.button
-                whileHover={{ scale: 1.05, y: -2, boxShadow: "0 10px 25px -5px rgba(37,99,235,0.3)" }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ boxShadow: "0 10px 25px -5px rgba(37,99,235,0.3)" }}
                 className="bg-[#0B0F19] text-white hover:bg-[#2563EB] transition-colors duration-300 font-medium px-5 py-2 rounded-full text-sm flex items-center gap-2"
               >
                 Prueba Gratis
