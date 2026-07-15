@@ -167,7 +167,7 @@ function StorefrontPage() {
         p_customer_phone: data.phone,
         p_customer_address: data.address,
         p_notes: data.notes || null,
-        p_items: JSON.stringify(itemsPayload),
+        p_items: itemsPayload,
       });
 
       if (error) throw error;

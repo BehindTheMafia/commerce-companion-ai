@@ -626,7 +626,7 @@ export type Database = {
           p_customer_phone: string
           p_customer_address: string
           p_notes: string | null
-          p_items: string
+          p_items: unknown
         }
         Returns: Record<string, unknown>
       }
