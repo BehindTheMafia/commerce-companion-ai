@@ -3,18 +3,25 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Loader2, ShoppingBag, Sparkles, AlertCircle, Package,
-  ArrowRight, ExternalLink, Search, Heart, Menu, Plus,
-  Facebook, Twitter, Instagram,
+  ArrowRight, ExternalLink, Search, Heart, Menu,
+  Facebook, Twitter, Instagram, Plus, X, ChevronLeft,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-
+import { CartProvider, useCart, type CartProduct } from "@/lib/cart-context";
+import { CartDrawer } from "@/components/storefront/cart-drawer";
+import { CheckoutForm, type CustomerData } from "@/components/storefront/checkout-form";
+import { buildWhatsAppMessage, getWhatsAppLink } from "@/lib/whatsapp";
 
 export const Route = createFileRoute("/go/$slug")({
-  component: StorefrontPage,
+  component: (props) => (
+    <CartProvider>
+      <StorefrontPage />
+    </CartProvider>
+  ),
   head: ({ params }) => ({
     meta: [
       { title: `${params.slug} | Commerce AI` },
@@ -25,12 +32,12 @@ export const Route = createFileRoute("/go/$slug")({
   }),
 });
 
-type Business = { id: string; name: string; slug: string; logo_url: string | null; currency: string };
+type Business = { id: string; name: string; slug: string; logo_url: string | null; currency: string; whatsapp_phone: string | null };
 type Category = { id: string; name: string; slug: string };
 type Product = {
   id: string; name: string; slug: string; price: number;
   sale_price: number | null; image_url: string | null;
-  description: string | null; stock: number;
+  description: string | null;
   category: { name: string } | null;
 };
 
@@ -41,13 +48,18 @@ function StorefrontPage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [email, setEmail] = useState("");
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [cartOpen, setCartOpen] = useState(false);
+  const [showCheckout, setShowCheckout] = useState(false);
+  const [checkoutBusy, setCheckoutBusy] = useState(false);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
+  const { itemCount, items, clearCart, subtotal } = useCart();
 
   const { data: business, isLoading: bizLoading, error: bizError } = useQuery({
     queryKey: ["sf-business", slug],
     queryFn: async (): Promise<Business> => {
       const { data, error } = await supabase
         .from("businesses")
-        .select("id, name, slug, logo_url, currency")
+        .select("id, name, slug, logo_url, currency, whatsapp_phone")
         .eq("slug", slug)
         .maybeSingle();
       if (error) throw error;
@@ -75,7 +87,7 @@ function StorefrontPage() {
     queryFn: async (): Promise<Product[]> => {
       const { data, error } = await supabase
         .from("products")
-        .select("id, name, slug, price, sale_price, image_url, description, stock, category:categories(name)")
+        .select("id, name, slug, price, sale_price, image_url, description, category:categories(name)")
         .eq("business_id", business!.id)
         .eq("status", "active")
         .order("created_at", { ascending: false });
@@ -128,9 +140,57 @@ function StorefrontPage() {
 
   const hasSale = (p: Product) => p.sale_price != null && p.sale_price < p.price;
 
+  async function handleCheckout(data: CustomerData) {
+    if (!business) return;
+    setCheckoutBusy(true);
+    setCheckoutError(null);
+
+    try {
+      const itemsPayload = items.map((i) => ({
+        product_id: i.product.id,
+        product_name: i.product.name,
+        quantity: i.quantity,
+      }));
+
+      const { data: result, error } = await supabase.rpc("create_order", {
+        p_business_id: business.id,
+        p_customer_name: data.name,
+        p_customer_phone: data.phone,
+        p_customer_address: data.address,
+        p_notes: data.notes || null,
+        p_items: JSON.stringify(itemsPayload),
+      });
+
+      if (error) throw error;
+
+      const message = buildWhatsAppMessage(
+        business.name,
+        items.map((i) => ({
+          name: i.product.name,
+          quantity: i.quantity,
+          price: i.product.sale_price ?? i.product.price,
+        })),
+        subtotal,
+        data,
+      );
+
+      const waPhone = business.whatsapp_phone;
+      if (waPhone) {
+        window.open(getWhatsAppLink(waPhone, message), "_blank");
+      }
+
+      clearCart();
+      setShowCheckout(false);
+      setCartOpen(false);
+    } catch (err) {
+      setCheckoutError(err instanceof Error ? err.message : "Error al crear el pedido");
+    } finally {
+      setCheckoutBusy(false);
+    }
+  }
+
   return (
     <div className="flex min-h-screen flex-col bg-background">
-      {/* === Announcement Bar === */}
       <div className="bg-foreground text-background text-[11px] py-2 text-center tracking-wide font-light">
         <span className="opacity-90">
           <Sparkles className="mr-1.5 inline size-3 align-text-top opacity-70" />
@@ -138,10 +198,8 @@ function StorefrontPage() {
         </span>
       </div>
 
-      {/* === Sticky Header === */}
       <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/80 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
-          {/* Mobile menu */}
           <button
             className="lg:hidden text-muted-foreground hover:text-foreground transition-colors"
             onClick={() => setMobileNavOpen(!mobileNavOpen)}
@@ -149,7 +207,6 @@ function StorefrontPage() {
             <Menu className="size-5" strokeWidth={1.5} />
           </button>
 
-          {/* Search (desktop) */}
           <div className="hidden lg:flex items-center gap-2 w-1/4">
             <Search className="size-4 text-muted-foreground/60" strokeWidth={1.5} />
             <input
@@ -159,7 +216,6 @@ function StorefrontPage() {
             />
           </div>
 
-          {/* Logo / Brand */}
           <div className="flex items-center gap-3 text-center lg:w-auto">
             {business.logo_url && (
               <img src={business.logo_url} alt="" className="size-7 rounded-lg object-cover ring-1 ring-border/50" />
@@ -169,21 +225,24 @@ function StorefrontPage() {
             </span>
           </div>
 
-          {/* Icons */}
           <div className="flex items-center justify-end gap-4 w-1/4">
             <button className="hidden lg:block text-muted-foreground hover:text-foreground transition-colors">
               <Heart className="size-4" strokeWidth={1.5} />
             </button>
-            <button className="relative text-muted-foreground hover:text-foreground transition-colors">
+            <button
+              onClick={() => { setShowCheckout(false); setCartOpen(true); }}
+              className="relative text-muted-foreground hover:text-foreground transition-colors"
+            >
               <ShoppingBag className="size-4" strokeWidth={1.5} />
-              <span className="absolute -top-1.5 -right-1.5 grid size-3.5 place-items-center rounded-full bg-primary text-[8px] font-bold text-primary-foreground">
-                0
-              </span>
+              {itemCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 grid size-3.5 place-items-center rounded-full bg-primary text-[8px] font-bold text-primary-foreground">
+                  {itemCount}
+                </span>
+              )}
             </button>
           </div>
         </div>
 
-        {/* Desktop nav */}
         {categories.length > 0 && (
           <nav className="hidden lg:flex justify-center border-t border-border/40">
             <ul className="flex gap-8 text-[11px] tracking-widest font-normal text-muted-foreground/80 h-9 items-center">
@@ -212,7 +271,6 @@ function StorefrontPage() {
           </nav>
         )}
 
-        {/* Mobile nav */}
         {mobileNavOpen && categories.length > 0 && (
           <div className="border-t border-border/40 bg-background/95 backdrop-blur-xl lg:hidden">
             <div className="flex flex-wrap gap-2 px-4 py-3">
@@ -247,7 +305,6 @@ function StorefrontPage() {
       </header>
 
       <main className="flex-1">
-        {/* === Hero / Brand Banner === */}
         <section className="border-b border-border/40 bg-gradient-to-b from-primary/[0.02] to-transparent">
           <div className="mx-auto max-w-7xl px-4 py-14 sm:px-6 sm:py-18">
             <div className="flex flex-col items-center text-center">
@@ -264,7 +321,6 @@ function StorefrontPage() {
           </div>
         </section>
 
-        {/* === Product Grid === */}
         <section className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:py-16">
           {filtered.length === 0 ? (
             <div className="py-20 text-center">
@@ -302,7 +358,6 @@ function StorefrontPage() {
           )}
         </section>
 
-        {/* === Newsletter === */}
         <section className="border-t border-border/40 py-20">
           <div className="max-w-lg mx-auto px-6 text-center">
             <h2 className="text-2xl font-bold tracking-tight mb-2">Mantente al día</h2>
@@ -327,10 +382,8 @@ function StorefrontPage() {
         </section>
       </main>
 
-      {/* === Footer === */}
       <footer className="bg-foreground text-background pt-14 pb-8">
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8 mb-14">
-          {/* Brand */}
           <div className="col-span-1 md:col-span-1">
             <div className="flex items-center gap-2 text-xl font-bold tracking-tight mb-5">
               {business.logo_url && (
@@ -348,7 +401,6 @@ function StorefrontPage() {
             </div>
           </div>
 
-          {/* Shop */}
           <div>
             <h4 className="text-[11px] font-semibold uppercase tracking-widest mb-6 text-background/80">Productos</h4>
             <ul className="space-y-3 text-xs font-light text-background/60">
@@ -410,6 +462,44 @@ function StorefrontPage() {
           </p>
         </div>
       </footer>
+
+      <CartDrawer
+        open={cartOpen && !showCheckout}
+        onClose={() => setCartOpen(false)}
+        onCheckout={() => setShowCheckout(true)}
+      />
+
+      {showCheckout && (
+        <>
+          <div
+            className="fixed inset-0 z-50 bg-black/40"
+            onClick={() => { if (!checkoutBusy) setShowCheckout(false); }}
+          />
+          <div className="fixed right-0 top-0 z-50 flex h-full w-full max-w-md flex-col bg-white shadow-xl">
+            <div className="flex items-center gap-2 border-b px-4 py-3">
+              <button
+                onClick={() => setShowCheckout(false)}
+                className="grid size-8 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+              >
+                <ChevronLeft className="size-4" />
+              </button>
+              <span className="text-sm font-medium">Checkout</span>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4">
+              {checkoutError && (
+                <div className="mb-4 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
+                  {checkoutError}
+                </div>
+              )}
+              <CheckoutForm
+                busy={checkoutBusy}
+                onSubmit={handleCheckout}
+                onBack={() => setShowCheckout(false)}
+              />
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -424,6 +514,16 @@ function ProductCard({
   hasSale: boolean;
 }) {
   const [imgError, setImgError] = useState(false);
+  const { addItem } = useCart();
+
+  const cartProduct: CartProduct = {
+    id: product.id,
+    name: product.name,
+    price: product.price,
+    sale_price: product.sale_price,
+    image_url: product.image_url,
+    slug: product.slug,
+  };
 
   return (
     <div className="group cursor-pointer">
@@ -448,17 +548,12 @@ function ProductCard({
           </Badge>
         )}
 
-        {product.stock <= 0 && (
-          <div className="absolute inset-0 flex items-center justify-center bg-background/60 backdrop-blur-[1px]">
-            <span className="rounded-full border bg-background px-3 py-1 text-[11px] font-medium text-muted-foreground shadow-sm">
-              Agotado
-            </span>
-          </div>
-        )}
-
-        <div className="absolute bottom-3 right-3 grid size-8 place-items-center rounded-full bg-white/90 backdrop-blur shadow-sm opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+        <button
+          onClick={() => addItem(cartProduct)}
+          className="absolute bottom-3 right-3 grid size-8 place-items-center rounded-full bg-white/90 backdrop-blur shadow-sm opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300"
+        >
           <Plus className="size-4 text-foreground" strokeWidth={2} />
-        </div>
+        </button>
       </div>
 
       <h3 className="text-sm font-medium text-foreground truncate">{product.name}</h3>

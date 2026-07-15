@@ -63,6 +63,7 @@ export type Database = {
           slug: string
           timezone: string
           updated_at: string
+          whatsapp_phone: string | null
         }
         Insert: {
           created_at?: string
@@ -74,6 +75,7 @@ export type Database = {
           slug: string
           timezone?: string
           updated_at?: string
+          whatsapp_phone?: string | null
         }
         Update: {
           created_at?: string
@@ -85,6 +87,7 @@ export type Database = {
           slug?: string
           timezone?: string
           updated_at?: string
+          whatsapp_phone?: string | null
         }
         Relationships: []
       }
@@ -369,7 +372,10 @@ export type Database = {
           business_id: string
           created_at: string
           currency: string
+          customer_address: string | null
           customer_id: string | null
+          customer_name: string | null
+          customer_phone: string | null
           id: string
           notes: string | null
           order_number: string
@@ -384,7 +390,10 @@ export type Database = {
           business_id: string
           created_at?: string
           currency?: string
+          customer_address?: string | null
           customer_id?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
           id?: string
           notes?: string | null
           order_number: string
@@ -399,7 +408,10 @@ export type Database = {
           business_id?: string
           created_at?: string
           currency?: string
+          customer_address?: string | null
           customer_id?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
           id?: string
           notes?: string | null
           order_number?: string
@@ -596,6 +608,7 @@ export type Database = {
           slug: string
           logo_url: string | null
           currency: string
+          whatsapp_phone: string | null
         }[]
       }
       has_business_role: {
@@ -606,6 +619,17 @@ export type Database = {
         Returns: boolean
       }
       is_business_member: { Args: { _business_id: string }; Returns: boolean }
+      create_order: {
+        Args: {
+          p_business_id: string
+          p_customer_name: string
+          p_customer_phone: string
+          p_customer_address: string
+          p_notes: string | null
+          p_items: string
+        }
+        Returns: Record<string, unknown>
+      }
     }
     Enums: {
       membership_role: "owner" | "admin" | "staff" | "viewer"

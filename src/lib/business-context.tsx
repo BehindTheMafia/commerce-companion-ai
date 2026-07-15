@@ -9,6 +9,7 @@ export type Business = {
   slug: string;
   logo_url: string | null;
   currency: string;
+  whatsapp_phone: string | null;
 };
 
 type Ctx = {

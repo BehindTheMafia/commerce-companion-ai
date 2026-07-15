@@ -20,6 +20,7 @@ function SettingsPage() {
   const [name, setName] = useState("");
   const [currency, setCurrency] = useState("USD");
   const [logoUrl, setLogoUrl] = useState("");
+  const [whatsappPhone, setWhatsappPhone] = useState("");
   const [busy, setBusy] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -28,6 +29,7 @@ function SettingsPage() {
       setName(activeBusiness.name);
       setCurrency(activeBusiness.currency);
       setLogoUrl(activeBusiness.logo_url || "");
+      setWhatsappPhone(activeBusiness.whatsapp_phone || "");
     }
   }, [activeBusiness]);
 
@@ -38,7 +40,7 @@ function SettingsPage() {
     try {
       const { error } = await supabase
         .from("businesses")
-        .update({ name, currency, logo_url: logoUrl || null })
+        .update({ name, currency, logo_url: logoUrl || null, whatsapp_phone: whatsappPhone || null })
         .eq("id", activeBusiness.id);
       if (error) throw error;
       toast.success("Guardado");
@@ -100,6 +102,11 @@ function SettingsPage() {
           <div className="space-y-1.5">
             <Label htmlFor="s-currency">Moneda</Label>
             <Input id="s-currency" value={currency} onChange={(e) => setCurrency(e.target.value.toUpperCase())} maxLength={3} />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="s-whatsapp">Teléfono WhatsApp (para recibir pedidos)</Label>
+            <Input id="s-whatsapp" value={whatsappPhone} onChange={(e) => setWhatsappPhone(e.target.value)} placeholder="+541112345678" />
+            <p className="text-xs text-muted-foreground">Los pedidos de clientes se enviarán a este número.</p>
           </div>
           <Button type="submit" disabled={busy}>Guardar cambios</Button>
         </form>
