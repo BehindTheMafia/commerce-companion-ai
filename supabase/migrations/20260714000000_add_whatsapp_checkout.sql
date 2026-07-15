@@ -80,7 +80,9 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION public.get_my_businesses()
+DROP FUNCTION IF EXISTS public.get_my_businesses();
+
+CREATE FUNCTION public.get_my_businesses()
 RETURNS TABLE (id uuid, name text, slug text, logo_url text, currency text, whatsapp_phone text)
 LANGUAGE sql
 SECURITY DEFINER
