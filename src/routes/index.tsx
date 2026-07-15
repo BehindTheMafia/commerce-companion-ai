@@ -51,7 +51,7 @@ function Landing() {
 
       {/* ---- Header ---- */}
       <motion.header
-        initial={{ y: -100 }}
+        initial={{ y: 0 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.6, ease: [0.22, 0.61, 0.36, 1] }}
         className={`fixed top-0 left-0 right-0 z-50 h-16 border-b transition-all duration-500 ${
@@ -119,7 +119,7 @@ function Landing() {
 
         <div className="max-w-[1280px] mx-auto px-6 relative z-10 pt-16">
           <motion.div
-            initial="hidden"
+            initial="visible"
             animate="visible"
             variants={{
               hidden: { opacity: 0 },
@@ -169,7 +169,7 @@ function Landing() {
 
           {/* Hero Image */}
           <motion.div
-            initial={{ opacity: 0, y: 40 }}
+            initial={{ opacity: 1, y: 0 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: [0.22, 0.61, 0.36, 1], delay: 0.4 }}
             className="max-w-5xl mx-auto mt-16 relative group"
@@ -247,7 +247,7 @@ function Landing() {
       <section id="how-it-works" className="py-24 bg-[#F8FAFC] border-b border-[#E2E8F0] overflow-hidden">
         <div className="max-w-[1280px] mx-auto px-6">
           <motion.div
-            initial={{ opacity: 0, y: 24 }}
+            initial={{ opacity: 1, y: 0 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-60px" }}
             transition={{ duration: 0.6, ease: [0.22, 0.61, 0.36, 1] }}
@@ -268,7 +268,7 @@ function Landing() {
             {steps.map((step, i) => (
               <motion.div
                 key={step.number}
-                initial="hidden"
+                initial="visible"
                 whileInView="visible"
                 viewport={{ once: true, margin: "-100px" }}
                 variants={{
@@ -326,7 +326,7 @@ function Landing() {
         <div className="absolute top-0 inset-x-0 h-40 bg-gradient-to-b from-[#F8FAFC] to-transparent pointer-events-none" />
         <div className="max-w-[1280px] mx-auto px-6 relative z-10">
           <motion.div
-            initial={{ opacity: 0, y: 24 }}
+            initial={{ opacity: 1, y: 0 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-60px" }}
             transition={{ duration: 0.6, ease: [0.22, 0.61, 0.36, 1] }}
@@ -347,7 +347,7 @@ function Landing() {
             {features.map((feature, i) => (
               <motion.div
                 key={feature.title}
-                initial={{ opacity: 0, y: 40, scale: 0.95 }}
+                initial={{ opacity: 1, y: 0, scale: 1 }}
                 whileInView={{ opacity: 1, y: 0, scale: 1 }}
                 viewport={{ once: true, margin: "-40px" }}
                 transition={{ duration: 0.7, ease: [0.22, 0.61, 0.36, 1], delay: i * 0.1 }}
@@ -395,7 +395,7 @@ function Landing() {
 
         <div className="max-w-[1280px] mx-auto px-6 relative z-10">
           <motion.div
-            initial={{ opacity: 0, y: 24 }}
+            initial={{ opacity: 1, y: 0 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-60px" }}
             transition={{ duration: 0.6, ease: [0.22, 0.61, 0.36, 1] }}
@@ -424,7 +424,7 @@ function Landing() {
       <section className="py-24 bg-white relative">
         <div className="max-w-[1280px] mx-auto px-6 relative z-10">
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            initial={{ opacity: 1, scale: 1, y: 0 }}
             whileInView={{ opacity: 1, scale: 1, y: 0 }}
             viewport={{ once: true, margin: "-60px" }}
             transition={{ duration: 0.8, ease: [0.22, 0.61, 0.36, 1] }}
@@ -542,7 +542,7 @@ function PlanCard({ plan, index }: { plan: (typeof plans)[number]; index: number
   return (
     <motion.div
       ref={cardRef}
-      initial={{ opacity: 0, y: 30, scale: 0.95 }}
+      initial={{ opacity: 1, y: 0, scale: 1 }}
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, margin: "-40px" }}
       transition={{
@@ -570,7 +570,7 @@ function PlanCard({ plan, index }: { plan: (typeof plans)[number]; index: number
 
       {plan.highlighted && (
         <motion.div
-          initial={{ opacity: 0, scale: 0 }}
+          initial={{ opacity: 1, scale: 1 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ delay: 0.4, type: "spring", stiffness: 300, damping: 15 }}
@@ -590,7 +590,7 @@ function PlanCard({ plan, index }: { plan: (typeof plans)[number]; index: number
       <div className="mb-8">
         <div className="flex items-baseline gap-1">
           <motion.span
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 1, y: 0 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 + index * 0.12, duration: 0.5, ease: [0.22, 0.61, 0.36, 1] }}
@@ -613,7 +613,7 @@ function PlanCard({ plan, index }: { plan: (typeof plans)[number]; index: number
         {plan.features.map((feature, fi) => (
           <motion.li
             key={feature}
-            initial={{ opacity: 0, x: -10 }}
+            initial={{ opacity: 1, x: 0 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: "-20px" }}
             transition={{
