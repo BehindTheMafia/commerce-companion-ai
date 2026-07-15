@@ -151,8 +151,28 @@ function StorefrontPage() {
 
   async function handleCheckout(data: CustomerData) {
     if (!business) return;
+
+    const waPhone = business.whatsapp_phone;
+    if (!waPhone) {
+      setCheckoutError("El negocio no tiene configurado un número de WhatsApp para recibir pedidos.");
+      return;
+    }
+
     setCheckoutBusy(true);
     setCheckoutError(null);
+
+    const message = buildWhatsAppMessage(
+      business.name,
+      items.map((i) => ({
+        name: i.product.name,
+        quantity: i.quantity,
+        price: i.product.sale_price ?? i.product.price,
+      })),
+      subtotal,
+      data,
+    );
+
+    location.href = getWhatsAppLink(waPhone, message);
 
     try {
       const itemsPayload = items.map((i) => ({
@@ -161,7 +181,7 @@ function StorefrontPage() {
         quantity: i.quantity,
       }));
 
-      const { data: result, error } = await supabase.rpc("create_order", {
+      await supabase.rpc("create_order", {
         p_business_id: business.id,
         p_customer_name: data.name,
         p_customer_phone: data.phone,
@@ -170,29 +190,11 @@ function StorefrontPage() {
         p_items: itemsPayload,
       });
 
-      if (error) throw error;
-
-      const message = buildWhatsAppMessage(
-        business.name,
-        items.map((i) => ({
-          name: i.product.name,
-          quantity: i.quantity,
-          price: i.product.sale_price ?? i.product.price,
-        })),
-        subtotal,
-        data,
-      );
-
-      const waPhone = business.whatsapp_phone;
-      if (waPhone) {
-        window.open(getWhatsAppLink(waPhone, message), "_blank");
-      }
-
       clearCart();
       setShowCheckout(false);
       setCartOpen(false);
     } catch (err) {
-      setCheckoutError(err instanceof Error ? err.message : "Error al crear el pedido");
+      console.error("Error creating order:", err);
     } finally {
       setCheckoutBusy(false);
     }
