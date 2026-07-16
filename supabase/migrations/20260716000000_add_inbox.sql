@@ -344,6 +344,79 @@ END;
 $$;
 
 -- ============================================================
+-- RPC: webhook_handle_incoming_message
+-- Bypasses RLS (SECURITY DEFINER) — only call from server-side
+-- ============================================================
+
+CREATE OR REPLACE FUNCTION webhook_handle_incoming_message(
+  p_business_id UUID,
+  p_phone TEXT,
+  p_customer_name TEXT DEFAULT NULL,
+  p_content TEXT DEFAULT NULL,
+  p_message_type TEXT DEFAULT 'text',
+  p_media_url TEXT DEFAULT NULL,
+  p_media_type TEXT DEFAULT NULL,
+  p_external_id TEXT DEFAULT NULL
+)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_customer_id UUID;
+  v_conversation_id UUID;
+  v_message_id UUID;
+BEGIN
+  -- Find or create customer
+  SELECT id INTO v_customer_id
+  FROM customers
+  WHERE phone = p_phone AND business_id = p_business_id
+  LIMIT 1;
+
+  IF v_customer_id IS NULL THEN
+    INSERT INTO customers (business_id, full_name, phone)
+    VALUES (p_business_id, COALESCE(p_customer_name, p_phone), p_phone)
+    RETURNING id INTO v_customer_id;
+  END IF;
+
+  -- Find or create conversation
+  SELECT id INTO v_conversation_id
+  FROM inbox_conversations
+  WHERE customer_phone = p_phone AND business_id = p_business_id
+  ORDER BY last_message_at DESC NULLS LAST
+  LIMIT 1;
+
+  IF v_conversation_id IS NULL THEN
+    INSERT INTO inbox_conversations (
+      business_id, customer_id, channel, status,
+      customer_phone, customer_name
+    ) VALUES (
+      p_business_id, v_customer_id, 'whatsapp', 'open',
+      p_phone, COALESCE(p_customer_name, p_phone)
+    ) RETURNING id INTO v_conversation_id;
+  ELSE
+    UPDATE inbox_conversations SET status = 'open' WHERE id = v_conversation_id;
+  END IF;
+
+  -- Insert message
+  INSERT INTO inbox_messages (
+    conversation_id, sender_type, content, message_type,
+    media_url, media_type, external_id, status
+  ) VALUES (
+    v_conversation_id, 'customer', p_content, p_message_type,
+    p_media_url, p_media_type, p_external_id, 'delivered'
+  ) RETURNING id INTO v_message_id;
+
+  RETURN jsonb_build_object(
+    'customer_id', v_customer_id,
+    'conversation_id', v_conversation_id,
+    'message_id', v_message_id
+  );
+END;
+$$;
+
+-- ============================================================
 -- Enable realtime for inbox tables
 -- ============================================================
 
