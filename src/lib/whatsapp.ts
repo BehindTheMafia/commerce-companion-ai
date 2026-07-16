@@ -26,39 +26,38 @@ export function buildWhatsAppMessage(
   const lines: string[] = [];
   const sep = "─".repeat(30);
 
-  lines.push(`🏪 *${businessName.toUpperCase()}*`);
-  lines.push(`📋 *Nuevo Pedido*`);
+  lines.push(`*${businessName.toUpperCase()}*`);
+  lines.push(`*Nuevo Pedido*`);
   lines.push(sep);
   lines.push("");
 
-  lines.push(`*${"Producto".padEnd(22)} Cant.  Total*`);
+  lines.push(`Producto              Cant.  Total`);
+  lines.push(`──────────────────────────────`);
 
   items.forEach((item) => {
-    const name = item.name.length > 20
-      ? item.name.slice(0, 18) + ".."
+    const name = item.name.length > 17
+      ? item.name.slice(0, 15) + ".."
       : item.name;
     const line = `${name.padEnd(22)} ${String(item.quantity).padStart(3)}   $${formatPrice(item.price * item.quantity)}`;
     lines.push(line);
   });
 
+  lines.push(`──────────────────────────────`);
+  lines.push(`*TOTAL*                $${formatPrice(subtotal)}`);
   lines.push("");
   lines.push(sep);
-  lines.push(`*TOTAL*${" ".repeat(17)}$${formatPrice(subtotal)}`);
-  lines.push("");
-  lines.push(sep);
-  lines.push("");
 
-  lines.push("👤 *DATOS DEL CLIENTE*");
-  lines.push(`   Nombre:    ${customer.name}`);
-  lines.push(`   Teléfono:  ${customer.phone}`);
-  lines.push(`   Dirección: ${customer.address}`);
+  lines.push(`*DATOS DEL CLIENTE*`);
+  lines.push(`Nombre:    ${customer.name}`);
+  lines.push(`Telefono:  ${customer.phone}`);
+  lines.push(`Direccion: ${customer.address}`);
   if (customer.notes) {
-    lines.push(`   Notas:     ${customer.notes}`);
+    lines.push(`Notas:     ${customer.notes}`);
   }
 
   lines.push("");
   lines.push(sep);
-  lines.push("✅ *Gracias por tu preferencia*");
+  lines.push(`Gracias por tu preferencia.`);
 
   return lines.join("\n");
 }
