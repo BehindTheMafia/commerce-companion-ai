@@ -14,10 +14,13 @@ import {
 import { useState, useMemo } from "react";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export const Route = createFileRoute("/_authenticated/app/orders")({
   component: OrdersPage,
-});const STATUS_LABELS: Record<string, string> = {
+});
+
+const STATUS_LABELS: Record<string, string> = {
   pending: "Pendiente",
   paid: "Pagado",
   preparing: "Preparando",
@@ -83,6 +86,7 @@ function getCustomerName(o: Order): string {
 function OrdersPage() {
   const { activeBusiness } = useBusiness();
   const qc = useQueryClient();
+  const isMobile = useIsMobile();
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [actionBusy, setActionBusy] = useState<string | null>(null);
   const [search, setSearch] = useState("");
@@ -146,108 +150,355 @@ function OrdersPage() {
   const currency = activeBusiness?.currency ?? "USD";
   const $ = sym(currency);
 
+  if (isMobile) {
+    return (
+      <MobileOrders
+        orders={orders}
+        filtered={filtered}
+        search={search}
+        setSearch={setSearch}
+        selectedOrder={selectedOrder}
+        setSelectedOrder={setSelectedOrder}
+        orderItems={orderItems}
+        actionBusy={actionBusy}
+        updateStatus={updateStatus}
+        STATUS_ACTIONS={STATUS_ACTIONS}
+        STATUS_COLORS={STATUS_COLORS}
+        STATUS_LABELS={STATUS_LABELS}
+        getCustomerName={getCustomerName}
+        $={$}
+      />
+    );
+  }
+
   return (
-    <div className="mx-auto max-w-full px-6 py-6">
+    <div
+      className="grid transition-[grid-template-columns] duration-200 ease-in-out"
+      style={{
+        gridTemplateColumns: selectedOrder ? "minmax(0, 1fr) 420px" : "minmax(0, 1fr) 0px",
+      }}
+    >
+      <div className="min-w-0 overflow-hidden px-6 py-6">
+        <PageHeader
+          title="Pedidos"
+          description="Revisa, acepta y da seguimiento a los pedidos de tus clientes."
+        />
+
+        {orders.length > 0 && (
+          <div className="relative mt-6">
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground/60" />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Buscar por cliente, teléfono o nº de pedido..."
+              className="w-full pl-9"
+            />
+          </div>
+        )}
+
+        <Card className="mt-4 overflow-hidden">
+          {orders.length === 0 ? (
+            <div className="flex flex-col items-center gap-3 p-16 text-center">
+              <div className="grid size-12 place-items-center rounded-2xl bg-primary/10 text-primary"><ShoppingCart className="size-6" /></div>
+              <p className="text-sm text-muted-foreground">Sin pedidos todavía.</p>
+              <p className="text-xs text-muted-foreground/60">Los pedidos de WhatsApp aparecerán aquí automáticamente.</p>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nº</TableHead>
+                  <TableHead>Cliente</TableHead>
+                  <TableHead>Teléfono</TableHead>
+                  <TableHead>Fecha</TableHead>
+                  <TableHead>Estado</TableHead>
+                  <TableHead className="text-right">Total</TableHead>
+                  <TableHead className="w-20"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filtered.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="py-12 text-center text-sm text-muted-foreground">
+                      No se encontraron pedidos para "{search}"
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filtered.map((o) => {
+                    const actions = STATUS_ACTIONS[o.status] ?? [];
+                    const firstAction = actions[0];
+                    return (
+                      <TableRow
+                        key={o.id}
+                        className={`cursor-pointer transition-colors hover:bg-muted/50 ${
+                          selectedOrder?.id === o.id ? "bg-muted/30" : ""
+                        }`}
+                        onClick={() => setSelectedOrder(o)}
+                      >
+                        <TableCell className="py-4 font-mono text-xs">{o.order_number}</TableCell>
+                        <TableCell className="py-4 font-medium">{getCustomerName(o)}</TableCell>
+                        <TableCell className="py-4 text-xs text-muted-foreground">
+                          {o.customer_phone || "—"}
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap py-4 text-xs text-muted-foreground">
+                          {format(new Date(o.created_at), "dd MMM yyyy")}
+                        </TableCell>
+                        <TableCell className="py-4">
+                          <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_COLORS[o.status] ?? ""}`}>
+                            {STATUS_LABELS[o.status] ?? o.status}
+                          </span>
+                        </TableCell>
+                        <TableCell className="py-4 text-right tabular-nums font-medium">
+                          {$}{Number(o.total).toFixed(2)}
+                        </TableCell>
+                        <TableCell className="py-4">
+                          <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
+                            {firstAction && (
+                              <Button
+                                size="sm"
+                                variant={firstAction.variant ?? "outline"}
+                                className="h-8 gap-1 px-2.5 text-xs"
+                                disabled={actionBusy === o.id}
+                                onClick={() => updateStatus(o.id, firstAction.nextStatus)}
+                              >
+                                <firstAction.icon className="size-3.5" />
+                                {firstAction.label}
+                              </Button>
+                            )}
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              className="h-8 w-8 p-0"
+                              onClick={() => setSelectedOrder(o)}
+                            >
+                              <ChevronRight className="size-4 text-muted-foreground" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
+              </TableBody>
+            </Table>
+          )}
+        </Card>
+      </div>
+
+      <div className="overflow-hidden border-l" style={{ overflow: selectedOrder ? undefined : "hidden" }}>
+        {selectedOrder && (
+          <div className="sticky top-0 flex h-screen flex-col">
+            <div className="flex items-center justify-between border-b px-5 py-4">
+              <div className="flex items-center gap-2.5 text-sm font-medium">
+                <Package className="size-4 text-muted-foreground" />
+                {selectedOrder.order_number}
+              </div>
+              <button
+                onClick={() => setSelectedOrder(null)}
+                className="grid size-8 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-5 space-y-6">
+              <div className="flex items-center gap-3">
+                <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_COLORS[selectedOrder.status] ?? ""}`}>
+                  {STATUS_LABELS[selectedOrder.status] ?? selectedOrder.status}
+                </span>
+                <span className="ml-auto text-lg tabular-nums font-bold">
+                  {$}{Number(selectedOrder.total).toFixed(2)}
+                </span>
+              </div>
+              <div>
+                <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  <Package className="size-3" />
+                  Productos
+                </div>
+                <div className="space-y-2">
+                  {orderItems.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">Cargando...</p>
+                  ) : (
+                    orderItems.map((item) => (
+                      <div key={item.id} className="flex items-center justify-between rounded-lg border p-3.5">
+                        <div>
+                          <p className="text-sm font-medium">{item.product_name}</p>
+                          <p className="mt-0.5 text-xs text-muted-foreground">
+                            {item.quantity} x {$}{Number(item.unit_price).toFixed(2)}
+                          </p>
+                        </div>
+                        <span className="text-sm tabular-nums font-semibold">
+                          {$}{Number(item.total).toFixed(2)}
+                        </span>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+              <div>
+                <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  <User className="size-3" />
+                  Cliente
+                </div>
+                <div className="space-y-3 rounded-lg border p-3.5 text-sm">
+                  <div className="flex items-center gap-2.5">
+                    <User className="size-4 shrink-0 text-muted-foreground" />
+                    <span>{getCustomerName(selectedOrder)}</span>
+                  </div>
+                  {selectedOrder.customer_phone && (
+                    <div className="flex items-center gap-2.5">
+                      <Phone className="size-4 shrink-0 text-muted-foreground" />
+                      <a href={`tel:${selectedOrder.customer_phone}`} className="hover:underline">
+                        {selectedOrder.customer_phone}
+                      </a>
+                    </div>
+                  )}
+                  {selectedOrder.customer_address && (
+                    <div className="flex items-center gap-2.5">
+                      <MapPin className="size-4 shrink-0 text-muted-foreground" />
+                      <span>{selectedOrder.customer_address}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+              {selectedOrder.notes && (
+                <div>
+                  <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    <FileText className="size-3" />
+                    Notas
+                  </div>
+                  <p className="leading-relaxed rounded-lg border p-3.5 text-sm text-muted-foreground">
+                    {selectedOrder.notes}
+                  </p>
+                </div>
+              )}
+              <div>
+                <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Fecha del pedido
+                </div>
+                <p className="text-sm">
+                  {format(new Date(selectedOrder.created_at), "dd MMM yyyy, HH:mm")}
+                </p>
+              </div>
+            </div>
+            <div className="border-t p-4">
+              <div className="flex gap-2">
+                {(STATUS_ACTIONS[selectedOrder.status] ?? []).map((action) => (
+                  <Button
+                    key={action.nextStatus}
+                    className="flex-1 gap-2"
+                    variant={action.variant ?? "default"}
+                    disabled={actionBusy === selectedOrder.id}
+                    onClick={() => {
+                      updateStatus(selectedOrder.id, action.nextStatus);
+                      if (action.nextStatus === "cancelled") setSelectedOrder(null);
+                    }}
+                  >
+                    <action.icon className="size-4" />
+                    {action.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function MobileOrders({
+  orders, filtered, search, setSearch,
+  selectedOrder, setSelectedOrder, orderItems,
+  actionBusy, updateStatus,
+  STATUS_ACTIONS, STATUS_COLORS, STATUS_LABELS, getCustomerName, $,
+}: {
+  orders: Order[];
+  filtered: Order[];
+  search: string;
+  setSearch: (v: string) => void;
+  selectedOrder: Order | null;
+  setSelectedOrder: (v: Order | null) => void;
+  orderItems: OrderItem[];
+  actionBusy: string | null;
+  updateStatus: (id: string, s: string) => void;
+  STATUS_ACTIONS: Record<string, { label: string; nextStatus: string; icon: any; variant?: "default" | "destructive" | "outline" }[]>;
+  STATUS_COLORS: Record<string, string>;
+  STATUS_LABELS: Record<string, string>;
+  getCustomerName: (o: Order) => string;
+  $: string;
+}) {
+  return (
+    <div className="px-4 py-6">
       <PageHeader
         title="Pedidos"
-        description="Revisa, acepta y da seguimiento a los pedidos de tus clientes."
+        description="Revisa, acepta y da seguimiento."
       />
-
       {orders.length > 0 && (
-        <div className="relative mt-6">
+        <div className="relative mt-4">
           <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground/60" />
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar por cliente, teléfono o nº de pedido..."
-            className="pl-9 w-full sm:max-w-sm"
+            placeholder="Buscar pedidos..."
+            className="w-full pl-9"
           />
         </div>
       )}
-
       <Card className="mt-4 overflow-hidden">
         {orders.length === 0 ? (
-          <div className="flex flex-col items-center gap-3 p-16 text-center">
+          <div className="flex flex-col items-center gap-3 p-12 text-center">
             <div className="grid size-12 place-items-center rounded-2xl bg-primary/10 text-primary"><ShoppingCart className="size-6" /></div>
             <p className="text-sm text-muted-foreground">Sin pedidos todavía.</p>
-            <p className="text-xs text-muted-foreground/60">Los pedidos de WhatsApp aparecerán aquí automáticamente.</p>
           </div>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nº</TableHead>
-                <TableHead>Cliente</TableHead>
-                <TableHead>Contacto</TableHead>
-                <TableHead>Fecha</TableHead>
-                <TableHead>Estado</TableHead>
-                <TableHead className="text-right">Total</TableHead>
-                <TableHead className="w-20"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filtered.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="py-12 text-center text-sm text-muted-foreground">
-                    No se encontraron pedidos para "{search}"
-                  </TableCell>
-                </TableRow>
-              ) : (
-                filtered.map((o) => {
-                  const actions = STATUS_ACTIONS[o.status] ?? [];
-                  const firstAction = actions[0];
-                  return (
-                    <TableRow
-                      key={o.id}
-                      className="cursor-pointer transition-colors hover:bg-muted/50"
-                      onClick={() => setSelectedOrder(o)}
-                    >
-                      <TableCell className="font-mono text-xs">{o.order_number}</TableCell>
-                      <TableCell className="font-medium">{getCustomerName(o)}</TableCell>
-                      <TableCell className="text-muted-foreground text-xs">
-                        {o.customer_phone || "—"}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground whitespace-nowrap text-xs">
-                        {format(new Date(o.created_at), "dd MMM yyyy")}
-                      </TableCell>
-                      <TableCell>
-                        <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_COLORS[o.status] ?? ""}`}>
+          <div className="divide-y">
+            {filtered.length === 0 ? (
+              <p className="p-8 text-center text-sm text-muted-foreground">
+                No se encontraron pedidos para "{search}"
+              </p>
+            ) : (
+              filtered.map((o) => {
+                const actions = STATUS_ACTIONS[o.status] ?? [];
+                const firstAction = actions[0];
+                return (
+                  <div
+                    key={o.id}
+                    className="flex items-center gap-3 px-4 py-3.5 transition-colors hover:bg-muted/50"
+                    onClick={() => setSelectedOrder(o)}
+                  >
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-xs">{o.order_number}</span>
+                        <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium ${STATUS_COLORS[o.status] ?? ""}`}>
                           {STATUS_LABELS[o.status] ?? o.status}
                         </span>
-                      </TableCell>
-                      <TableCell className="text-right tabular-nums font-medium">
-                        {$}{Number(o.total).toFixed(2)}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
-                          {firstAction && (
-                            <Button
-                              size="sm"
-                              variant={firstAction.variant ?? "outline"}
-                              className="h-7 text-xs gap-1"
-                              disabled={actionBusy === o.id}
-                              onClick={() => updateStatus(o.id, firstAction.nextStatus)}
-                            >
-                              <firstAction.icon className="size-3" />
-                              {firstAction.label}
-                            </Button>
-                          )}
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="h-7 w-7 p-0"
-                            onClick={() => setSelectedOrder(o)}
-                          >
-                            <ChevronRight className="size-4 text-muted-foreground" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })
-              )}
-            </TableBody>
-          </Table>
+                      </div>
+                      <p className="mt-0.5 text-sm font-medium">{getCustomerName(o)}</p>
+                      <div className="mt-0.5 flex items-center gap-3 text-xs text-muted-foreground">
+                        <span>{o.customer_phone || "—"}</span>
+                        <span>{format(new Date(o.created_at), "dd MMM")}</span>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm tabular-nums font-semibold">{$}{Number(o.total).toFixed(2)}</p>
+                      {firstAction && (
+                        <Button
+                          size="sm"
+                          variant={firstAction.variant ?? "outline"}
+                          className="mt-1 h-7 gap-1 px-2 text-[10px]"
+                          disabled={actionBusy === o.id}
+                          onClick={(e) => { e.stopPropagation(); updateStatus(o.id, firstAction.nextStatus); }}
+                        >
+                          <firstAction.icon className="size-3" />
+                          {firstAction.label}
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
         )}
       </Card>
 
@@ -259,7 +510,7 @@ function OrdersPage() {
           onClick={() => setSelectedOrder(null)}
         />
         <div
-          className={`fixed right-0 top-0 z-50 flex h-full w-full max-w-lg flex-col bg-white shadow-2xl transition-transform duration-300 ease-out ${
+          className={`fixed right-0 top-0 z-50 flex h-full w-full max-w-md flex-col bg-white shadow-2xl transition-transform duration-300 ease-out ${
             selectedOrder ? "translate-x-0" : "translate-x-full"
           }`}
         >
@@ -277,92 +528,69 @@ function OrdersPage() {
                   <X className="size-4" />
                 </button>
               </div>
-
               <div className="flex-1 overflow-y-auto p-5 space-y-6">
                 <div className="flex items-center gap-3">
                   <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_COLORS[selectedOrder.status] ?? ""}`}>
                     {STATUS_LABELS[selectedOrder.status] ?? selectedOrder.status}
                   </span>
-                  <span className="text-lg tabular-nums font-bold ml-auto">
+                  <span className="ml-auto text-lg tabular-nums font-bold">
                     {$}{Number(selectedOrder.total).toFixed(2)}
                   </span>
                 </div>
-
                 <div>
-                  <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-                    <Package className="size-3" />
-                    Productos
+                  <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    <Package className="size-3" /> Productos
                   </div>
                   <div className="space-y-2">
-                    {orderItems.length === 0 ? (
-                      <p className="text-sm text-muted-foreground">Cargando...</p>
-                    ) : (
-                      orderItems.map((item) => (
-                        <div key={item.id} className="flex items-center justify-between rounded-lg border p-3.5">
-                          <div>
-                            <p className="text-sm font-medium">{item.product_name}</p>
-                            <p className="text-xs text-muted-foreground mt-0.5">
-                              {item.quantity} x {$}{Number(item.unit_price).toFixed(2)}
-                            </p>
-                          </div>
-                          <span className="text-sm tabular-nums font-semibold">
-                            {$}{Number(item.total).toFixed(2)}
-                          </span>
+                    {orderItems.map((item) => (
+                      <div key={item.id} className="flex items-center justify-between rounded-lg border p-3.5">
+                        <div>
+                          <p className="text-sm font-medium">{item.product_name}</p>
+                          <p className="mt-0.5 text-xs text-muted-foreground">
+                            {item.quantity} x {$}{Number(item.unit_price).toFixed(2)}
+                          </p>
                         </div>
-                      ))
-                    )}
+                        <span className="text-sm tabular-nums font-semibold">{$}{Number(item.total).toFixed(2)}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
-
                 <div>
-                  <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-                    <User className="size-3" />
-                    Cliente
+                  <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    <User className="size-3" /> Cliente
                   </div>
                   <div className="space-y-3 rounded-lg border p-3.5 text-sm">
                     <div className="flex items-center gap-2.5">
-                      <User className="size-4 text-muted-foreground shrink-0" />
+                      <User className="size-4 shrink-0 text-muted-foreground" />
                       <span>{getCustomerName(selectedOrder)}</span>
                     </div>
                     {selectedOrder.customer_phone && (
                       <div className="flex items-center gap-2.5">
-                        <Phone className="size-4 text-muted-foreground shrink-0" />
-                        <a href={`tel:${selectedOrder.customer_phone}`} className="hover:underline">
-                          {selectedOrder.customer_phone}
-                        </a>
+                        <Phone className="size-4 shrink-0 text-muted-foreground" />
+                        <a href={`tel:${selectedOrder.customer_phone}`} className="hover:underline">{selectedOrder.customer_phone}</a>
                       </div>
                     )}
                     {selectedOrder.customer_address && (
                       <div className="flex items-center gap-2.5">
-                        <MapPin className="size-4 text-muted-foreground shrink-0" />
+                        <MapPin className="size-4 shrink-0 text-muted-foreground" />
                         <span>{selectedOrder.customer_address}</span>
                       </div>
                     )}
                   </div>
                 </div>
-
                 {selectedOrder.notes && (
                   <div>
-                    <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
-                      <FileText className="size-3" />
-                      Notas
+                    <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      <FileText className="size-3" /> Notas
                     </div>
-                    <p className="rounded-lg border p-3.5 text-sm text-muted-foreground leading-relaxed">
-                      {selectedOrder.notes}
-                    </p>
+                    <p className="leading-relaxed rounded-lg border p-3.5 text-sm text-muted-foreground">{selectedOrder.notes}</p>
                   </div>
                 )}
-
                 <div>
-                  <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                    Fecha del pedido
-                  </div>
-                  <p className="text-sm">
-                    {format(new Date(selectedOrder.created_at), "dd MMM yyyy, HH:mm")}
-                  </p>
+                  <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Fecha del pedido</div>
+                  <p className="text-sm">{format(new Date(selectedOrder.created_at), "dd MMM yyyy, HH:mm")}</p>
                 </div>
               </div>
-
               <div className="border-t p-4">
                 <div className="flex gap-2">
                   {(STATUS_ACTIONS[selectedOrder.status] ?? []).map((action) => (
@@ -371,10 +599,7 @@ function OrdersPage() {
                       className="flex-1 gap-2"
                       variant={action.variant ?? "default"}
                       disabled={actionBusy === selectedOrder.id}
-                      onClick={() => {
-                        updateStatus(selectedOrder.id, action.nextStatus);
-                        if (action.nextStatus === "cancelled") setSelectedOrder(null);
-                      }}
+                      onClick={() => { updateStatus(selectedOrder.id, action.nextStatus); if (action.nextStatus === "cancelled") setSelectedOrder(null); }}
                     >
                       <action.icon className="size-4" />
                       {action.label}
