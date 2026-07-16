@@ -10,13 +10,15 @@ export const Route = createFileRoute("/api/twilio/webhook")({
         const params = new URLSearchParams(text);
 
         const from = params.get("From") || "";
+        const to = params.get("To") || "";
         const messageBody = params.get("Body") || "";
         const messageSid = params.get("MessageSid") || "";
         const profileName = params.get("ProfileName") || "";
         const mediaUrl = params.get("MediaUrl0") || "";
         const mediaContentType = params.get("MediaContentType0") || "";
         const numMedia = parseInt(params.get("NumMedia") || "0", 10);
-        const phone = from.replace("whatsapp:", "");
+        const customerPhone = from.replace("whatsapp:", "");
+        const businessPhone = to.replace("whatsapp:", "");
 
         if (!from || !messageBody) {
           return new Response(
@@ -39,14 +41,28 @@ export const Route = createFileRoute("/api/twilio/webhook")({
         const sb = createClient(supabaseUrl, supabaseKey);
 
         try {
-          const { data: business } = await sb
-            .from("businesses")
-            .select("id")
-            .not("whatsapp_phone", "is", null)
-            .limit(1)
-            .single();
+          let businessId: string | null = null;
 
-          if (!business) {
+          if (businessPhone) {
+            const { data: bizByPhone } = await sb
+              .from("businesses")
+              .select("id")
+              .eq("whatsapp_phone", businessPhone)
+              .maybeSingle();
+            if (bizByPhone) businessId = bizByPhone.id;
+          }
+
+          if (!businessId) {
+            const { data: biz } = await sb
+              .from("businesses")
+              .select("id")
+              .not("whatsapp_phone", "is", null)
+              .limit(1)
+              .single();
+            if (biz) businessId = biz.id;
+          }
+
+          if (!businessId) {
             return new Response(
               '<?xml version="1.0" encoding="UTF-8"?><Response></Response>',
               { headers: { "Content-Type": "text/xml" } },
@@ -56,8 +72,8 @@ export const Route = createFileRoute("/api/twilio/webhook")({
           const messageType = numMedia > 0 && mediaUrl ? "image" : "text";
 
           const { error } = await sb.rpc("webhook_handle_incoming_message", {
-            p_business_id: business.id,
-            p_phone: phone,
+            p_business_id: businessId,
+            p_phone: customerPhone,
             p_customer_name: profileName || null,
             p_content: messageBody,
             p_message_type: messageType,
