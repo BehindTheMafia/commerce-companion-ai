@@ -11,9 +11,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import {
-  Users, Plus, Search, Phone, Mail, ShoppingCart, DollarSign,
-  TrendingUp, UserPlus, ChevronRight, X, Package, Calendar,
-  MapPin, Tag, FileText, Clock, MessageSquare, PhoneCall,
+  Users, Plus, Search, Phone, Mail,
+  ChevronRight, X, Package, Tag, FileText, Clock,
+  MessageSquare, PhoneCall,
   MoreHorizontal, Trash2, Edit3, CreditCard, ArrowUpRight,
 } from "lucide-react";
 import { useState, useMemo } from "react";
@@ -342,17 +342,13 @@ function CustomersPage() {
           </div>
         </div>
 
-        <div className="mt-5 grid grid-cols-6 gap-3">
+        <div className="mt-5 grid grid-cols-2 gap-3">
           <StatCard icon={Users} label="Total" value={stats.total} />
-          <StatCard icon={UserPlus} label="Nuevos este mes" value={stats.newMonth} />
-          <StatCard icon={TrendingUp} label="Recurrentes" value={stats.returning} />
-          <StatCard icon={DollarSign} label="Ingreso total" value={`${revenue(currency, stats.revenue)}`} />
-          <StatCard icon={ShoppingCart} label="Ticket promedio" value={`${$}${stats.avgTicket.toFixed(2)}`} />
-          <StatCard icon={Users} label="Top cliente" value={stats.top?.full_name ?? "—"} truncate />
+          <StatCard icon={Users} label="Cliente destacado" value={stats.top?.full_name ?? "—"} truncate />
         </div>
 
-        <div className="mt-5 flex items-center gap-3">
-          <div className="relative flex-1">
+        <div className="mt-5">
+          <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground/60" />
             <Input
               value={search}
@@ -360,21 +356,6 @@ function CustomersPage() {
               placeholder="Buscar por nombre, teléfono, email..."
               className="w-full pl-9"
             />
-          </div>
-          <div className="flex gap-1">
-            {FILTERS.map((f) => (
-              <button
-                key={f.value}
-                onClick={() => setFilter(f.value)}
-                className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
-                  filter === f.value
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-accent hover:text-foreground"
-                }`}
-              >
-                {f.label}
-              </button>
-            ))}
           </div>
         </div>
 
@@ -808,23 +789,11 @@ function MobileCustomers({
         </NewCustomerDialog>
       </div>
 
-      <div className="relative mt-4">
-        <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground/60" />
-        <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar..." className="w-full pl-9" />
-      </div>
-
-      <div className="mt-3 flex gap-1 overflow-x-auto pb-1">
-        {FILTERS.map((f) => (
-          <button
-            key={f.value}
-            onClick={() => setFilter(f.value)}
-            className={`shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
-              filter === f.value ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-accent"
-            }`}
-          >
-            {f.label}
-          </button>
-        ))}
+      <div className="mt-3">
+        <div className="relative">
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground/60" />
+          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar..." className="w-full pl-9" />
+        </div>
       </div>
 
       <Card className="mt-4 overflow-hidden">
