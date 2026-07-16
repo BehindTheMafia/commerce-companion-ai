@@ -257,14 +257,14 @@ function InventoryPage() {
               <thead>
                 <tr className="border-b text-left text-xs font-medium text-muted-foreground">
                   <th className="px-4 py-3">Producto</th>
-                  <th className="px-4 py-3">SKU</th>
-                  <th className="px-4 py-3">Categoría</th>
-                  <th className="px-4 py-3 text-right">Stock</th>
-                  <th className="px-4 py-3 text-right">Mínimo</th>
-                  <th className="px-4 py-3">Estado</th>
+                  <th className="px-4 py-3 text-center">SKU</th>
+                  <th className="px-4 py-3 text-center">Categoría</th>
+                  <th className="px-4 py-3 text-center">Stock</th>
+                  <th className="px-4 py-3 text-center">Mínimo</th>
+                  <th className="px-4 py-3 text-center">Estado</th>
                   <th className="px-4 py-3 text-right">Valor</th>
-                  <th className="px-4 py-3">Actualizado</th>
-                  <th className="w-12 px-4 py-3"></th>
+                  <th className="px-4 py-3 text-center">Actualizado</th>
+                  <th className="w-12 px-4 py-3 text-center"></th>
                 </tr>
               </thead>
               <tbody>
@@ -298,10 +298,10 @@ function InventoryPage() {
                             </div>
                           </div>
                         </td>
-                        <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{p.sku || "—"}</td>
-                        <td className="px-4 py-3 text-xs text-muted-foreground">{p.category?.name || "—"}</td>
+                        <td className="px-4 py-3 text-center font-mono text-xs text-muted-foreground">{p.sku || "—"}</td>
+                        <td className="px-4 py-3 text-center text-xs text-muted-foreground">{p.category?.name || "—"}</td>
                         <td className="px-4 py-3">
-                          <div className="flex flex-col items-end gap-1">
+                          <div className="flex flex-col items-center gap-1">
                             <span className={`text-sm tabular-nums font-semibold ${
                               p.stock <= 0 ? "text-destructive" : p.stock <= p.min_stock ? "text-warning-foreground" : ""
                             }`}>
@@ -312,8 +312,8 @@ function InventoryPage() {
                             </div>
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-right tabular-nums text-muted-foreground">{p.min_stock}</td>
-                        <td className="px-4 py-3">
+                        <td className="px-4 py-3 text-center tabular-nums text-muted-foreground">{p.min_stock}</td>
+                        <td className="px-4 py-3 text-center">
                           <span className={`inline-flex rounded-full px-2.5 py-0.5 text-[10px] font-medium ${st.color}`}>
                             {st.label}
                           </span>
@@ -321,10 +321,10 @@ function InventoryPage() {
                         <td className="px-4 py-3 text-right tabular-nums text-sm text-muted-foreground">
                           {$}{(p.cost ?? p.price).toFixed(2)}
                         </td>
-                        <td className="whitespace-nowrap px-4 py-3 text-xs text-muted-foreground">
+                        <td className="whitespace-nowrap px-4 py-3 text-center text-xs text-muted-foreground">
                           {format(new Date(p.updated_at), "dd MMM yyyy")}
                         </td>
-                        <td className="w-12 px-4 py-3">
+                        <td className="w-12 px-4 py-3 text-center">
                           <Button
                             size="sm"
                             variant="ghost"

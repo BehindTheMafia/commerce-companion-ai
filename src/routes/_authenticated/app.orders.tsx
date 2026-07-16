@@ -209,11 +209,11 @@ function OrdersPage() {
                 <TableRow>
                   <TableHead>Nº</TableHead>
                   <TableHead>Cliente</TableHead>
-                  <TableHead>Teléfono</TableHead>
-                  <TableHead>Fecha</TableHead>
-                  <TableHead>Estado</TableHead>
+                  <TableHead className="text-center">Teléfono</TableHead>
+                  <TableHead className="text-center">Fecha</TableHead>
+                  <TableHead className="text-center">Estado</TableHead>
                   <TableHead className="text-right">Total</TableHead>
-                  <TableHead className="w-20"></TableHead>
+                  <TableHead className="w-20 text-center"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -237,13 +237,13 @@ function OrdersPage() {
                       >
                         <TableCell className="py-4 font-mono text-xs">{o.order_number}</TableCell>
                         <TableCell className="py-4 font-medium">{getCustomerName(o)}</TableCell>
-                        <TableCell className="py-4 text-xs text-muted-foreground">
+                        <TableCell className="py-4 text-center text-xs text-muted-foreground">
                           {o.customer_phone || "—"}
                         </TableCell>
-                        <TableCell className="whitespace-nowrap py-4 text-xs text-muted-foreground">
+                        <TableCell className="whitespace-nowrap py-4 text-center text-xs text-muted-foreground">
                           {format(new Date(o.created_at), "dd MMM yyyy")}
                         </TableCell>
-                        <TableCell className="py-4">
+                        <TableCell className="py-4 text-center">
                           <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_COLORS[o.status] ?? ""}`}>
                             {STATUS_LABELS[o.status] ?? o.status}
                           </span>
@@ -251,8 +251,8 @@ function OrdersPage() {
                         <TableCell className="py-4 text-right tabular-nums font-medium">
                           {$}{Number(o.total).toFixed(2)}
                         </TableCell>
-                        <TableCell className="py-4">
-                          <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
+                        <TableCell className="py-4 text-center">
+                          <div className="flex items-center justify-center gap-1" onClick={(e) => e.stopPropagation()}>
                             {firstAction && (
                               <Button
                                 size="sm"

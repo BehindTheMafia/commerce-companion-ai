@@ -397,14 +397,14 @@ function CustomersPage() {
               <thead>
                 <tr className="border-b text-left text-xs font-medium text-muted-foreground">
                   <th className="px-4 py-3">Cliente</th>
-                  <th className="px-4 py-3">Contacto</th>
-                  <th className="px-4 py-3 text-right">Pedidos</th>
+                  <th className="px-4 py-3 text-center">Contacto</th>
+                  <th className="px-4 py-3 text-center">Pedidos</th>
                   <th className="px-4 py-3 text-right">Total gastado</th>
                   <th className="px-4 py-3 text-right">Ticket promedio</th>
-                  <th className="px-4 py-3">Última compra</th>
-                  <th className="px-4 py-3">Segmento</th>
-                  <th className="px-4 py-3">Tags</th>
-                  <th className="w-12 px-4 py-3"></th>
+                  <th className="px-4 py-3 text-center">Última compra</th>
+                  <th className="px-4 py-3 text-center">Segmento</th>
+                  <th className="px-4 py-3 text-center">Tags</th>
+                  <th className="w-12 px-4 py-3 text-center"></th>
                 </tr>
               </thead>
               <tbody>
@@ -436,7 +436,7 @@ function CustomersPage() {
                             </div>
                           </div>
                         </td>
-                        <td className="px-4 py-3.5">
+                        <td className="px-4 py-3.5 text-center">
                           {c.phone ? (
                             <a
                               href={`tel:${c.phone}`}
@@ -450,7 +450,7 @@ function CustomersPage() {
                             <span className="text-sm text-muted-foreground">—</span>
                           )}
                         </td>
-                        <td className="px-4 py-3.5 text-right tabular-nums">
+                        <td className="px-4 py-3.5 text-center tabular-nums">
                           <span className="text-sm font-medium">{c.stats?.order_count ?? 0}</span>
                         </td>
                         <td className="px-4 py-3.5 text-right tabular-nums">
@@ -461,7 +461,7 @@ function CustomersPage() {
                             {$}{(c.stats?.avg_ticket ?? 0).toFixed(2)}
                           </span>
                         </td>
-                        <td className="px-4 py-3.5">
+                        <td className="px-4 py-3.5 text-center">
                           {c.stats?.last_purchase ? (
                             <span className="text-sm text-muted-foreground">
                               {format(new Date(c.stats.last_purchase), "dd MMM")}
@@ -470,7 +470,7 @@ function CustomersPage() {
                             <span className="text-sm text-muted-foreground">—</span>
                           )}
                         </td>
-                        <td className="px-4 py-3.5">
+                        <td className="px-4 py-3.5 text-center">
                           <div className="flex flex-wrap gap-1">
                             {segs.slice(0, 2).map((s) => (
                               <span
@@ -488,8 +488,8 @@ function CustomersPage() {
                             ))}
                           </div>
                         </td>
-                        <td className="px-4 py-3.5">
-                          <div className="flex flex-wrap gap-1">
+                        <td className="px-4 py-3.5 text-center">
+                          <div className="flex flex-wrap justify-center gap-1">
                             {(c.tags ?? []).slice(0, 2).map((t, i) => (
                               <span key={t} className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium ${tagColor(i)}`}>
                                 {t}
@@ -502,7 +502,7 @@ function CustomersPage() {
                             )}
                           </div>
                         </td>
-                        <td className="w-12 px-4 py-3.5">
+                        <td className="w-12 px-4 py-3.5 text-center">
                           <Button
                             size="sm"
                             variant="ghost"
