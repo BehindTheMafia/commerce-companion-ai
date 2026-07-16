@@ -507,6 +507,26 @@ function ConversationsPanel({
   );
 }
 
+type MessageGroup = {
+  senderType: "customer" | "agent" | "system";
+  messages: InboxMessage[];
+};
+
+function groupMessages(msgs: InboxMessage[]): MessageGroup[] {
+  return msgs.reduce<MessageGroup[]>((groups, msg) => {
+    const type = msg.sender_type === "system" ? "system" as const
+      : msg.sender_type === "customer" ? "customer" as const
+      : "agent" as const;
+    const last = groups[groups.length - 1];
+    if (last && last.senderType === type) {
+      last.messages.push(msg);
+    } else {
+      groups.push({ senderType: type, messages: [msg] });
+    }
+    return groups;
+  }, []);
+}
+
 function ChatPanel({
   conversation, messages, inputText, isPending,
   showEmoji, showQuickReplies,
@@ -538,7 +558,7 @@ function ChatPanel({
   const checkIsAtBottom = useCallback(() => {
     if (!scrollRef.current) return true;
     const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
-    return scrollHeight + scrollTop - clientHeight < 80;
+    return scrollHeight + scrollTop - clientHeight < 60;
   }, []);
 
   const handleScroll = useCallback(() => {
@@ -555,7 +575,9 @@ function ChatPanel({
 
   useEffect(() => {
     if (messages.length > prevMsgCount.current && isAtBottom) {
-      scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+      requestAnimationFrame(() => {
+        scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+      });
     }
     if (messages.length > prevMsgCount.current && !isAtBottom) {
       setShowNewMsgBtn(true);
@@ -563,9 +585,162 @@ function ChatPanel({
     prevMsgCount.current = messages.length;
   }, [messages.length, isAtBottom]);
 
+  const groups = useMemo(() => groupMessages(messages), [messages]);
+
+  function renderContent() {
+    if (loading) {
+      return (
+        <div className="mt-auto space-y-3">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className={`flex ${i % 2 === 0 ? "" : "flex-row-reverse mr-5"} ${i % 2 === 0 ? "ml-5" : ""}`}>
+              {i % 2 === 0 && <div className="size-7 shrink-0 animate-pulse rounded-full bg-muted" />}
+              <div className={`space-y-1.5 ${i % 2 === 0 ? "" : "items-end flex flex-col"}`}>
+                <div className={`h-7 animate-pulse rounded-lg bg-muted ${i % 2 === 0 ? "w-40" : "w-32"}`} />
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    if (messages.length === 0) {
+      return (
+        <div className="animate-inbox-fade-in mt-auto flex flex-col items-center justify-center gap-2 py-12 text-center">
+          <MessageCircle className="size-8 text-muted-foreground/30" />
+          <p className="text-sm text-muted-foreground">No hay mensajes todavía</p>
+          <p className="text-xs text-muted-foreground/60">Escribe para iniciar la conversación</p>
+        </div>
+      );
+    }
+
+    let globalIdx = 0;
+
+    return (
+      <div className="mt-auto">
+        {groups.map((group) => {
+          if (group.senderType === "system") {
+            globalIdx += group.messages.length;
+            return group.messages.map((msg) => (
+              <div key={msg.id} className="flex justify-center py-2 animate-inbox-fade-in" style={{ animationDelay: `${(globalIdx - group.messages.length + group.messages.indexOf(msg)) * 15}ms` }}>
+                <span className="rounded-full bg-muted/60 px-3 py-1 text-[10px] text-muted-foreground">
+                  {msg.content}
+                </span>
+              </div>
+            ));
+          }
+
+          const isCustomer = group.senderType === "customer";
+          const isAgent = group.senderType === "agent";
+          const groupLen = group.messages.length;
+
+          return (
+            <div
+              key={group.messages[0].id}
+              className={`mb-2 ${isAgent ? "flex flex-col items-end mr-5" : "ml-5"}`}
+            >
+              {group.messages.map((msg, msgIdx) => {
+                globalIdx++;
+                const isLast = msgIdx === groupLen - 1;
+                const StatusIcon = STATUS_ICONS[msg.status] || Check;
+                const statusColor = STATUS_COLORS[msg.status] || "text-muted-foreground";
+
+                return (
+                  <div
+                    key={msg.id}
+                    className={`inbox-message-row flex gap-2.5 group ${isAgent ? "flex-row-reverse" : ""} ${isLast ? "mb-0" : "mb-0.5"}`}
+                    style={{ animationDelay: `${(globalIdx - 1) * 15}ms` }}
+                  >
+                    {isCustomer && (
+                      <div className="w-7 shrink-0">
+                        {isLast ? (
+                          <Avatar className="size-7">
+                            <AvatarFallback className="text-[9px] bg-primary/10 text-primary">
+                              {conversation.customer_name?.charAt(0)?.toUpperCase() ?? "C"}
+                            </AvatarFallback>
+                          </Avatar>
+                        ) : (
+                          <div className="size-7" />
+                        )}
+                      </div>
+                    )}
+
+                    <div className={`flex flex-col ${isAgent ? "items-end" : ""} relative`}>
+                      <div
+                        className={`max-w-[360px] text-sm leading-relaxed ${
+                          isCustomer
+                            ? "rounded-2xl rounded-bl-sm bg-muted/80 px-3.5 py-2"
+                            : "rounded-2xl rounded-br-sm bg-primary text-primary-foreground px-3.5 pt-2 pb-1.5"
+                        }`}
+                      >
+                        {msg.message_type === "image" ? (
+                          <div className="space-y-1.5">
+                            {msg.media_url && (
+                              <img src={msg.media_url} alt="" className="max-w-full rounded-lg object-cover" />
+                            )}
+                            {msg.content && <p className="animate-inbox-fade-in">{msg.content}</p>}
+                          </div>
+                        ) : msg.message_type === "document" ? (
+                          <div className="flex items-center gap-2">
+                            <File className="size-3.5 shrink-0" />
+                            <span className="truncate text-sm">{msg.content ?? "Documento"}</span>
+                          </div>
+                        ) : msg.message_type === "location" ? (
+                          <div className="flex items-center gap-2">
+                            <MapPin className="size-3.5 shrink-0" />
+                            <span className="text-sm">{msg.content ?? "Ubicación"}</span>
+                          </div>
+                        ) : (
+                          <p className="whitespace-pre-wrap break-words leading-snug">{msg.content}</p>
+                        )}
+
+                        {isAgent && (
+                          <div className="mt-1 flex items-center justify-end gap-1">
+                            <span className="text-[9px] text-primary-foreground/60">
+                              {format(new Date(msg.created_at), "HH:mm")}
+                            </span>
+                            <span className="flex" key={`${msg.status}-${msg.id}`}>
+                              <StatusIcon className={`size-2.5 ${statusColor} ${isAgent ? "text-primary-foreground/60" : ""} animate-inbox-status-enter`} />
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      {isCustomer && (
+                        <div className="mt-0.5 flex items-center gap-1 px-1">
+                          <span className="text-[9px] text-muted-foreground/50">
+                            {format(new Date(msg.created_at), "HH:mm")}
+                          </span>
+                        </div>
+                      )}
+
+                      {isAgent && isLast && (
+                        <div className="inbox-message-actions absolute top-0 right-0 flex items-center gap-0.5 rounded-md border bg-background px-1 py-0.5 shadow-xs">
+                          <button className="rounded p-0.5 text-muted-foreground hover:text-foreground transition-colors" title="Responder">
+                            <CornerDownRight className="size-2.5" />
+                          </button>
+                          <button className="rounded p-0.5 text-muted-foreground hover:text-foreground transition-colors" title="Reenviar">
+                            <Forward className="size-2.5" />
+                          </button>
+                          <button className="rounded p-0.5 text-muted-foreground hover:text-foreground transition-colors" title="Copiar">
+                            <FileText className="size-2.5" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })}
+        <div ref={messagesEndRef} />
+      </div>
+    );
+  }
+
   return (
     <>
-      <div className="flex items-center justify-between border-b px-4 py-2.5">
+      <div className="flex items-center justify-between border-b px-4 py-2.5 shrink-0">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className="relative shrink-0">
             <Avatar className="size-8">
@@ -573,7 +748,7 @@ function ChatPanel({
                 {conversation.customer_name?.charAt(0)?.toUpperCase() ?? "?"}
               </AvatarFallback>
             </Avatar>
-            <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full border-2 border-background bg-green-500 transition-colors duration-300" />
+            <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full border-2 border-background bg-green-500" />
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
@@ -592,7 +767,7 @@ function ChatPanel({
             <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
               <span className="font-medium">{conversation.customer_phone ?? ""}</span>
               <span>·</span>
-              <span className="transition-opacity duration-200">En línea</span>
+              <span>En línea</span>
             </div>
           </div>
         </div>
@@ -617,124 +792,20 @@ function ChatPanel({
         <div
           ref={scrollRef}
           onScroll={handleScroll}
-          className="flex min-h-0 w-full flex-1 flex-col px-4 py-3 overflow-y-auto"
+          className="flex min-h-0 w-full flex-1 flex-col overflow-y-auto scroll-smooth"
         >
-          {loading ? (
-            <div className="mt-auto space-y-3">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className={`flex gap-2.5 ${i % 2 === 0 ? "" : "flex-row-reverse"}`}>
-                  <div className="size-7 shrink-0 animate-pulse rounded-full bg-muted" />
-                  <div className={`space-y-1.5 ${i % 2 === 0 ? "" : "items-end flex flex-col"}`}>
-                    <div className={`h-7 animate-pulse rounded-lg bg-muted ${i % 2 === 0 ? "w-40" : "w-32"}`} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : messages.length === 0 ? (
-            <div className="animate-inbox-fade-in mt-auto flex flex-col items-center justify-center gap-2 py-12 text-center">
-              <MessageCircle className="size-8 text-muted-foreground/30" />
-              <p className="text-sm text-muted-foreground">No hay mensajes todavía</p>
-              <p className="text-xs text-muted-foreground/60">Escribe para iniciar la conversación</p>
-            </div>
-          ) : (
-            <div className="mt-auto space-y-1.5">
-              {messages.map((msg, idx) => {
-                const isCustomer = msg.sender_type === "customer";
-                const isSystem = msg.sender_type === "system";
-                const StatusIcon = STATUS_ICONS[msg.status] || Check;
-                const statusColor = STATUS_COLORS[msg.status] || "text-muted-foreground";
-
-                if (isSystem) {
-                  return (
-                    <div key={msg.id} className="flex justify-center py-1 animate-inbox-fade-in" style={{ animationDelay: `${idx * 15}ms` }}>
-                      <span className="rounded-full bg-muted/60 px-3 py-1 text-[10px] text-muted-foreground">
-                        {msg.content}
-                      </span>
-                    </div>
-                  );
-                }
-
-                return (
-                  <div
-                    key={msg.id}
-                    className="inbox-message-row flex gap-2.5 group"
-                    style={{ animationDelay: `${idx * 15}ms` }}
-                  >
-                    <div className={`flex gap-2.5 w-full ${isCustomer ? "" : "flex-row-reverse"}`}>
-                      <Avatar className="size-7 shrink-0">
-                        <AvatarFallback className={`text-[9px] ${isCustomer ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
-                          {isCustomer
-                            ? (conversation.customer_name?.charAt(0)?.toUpperCase() ?? "C")
-                            : "A"}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className={`max-w-[75%] ${!isCustomer ? "items-end flex flex-col" : ""} relative`}>
-                        <div className={`rounded-xl px-3.5 py-2 text-sm leading-relaxed ${
-                          isCustomer
-                            ? "rounded-bl-sm bg-muted/80"
-                            : "rounded-br-sm bg-primary text-primary-foreground"
-                        }`}>
-                          {msg.message_type === "image" ? (
-                            <div className="space-y-1.5">
-                              {msg.media_url && (
-                                <img src={msg.media_url} alt="" className="max-w-full rounded-lg object-cover" />
-                              )}
-                              {msg.content && <p className="animate-inbox-fade-in">{msg.content}</p>}
-                            </div>
-                          ) : msg.message_type === "document" ? (
-                            <div className="flex items-center gap-2">
-                              <File className="size-3.5 shrink-0" />
-                              <span className="truncate text-sm">{msg.content ?? "Documento"}</span>
-                            </div>
-                          ) : msg.message_type === "location" ? (
-                            <div className="flex items-center gap-2">
-                              <MapPin className="size-3.5 shrink-0" />
-                              <span className="text-sm">{msg.content ?? "Ubicación"}</span>
-                            </div>
-                          ) : (
-                            <p className="whitespace-pre-wrap break-words leading-snug">{msg.content}</p>
-                          )}
-                        </div>
-                        <div className={`mt-0.5 flex items-center gap-1 px-1 ${!isCustomer ? "flex-row-reverse" : ""}`}>
-                          <span className="text-[9px] text-muted-foreground/60">
-                            {format(new Date(msg.created_at), "HH:mm")}
-                          </span>
-                          {!isCustomer && (
-                            <span className="flex" key={`${msg.status}-${msg.id}`}>
-                              <StatusIcon className={`size-2.5 ${statusColor} animate-inbox-status-enter`} />
-                            </span>
-                          )}
-                        </div>
-                        {!isCustomer && (
-                          <div className="inbox-message-actions absolute -top-5 right-0 flex items-center gap-0.5 rounded-md border bg-background px-1 py-0.5 shadow-xs">
-                            <button className="rounded p-0.5 text-muted-foreground hover:text-foreground transition-colors" title="Responder">
-                              <CornerDownRight className="size-2.5" />
-                            </button>
-                            <button className="rounded p-0.5 text-muted-foreground hover:text-foreground transition-colors" title="Reenviar">
-                              <Forward className="size-2.5" />
-                            </button>
-                            <button className="rounded p-0.5 text-muted-foreground hover:text-foreground transition-colors" title="Copiar">
-                              <FileText className="size-2.5" />
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-              <div ref={messagesEndRef} />
-            </div>
-          )}
+          <div className="px-4 py-3">
+            {renderContent()}
+          </div>
         </div>
 
-        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-10">
+        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-10 pointer-events-none">
           <TypingIndicator visible={false} />
         </div>
 
         <button
           onClick={scrollToBottom}
-          className={`absolute bottom-3 right-4 z-10 flex items-center gap-1.5 rounded-full border bg-background px-3 py-1.5 text-[10px] font-medium text-primary shadow-md transition-all duration-200 ${
+          className={`absolute bottom-3 right-6 z-10 flex items-center gap-1.5 rounded-full border bg-background px-3 py-1.5 text-[10px] font-medium text-primary shadow-md transition-all duration-200 ${
             showNewMsgBtn
               ? "translate-y-0 opacity-100 pointer-events-auto"
               : "translate-y-2 opacity-0 pointer-events-none"
@@ -781,7 +852,7 @@ function ChatPanel({
         </div>
       )}
 
-      <div className="border-t px-4 py-3">
+      <div className="border-t shrink-0 px-4 py-3">
         <div className="flex items-end gap-2">
           <div className="flex items-center gap-0.5 pb-1">
             <Button variant="ghost" size="icon" className="size-8 text-muted-foreground/70 hover:text-foreground transition-colors" onClick={onToggleEmoji} title="Emojis">
