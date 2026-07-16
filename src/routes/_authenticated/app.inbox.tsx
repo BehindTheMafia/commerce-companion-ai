@@ -554,6 +554,7 @@ function ChatPanel({
   const [showNewMsgBtn, setShowNewMsgBtn] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const prevMsgCount = useRef(messages.length);
+  const isInitialRender = useRef(true);
 
   const checkIsAtBottom = useCallback(() => {
     if (!scrollRef.current) return true;
@@ -574,6 +575,14 @@ function ChatPanel({
   }, []);
 
   useEffect(() => {
+    if (isInitialRender.current) {
+      isInitialRender.current = false;
+      requestAnimationFrame(() => {
+        scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
+      });
+      prevMsgCount.current = messages.length;
+      return;
+    }
     if (messages.length > prevMsgCount.current && isAtBottom) {
       requestAnimationFrame(() => {
         scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -792,11 +801,9 @@ function ChatPanel({
         <div
           ref={scrollRef}
           onScroll={handleScroll}
-          className="flex min-h-0 w-full flex-1 flex-col overflow-y-auto scroll-smooth"
+          className="flex min-h-0 w-full flex-1 flex-col overflow-y-auto scroll-smooth px-0 py-3"
         >
-          <div className="px-4 py-3">
-            {renderContent()}
-          </div>
+          {renderContent()}
         </div>
 
         <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-10 pointer-events-none">
