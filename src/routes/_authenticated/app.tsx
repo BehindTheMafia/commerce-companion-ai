@@ -108,6 +108,7 @@ const navPlatform = [
     isActive: true,
     items: [
       { to: "/app", label: "Dashboard", icon: LayoutDashboard, end: true },
+      { to: "/app/inbox", label: "Inbox", icon: MessageSquare },
       { to: "/app/orders", label: "Pedidos", icon: ShoppingCart },
       { to: "/app/customers", label: "Clientes", icon: Users },
     ],
@@ -124,7 +125,6 @@ const navPlatform = [
 ];
 
 const navProjects = [
-  { name: "Inbox", url: "/app/inbox", icon: MessageSquare, soon: true },
   { name: "Agentes IA", url: "/app/agents", icon: Bot, soon: true },
   { name: "Automatizaciones", url: "/app/automations", icon: Zap, soon: true },
   { name: "Analytics", url: "/app/analytics", icon: PieChart, soon: true },
