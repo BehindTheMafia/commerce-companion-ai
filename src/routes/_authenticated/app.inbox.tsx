@@ -23,7 +23,8 @@ import {
   MoreHorizontal, Archive, CheckCheck, AlertCircle,
   Image, Mic, File, Download, Plus, Minus,
   ArrowUpRight, Sparkles, Bot, Zap, Settings2,
-  RefreshCw, Inbox, CornerDownRight,
+  RefreshCw, Inbox, CornerDownRight, Ellipsis,
+  MessageCircle,
 } from "lucide-react";
 import {
   type InboxConversation, type InboxMessage, type FilterValue,
@@ -371,73 +372,75 @@ function ConversationsPanel({
   onSearchChange: (v: string) => void;
   onSelect: (id: string) => void;
 }) {
-  const [showFilters, setShowFilters] = useState(false);
   return (
     <>
-      <div className="flex items-center justify-between px-4 pt-4 pb-2">
-        <div className="flex items-center gap-2">
-          <h2 className="text-sm font-semibold">Bandeja de entrada</h2>
+      <div className="flex items-center justify-between px-4 pt-3.5 pb-2">
+        <h2 className="text-sm font-semibold tracking-tight">Conversaciones</h2>
+        <div className="flex items-center gap-1">
           {unreadTotal > 0 && (
-            <Badge variant="secondary" className="size-5 rounded-full p-0 text-[10px] leading-none">
+            <span className="flex size-5 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-primary-foreground">
               {unreadTotal > 99 ? "99+" : unreadTotal}
-            </Badge>
+            </span>
           )}
+          <Button variant="ghost" size="icon" className="size-6 text-muted-foreground">
+            <Settings2 className="size-3.5" />
+          </Button>
         </div>
-        <Button variant="ghost" size="icon" className="size-7" onClick={() => setShowFilters(!showFilters)}>
-          <Filter className="size-3.5" />
-        </Button>
       </div>
 
       <div className="px-4 pb-2">
         <div className="relative">
-          <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground/60" />
+          <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground/50" />
           <Input
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
-            placeholder="Buscar conversaciones..."
+            placeholder="Buscar..."
             className="h-8 pl-8 text-xs"
           />
         </div>
       </div>
 
-      {showFilters && (
-        <div className="flex flex-wrap gap-1 px-4 pb-2">
-          {FILTERS.map((f) => (
-            <button
-              key={f.value}
-              onClick={() => onFilterChange(f.value)}
-              className={`rounded-lg px-2.5 py-1 text-[10px] font-medium transition-colors ${
-                filter === f.value
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-accent hover:text-foreground"
-              }`}
-            >
-              {f.label}
-            </button>
-          ))}
-        </div>
-      )}
+      <div className="flex gap-0.5 px-3 pb-2">
+        {[
+          { value: "all" as FilterValue, label: "Todos" },
+          { value: "unread" as FilterValue, label: "No leídos" },
+          { value: "mine" as FilterValue, label: "Mis chats" },
+          { value: "archived" as FilterValue, label: "Archivados" },
+        ].map((f) => (
+          <button
+            key={f.value}
+            onClick={() => onFilterChange(f.value)}
+            className={`flex-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors ${
+              filter === f.value
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:bg-accent hover:text-foreground"
+            }`}
+          >
+            {f.label}
+          </button>
+        ))}
+      </div>
 
       <ScrollArea className="flex-1">
         {isLoading ? (
-          <div className="space-y-2 p-4">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="flex items-center gap-3">
-                <div className="size-10 shrink-0 animate-pulse rounded-full bg-muted" />
+          <div className="space-y-1 p-3">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-3 rounded-lg p-2">
+                <div className="size-9 shrink-0 animate-pulse rounded-full bg-muted" />
                 <div className="flex-1 space-y-1.5">
-                  <div className="h-3 w-32 animate-pulse rounded bg-muted" />
-                  <div className="h-2.5 w-48 animate-pulse rounded bg-muted/60" />
+                  <div className="h-3 w-28 animate-pulse rounded bg-muted" />
+                  <div className="h-2.5 w-44 animate-pulse rounded bg-muted/60" />
                 </div>
               </div>
             ))}
           </div>
         ) : conversations.length === 0 ? (
           <div className="flex flex-col items-center gap-2 p-8 text-center">
-            <Inbox className="size-8 text-muted-foreground/40" />
+            <Inbox className="size-8 text-muted-foreground/30" />
             <p className="text-xs text-muted-foreground">No hay conversaciones</p>
           </div>
         ) : (
-          <div className="divide-y">
+          <div className="space-y-0.5 px-2 pb-2">
             {conversations.map((conv) => {
               const isSelected = conv.id === selectedConversationId;
               const convTags = conv.tags?.map((t) => t.tag) ?? [];
@@ -445,48 +448,50 @@ function ConversationsPanel({
                 <button
                   key={conv.id}
                   onClick={() => onSelect(conv.id)}
-                  className={`flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-accent/50 ${
-                    isSelected ? "bg-accent" : ""
+                  className={`flex w-full items-start gap-2.5 rounded-lg px-2.5 py-2.5 text-left transition-colors ${
+                    isSelected
+                      ? "bg-accent"
+                      : "hover:bg-accent/50"
                   }`}
                 >
                   <div className="relative shrink-0">
-                    <Avatar className="size-10">
-                      <AvatarFallback className="text-xs bg-primary/10 text-primary">
+                    <Avatar className="size-9">
+                      <AvatarFallback className="text-[11px] bg-primary/10 text-primary">
                         {conv.customer_name?.charAt(0)?.toUpperCase() ?? "?"}
                       </AvatarFallback>
                     </Avatar>
-                    <div className={`absolute -bottom-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full text-[8px] font-bold text-white ${CHANNEL_COLORS[conv.channel]?.split(" ")[0] ?? "bg-muted"}`}>
-                      {CHANNEL_ICONS[conv.channel] ?? "?"}
+                    <div className="absolute -bottom-0.5 -right-0.5 flex size-3.5 items-center justify-center rounded-full bg-green-500 text-[6px] font-bold text-white ring-1 ring-background">
+                      WA
                     </div>
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="truncate text-sm font-medium">
+                    <div className="flex items-center justify-between gap-1.5">
+                      <span className="truncate text-[13px] font-medium leading-tight">
                         {conv.customer_name ?? conv.customer_phone ?? "Desconocido"}
                       </span>
-                      <span className="shrink-0 text-[10px] text-muted-foreground">
+                      <span className="shrink-0 text-[10px] tabular-nums text-muted-foreground">
                         {conv.last_message_at ? formatTime(conv.last_message_at) : ""}
                       </span>
                     </div>
-                    <p className={`mt-0.5 truncate text-xs ${
-                      conv.unread_count > 0 ? "font-medium text-foreground" : "text-muted-foreground"
+                    <p className={`mt-0.5 truncate text-[12px] leading-tight ${
+                      conv.unread_count > 0 ? "font-semibold text-foreground" : "text-muted-foreground/80"
                     }`}>
                       {conv.last_message_text ?? "Sin mensajes"}
                     </p>
-                    <div className="mt-1 flex flex-wrap gap-1">
+                    <div className="mt-1 flex items-center gap-1">
                       {conv.unread_count > 0 && (
-                        <Badge variant="default" className="h-4 rounded px-1 text-[9px] leading-none">
-                          {conv.unread_count}
-                        </Badge>
+                        <span className="flex size-4 items-center justify-center rounded-full bg-primary text-[8px] font-medium text-primary-foreground">
+                          {conv.unread_count > 9 ? "9+" : conv.unread_count}
+                        </span>
                       )}
-                      {convTags.slice(0, 2).map((t) => (
-                        <span key={t} className={`rounded px-1 py-[1px] text-[8px] font-medium ${getTagColor(t)}`}>
+                      {convTags.slice(0, 1).map((t) => (
+                        <span key={t} className={`rounded px-1 py-[1px] text-[8px] font-medium leading-none ${getTagColor(t)}`}>
                           {t}
                         </span>
                       ))}
                       {conv.status !== "open" && (
-                        <span className="rounded bg-muted px-1 py-[1px] text-[8px] font-medium text-muted-foreground">
-                          {conv.status}
+                        <span className="rounded bg-muted px-1 py-[1px] text-[8px] font-medium leading-none text-muted-foreground">
+                          {conv.status === "resolved" ? "Resuelto" : conv.status}
                         </span>
                       )}
                     </div>
@@ -528,68 +533,74 @@ function ChatPanel({
 
   return (
     <>
-      <div className="flex items-center justify-between border-b px-5 py-3">
-        <div className="flex items-center gap-3 min-w-0">
-          <Avatar className="size-9">
-            <AvatarFallback className="text-xs bg-primary/10 text-primary">
-              {conversation.customer_name?.charAt(0)?.toUpperCase() ?? "?"}
-            </AvatarFallback>
-          </Avatar>
+      <div className="flex items-center justify-between border-b px-4 py-2.5">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="relative shrink-0">
+            <Avatar className="size-8">
+              <AvatarFallback className="text-[10px] bg-primary/10 text-primary">
+                {conversation.customer_name?.charAt(0)?.toUpperCase() ?? "?"}
+              </AvatarFallback>
+            </Avatar>
+            <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full border-2 border-background bg-green-500" />
+          </div>
           <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <h3 className="truncate text-sm font-semibold">
+            <div className="flex items-center gap-1.5">
+              <h3 className="truncate text-sm font-semibold leading-tight">
                 {conversation.customer_name ?? conversation.customer_phone ?? "Desconocido"}
               </h3>
+              <span className="shrink-0 rounded bg-green-100 px-1 py-[1px] text-[8px] font-medium text-green-700">WhatsApp</span>
               {conversation.ai?.urgency && (
-                <Badge variant={conversation.ai.urgency === "critical" ? "destructive" : "secondary"} className="h-4 rounded px-1 text-[9px] leading-none">
+                <span className={`shrink-0 rounded px-1 py-[1px] text-[8px] font-medium ${
+                  conversation.ai.urgency === "critical" ? "bg-red-100 text-red-700" : "bg-muted text-muted-foreground"
+                }`}>
                   {conversation.ai.urgency}
-                </Badge>
+                </span>
               )}
             </div>
-            <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+            <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
               <span className="font-medium">{conversation.customer_phone ?? ""}</span>
-              {convTags.length > 0 && (
-                <>
-                  <span>·</span>
-                  {convTags.map((t) => (
-                    <span key={t} className={`rounded px-1 py-[1px] ${getTagColor(t)}`}>{t}</span>
-                  ))}
-                </>
-              )}
+              <span>·</span>
+              <span>En línea</span>
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-1">
-          <Button variant="ghost" size="icon" className="size-7" onClick={onResolve} title="Resolver">
-            <Check className="size-3.5" />
+        <div className="flex items-center gap-0.5">
+          <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" title="Buscar">
+            <Search className="size-3.5" />
           </Button>
-          <Button variant="ghost" size="icon" className="size-7" title="Más opciones">
-            <MoreHorizontal className="size-3.5" />
+          <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" title="Llamar">
+            <Phone className="size-3.5" />
+          </Button>
+          <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" title="Más opciones">
+            <Ellipsis className="size-3.5" />
+          </Button>
+          <Separator orientation="vertical" className="mx-1 h-5" />
+          <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" onClick={onResolve} title="Marcar como resuelto">
+            <Check className="size-3.5" />
           </Button>
         </div>
       </div>
 
-      <ScrollArea className="flex-1 px-5 py-4">
+      <div className="flex min-h-0 flex-1 flex-col-reverse overflow-y-auto px-4 py-3">
         {loading ? (
-          <div className="space-y-4">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className={`flex gap-3 ${i % 2 === 0 ? "" : "flex-row-reverse"}`}>
-                <div className="size-8 shrink-0 animate-pulse rounded-full bg-muted" />
+          <div className="space-y-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className={`flex gap-2.5 ${i % 2 === 0 ? "" : "flex-row-reverse"}`}>
+                <div className="size-7 shrink-0 animate-pulse rounded-full bg-muted" />
                 <div className={`space-y-1.5 ${i % 2 === 0 ? "" : "items-end flex flex-col"}`}>
-                  <div className={`h-8 animate-pulse rounded-lg bg-muted ${i % 2 === 0 ? "w-48" : "w-36"}`} />
-                  <div className={`h-4 w-16 animate-pulse rounded bg-muted/60`} />
+                  <div className={`h-7 animate-pulse rounded-lg bg-muted ${i % 2 === 0 ? "w-40" : "w-32"}`} />
                 </div>
               </div>
             ))}
           </div>
         ) : messages.length === 0 ? (
-          <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
-            <MessageSquare className="size-8 text-muted-foreground/40" />
+          <div className="flex flex-col items-center justify-center gap-2 py-12 text-center">
+            <MessageCircle className="size-8 text-muted-foreground/30" />
             <p className="text-sm text-muted-foreground">No hay mensajes todavía</p>
-            <p className="text-xs text-muted-foreground/60">Escribe el primer mensaje para iniciar la conversación</p>
+            <p className="text-xs text-muted-foreground/60">Escribe para iniciar la conversación</p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-2">
             {[...messages].reverse().map((msg) => {
               const isCustomer = msg.sender_type === "customer";
               const isSystem = msg.sender_type === "system";
@@ -598,8 +609,8 @@ function ChatPanel({
 
               if (isSystem) {
                 return (
-                  <div key={msg.id} className="flex justify-center">
-                    <span className="rounded-full bg-muted px-3 py-1 text-[10px] text-muted-foreground">
+                  <div key={msg.id} className="flex justify-center py-1">
+                    <span className="rounded-full bg-muted/60 px-3 py-1 text-[10px] text-muted-foreground">
                       {msg.content}
                     </span>
                   </div>
@@ -607,22 +618,22 @@ function ChatPanel({
               }
 
               return (
-                <div key={msg.id} className={`flex gap-3 ${isCustomer ? "" : "flex-row-reverse"}`}>
-                  <Avatar className="size-8 shrink-0">
-                    <AvatarFallback className={`text-[10px] ${isCustomer ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
+                <div key={msg.id} className={`flex gap-2.5 ${isCustomer ? "" : "flex-row-reverse"}`}>
+                  <Avatar className="size-7 shrink-0">
+                    <AvatarFallback className={`text-[9px] ${isCustomer ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
                       {isCustomer
                         ? (conversation.customer_name?.charAt(0)?.toUpperCase() ?? "C")
                         : "A"}
                     </AvatarFallback>
                   </Avatar>
-                  <div className={`max-w-[70%] ${!isCustomer ? "items-end flex flex-col" : ""}`}>
-                    <div className={`rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
+                  <div className={`max-w-[75%] ${!isCustomer ? "items-end flex flex-col" : ""}`}>
+                    <div className={`rounded-xl px-3.5 py-2 text-sm leading-relaxed ${
                       isCustomer
-                        ? "rounded-bl-sm bg-muted"
+                        ? "rounded-bl-sm bg-muted/80"
                         : "rounded-br-sm bg-primary text-primary-foreground"
                     }`}>
                       {msg.message_type === "image" ? (
-                        <div className="space-y-2">
+                        <div className="space-y-1.5">
                           {msg.media_url && (
                             <img src={msg.media_url} alt="" className="max-w-full rounded-lg object-cover" />
                           )}
@@ -630,24 +641,24 @@ function ChatPanel({
                         </div>
                       ) : msg.message_type === "document" ? (
                         <div className="flex items-center gap-2">
-                          <File className="size-4 shrink-0" />
+                          <File className="size-3.5 shrink-0" />
                           <span className="truncate text-sm">{msg.content ?? "Documento"}</span>
                         </div>
                       ) : msg.message_type === "location" ? (
                         <div className="flex items-center gap-2">
-                          <MapPin className="size-4 shrink-0" />
+                          <MapPin className="size-3.5 shrink-0" />
                           <span className="text-sm">{msg.content ?? "Ubicación"}</span>
                         </div>
                       ) : (
-                        <p className="whitespace-pre-wrap break-words">{msg.content}</p>
+                        <p className="whitespace-pre-wrap break-words leading-snug">{msg.content}</p>
                       )}
                     </div>
                     <div className={`mt-0.5 flex items-center gap-1 px-1 ${!isCustomer ? "flex-row-reverse" : ""}`}>
-                      <span className="text-[10px] text-muted-foreground">
+                      <span className="text-[9px] text-muted-foreground/60">
                         {format(new Date(msg.created_at), "HH:mm")}
                       </span>
                       {!isCustomer && (
-                        <StatusIcon className={`size-3 ${statusColor}`} />
+                        <StatusIcon className={`size-2.5 ${statusColor}`} />
                       )}
                     </div>
                   </div>
@@ -657,20 +668,20 @@ function ChatPanel({
             <div ref={messagesEndRef} />
           </div>
         )}
-      </ScrollArea>
+      </div>
 
       {showQuickReplies && (
-        <div className="border-t px-5 py-3">
-          <div className="mb-2 flex items-center gap-2">
-            <Bot className="size-3.5 text-muted-foreground" />
+        <div className="border-t bg-muted/30 px-4 py-2.5">
+          <div className="mb-1.5 flex items-center gap-1.5">
+            <Bot className="size-3 text-muted-foreground" />
             <span className="text-[10px] font-medium text-muted-foreground">Respuestas rápidas</span>
           </div>
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-1">
             {QUICK_REPLIES.map((reply) => (
               <button
                 key={reply}
                 onClick={() => onInputChange(reply)}
-                className="rounded-lg border bg-background px-2.5 py-1.5 text-[11px] text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                className="rounded-md border bg-background px-2 py-1 text-[10px] text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
               >
                 {reply}
               </button>
@@ -680,9 +691,9 @@ function ChatPanel({
       )}
 
       {showEmoji && (
-        <div className="border-t px-5 py-3">
-          <div className="flex flex-wrap gap-1">
-            {EMOJIS.map((emoji) => (
+        <div className="border-t bg-muted/30 px-4 py-2.5">
+          <div className="flex flex-wrap gap-0.5">
+            {EMOJIS.slice(0, 28).map((emoji) => (
               <button
                 key={emoji}
                 onClick={() => onInsertEmoji(emoji)}
@@ -695,38 +706,43 @@ function ChatPanel({
         </div>
       )}
 
-      <div className="border-t px-5 py-3">
+      <div className="border-t px-4 py-3">
         <div className="flex items-end gap-2">
-          <div className="flex items-center gap-1 pb-1">
-            <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" onClick={onToggleEmoji} title="Emojis">
+          <div className="flex items-center gap-0.5 pb-1">
+            <Button variant="ghost" size="icon" className="size-8 text-muted-foreground/70 hover:text-foreground" onClick={onToggleEmoji} title="Emojis">
               <Smile className="size-4" />
             </Button>
-            <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" title="Adjuntar">
+            <Button variant="ghost" size="icon" className="size-8 text-muted-foreground/70 hover:text-foreground" title="Adjuntar">
               <Paperclip className="size-4" />
             </Button>
-            <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" title="Plantillas">
+            <Button variant="ghost" size="icon" className="size-8 text-muted-foreground/70 hover:text-foreground" title="Plantillas">
               <FileText className="size-4" />
             </Button>
-            <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" onClick={onToggleQuickReplies} title="Respuestas rápidas">
-              <Zap className="size-4" />
+            <Button variant="ghost" size="icon" className="size-8 text-muted-foreground/70 hover:text-foreground" title="Asistente IA">
+              <Bot className="size-4" />
+            </Button>
+            <Button variant="ghost" size="icon" className="size-8 text-muted-foreground/70 hover:text-foreground" title="Nota de voz">
+              <Mic className="size-4" />
             </Button>
           </div>
           <div className="relative flex-1">
-            <Input
-              value={inputText}
-              onChange={(e) => onInputChange(e.target.value)}
-              onKeyDown={onKeyDown}
-              placeholder="Escribe un mensaje..."
-              className="h-10 pr-10 resize-none"
-            />
-            <Button
-              size="icon"
-              className="absolute right-0.5 top-0.5 size-9"
-              onClick={onSend}
-              disabled={!inputText.trim() || isPending}
-            >
-              <Send className="size-4" />
-            </Button>
+            <div className="flex items-center gap-2 rounded-xl border bg-background px-3 py-1.5">
+              <input
+                value={inputText}
+                onChange={(e) => onInputChange(e.target.value)}
+                onKeyDown={onKeyDown}
+                placeholder="Escribe un mensaje..."
+                className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground/50"
+              />
+              <Button
+                size="icon"
+                className="size-8 shrink-0 rounded-lg"
+                onClick={onSend}
+                disabled={!inputText.trim() || isPending}
+              >
+                <Send className="size-4" />
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -751,161 +767,158 @@ function CustomerContextPanel({
 }) {
   const customer = conversation.customer;
   const ai = conversation.ai;
-  const totalSpent = customer ? 0 : 0;
   const customerSince = (customer as any)?.created_at ?? conversation.created_at;
 
   return (
     <ScrollArea className="flex-1">
-      <div className="px-5 py-4">
-        <div className="flex flex-col items-center gap-2 pb-4 text-center">
-          <Avatar className="size-14">
-            <AvatarFallback className="text-lg bg-primary/10 text-primary">
+      <div className="px-4 py-3.5">
+        <div className="flex items-center gap-3 pb-3">
+          <Avatar className="size-10 shrink-0">
+            <AvatarFallback className="text-sm bg-primary/10 text-primary">
               {customer?.full_name?.charAt(0)?.toUpperCase() ?? conversation.customer_name?.charAt(0)?.toUpperCase() ?? "?"}
             </AvatarFallback>
           </Avatar>
-          <div>
-            <h3 className="text-base font-semibold">{customer?.full_name ?? conversation.customer_name ?? "Desconocido"}</h3>
-            {conversation.customer_phone && (
-              <p className="text-xs text-muted-foreground">{conversation.customer_phone}</p>
-            )}
+          <div className="min-w-0">
+            <h3 className="truncate text-sm font-semibold">{customer?.full_name ?? conversation.customer_name ?? "Desconocido"}</h3>
+            <p className="truncate text-xs text-muted-foreground">{conversation.customer_phone ?? ""}</p>
           </div>
         </div>
 
-        <div className="mb-4 grid grid-cols-2 gap-2">
-          <div className="rounded-lg bg-muted/50 px-3 py-2.5">
-            <p className="text-[10px] text-muted-foreground">Desde</p>
+        <div className="mb-3 grid grid-cols-2 gap-1.5">
+          <div className="rounded-md bg-muted/40 px-2.5 py-2">
+            <p className="text-[9px] text-muted-foreground">Cliente desde</p>
             <p className="text-xs font-medium">{format(new Date(customerSince), "MMM yyyy")}</p>
           </div>
-          <div className="rounded-lg bg-muted/50 px-3 py-2.5">
-            <p className="text-[10px] text-muted-foreground">Gasto total</p>
+          <div className="rounded-md bg-muted/40 px-2.5 py-2">
+            <p className="text-[9px] text-muted-foreground">Gasto total</p>
             <p className="text-xs font-medium">$0.00</p>
           </div>
         </div>
 
-        <Separator className="mb-4" />
-
-        {customer && (
-          <>
-            <div className="mb-4 space-y-2">
-              <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Contacto</h4>
-              {customer.email && (
-                <div className="flex items-center gap-2 text-xs">
-                  <Mail className="size-3 text-muted-foreground" />
-                  <span className="truncate">{customer.email}</span>
-                </div>
-              )}
-              {customer.phone && (
-                <div className="flex items-center gap-2 text-xs">
-                  <Phone className="size-3 text-muted-foreground" />
-                  <span>{customer.phone}</span>
-                </div>
-              )}
-            </div>
-            <Separator className="mb-4" />
-          </>
+        {customer && (customer.email || customer.phone) && (
+          <div className="mb-3 space-y-1">
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Información del cliente</p>
+            {customer.email && (
+              <div className="flex items-center gap-2 text-xs">
+                <Mail className="size-3 text-muted-foreground" />
+                <span className="truncate">{customer.email}</span>
+              </div>
+            )}
+            {customer.phone && (
+              <div className="flex items-center gap-2 text-xs">
+                <Phone className="size-3 text-muted-foreground" />
+                <span>{customer.phone}</span>
+              </div>
+            )}
+          </div>
         )}
 
-        <div className="mb-4">
-          <button onClick={onToggleTags} className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 hover:text-foreground">
-            <Tag className="size-3" />
-            Tags
-            {selectedTags.length > 0 && (
-              <Badge variant="secondary" className="h-4 rounded px-1 text-[9px] leading-none">{selectedTags.length}</Badge>
-            )}
-          </button>
-          <div className="flex flex-wrap gap-1">
-            {selectedTags.map((t) => (
-              <span key={t} className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${getTagColor(t)}`}>
-                {t}
-                <button onClick={() => onRemoveTag(t)} className="hover:text-foreground/60">
-                  <X className="size-2.5" />
-                </button>
-              </span>
-            ))}
+        {!customer && (
+          <div className="mb-3 rounded-md bg-muted/30 px-3 py-2">
+            <p className="text-[10px] text-muted-foreground">Cliente no registrado en CRM</p>
           </div>
+        )}
+
+        <div className="mb-3">
+          <div className="flex items-center justify-between">
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+              <Tag className="mr-1 inline size-2.5" />
+              Tags
+            </p>
+            <Button variant="ghost" size="icon" className="size-5 text-muted-foreground" onClick={onToggleTags}>
+              <Plus className="size-3" />
+            </Button>
+          </div>
+          {selectedTags.length > 0 ? (
+            <div className="mt-1.5 flex flex-wrap gap-1">
+              {selectedTags.map((t) => (
+                <span key={t} className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[9px] font-medium ${getTagColor(t)}`}>
+                  {t}
+                  <button onClick={() => onRemoveTag(t)} className="hover:text-foreground/60">
+                    <X className="size-2.5" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          ) : (
+            <p className="mt-1 text-[10px] text-muted-foreground/60">Sin etiquetas</p>
+          )}
           {showTags && (
-            <div className="mt-2 flex flex-wrap gap-1">
+            <div className="mt-1.5 flex flex-wrap gap-1">
               {DEFAULT_TAGS.filter((t) => !selectedTags.includes(t)).map((t) => (
                 <button
                   key={t}
                   onClick={() => onAddTag(t)}
-                  className={`rounded px-2 py-0.5 text-[10px] font-medium transition-colors hover:opacity-80 ${getTagColor(t)}`}
+                  className={`rounded px-1.5 py-0.5 text-[9px] font-medium transition-colors hover:opacity-80 ${getTagColor(t)}`}
                 >
-                  + {t}
+                  +{t}
                 </button>
               ))}
             </div>
           )}
         </div>
 
-        <Separator className="mb-4" />
-
-        {ai && (ai.summary || ai.sentiment || ai.suggested_reply) && (
-          <>
-            <div className="mb-4">
-              <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                <Sparkles className="size-3" />
-                Resumen IA
-              </div>
-              {ai.summary && (
-                <p className="mb-2 text-xs leading-relaxed text-muted-foreground">{ai.summary}</p>
-              )}
-              {ai.sentiment && (
-                <Badge variant="secondary" className="mb-1 text-[9px]">{ai.sentiment}</Badge>
-              )}
-              {ai.suggested_reply && (
-                <div className="rounded-lg border bg-muted/30 p-2.5">
-                  <p className="text-[10px] font-medium text-muted-foreground mb-1">Respuesta sugerida:</p>
-                  <p className="text-xs leading-relaxed text-muted-foreground">{ai.suggested_reply}</p>
-                </div>
-              )}
-            </div>
-            <Separator className="mb-4" />
-          </>
-        )}
-
-        <div className="mb-4">
-          <h4 className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-            <Package className="size-3" />
-            Últimos pedidos
-          </h4>
-          <div className="rounded-lg border bg-muted/30 p-4 text-center">
+        <div className="mb-3">
+          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+            <Package className="mr-1 inline size-2.5" />
+            Pedidos
+          </p>
+          <div className="rounded-md border border-dashed px-3 py-2.5 text-center">
             <p className="text-[10px] text-muted-foreground">Sin pedidos registrados</p>
           </div>
         </div>
 
-        <Separator className="mb-4" />
+        {ai && (ai.summary || ai.sentiment || ai.suggested_reply) && (
+          <div className="mb-3 rounded-md bg-muted/40 px-3 py-2">
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+              <Sparkles className="mr-1 inline size-2.5" />
+              Resumen IA
+            </p>
+            {ai.summary && (
+              <p className="mb-1 text-[11px] leading-relaxed text-muted-foreground">{ai.summary}</p>
+            )}
+            {ai.sentiment && (
+              <span className="rounded bg-muted px-1.5 py-0.5 text-[8px] font-medium">{ai.sentiment}</span>
+            )}
+            {ai.suggested_reply && (
+              <div className="mt-1 rounded border bg-background/50 p-2">
+                <p className="text-[8px] font-medium text-muted-foreground mb-0.5">Respuesta sugerida:</p>
+                <p className="text-[11px] leading-relaxed text-muted-foreground">{ai.suggested_reply}</p>
+              </div>
+            )}
+          </div>
+        )}
 
-        <div className="mb-4">
-          <h4 className="flex items-center gap-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-            <FileText className="size-3" />
+        <div className="mb-3">
+          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">
+            <FileText className="mr-1 inline size-2.5" />
             Notas internas
-          </h4>
-          <div className="mb-2 space-y-2">
-            {notes.length === 0 ? (
-              <p className="text-[10px] text-muted-foreground">Sin notas</p>
-            ) : (
-              notes.map((note: any) => (
-                <div key={note.id} className="rounded-lg bg-muted/50 p-2.5">
-                  <p className="text-xs leading-relaxed">{note.content}</p>
-                  <p className="mt-1 text-[9px] text-muted-foreground">
+          </p>
+          {notes.length > 0 ? (
+            <div className="mb-1.5 space-y-1">
+              {notes.map((note: any) => (
+                <div key={note.id} className="rounded-md bg-muted/30 px-2.5 py-2">
+                  <p className="text-[11px] leading-relaxed">{note.content}</p>
+                  <p className="mt-0.5 text-[8px] text-muted-foreground">
                     {format(new Date(note.created_at), "dd MMM HH:mm")}
                   </p>
                 </div>
-              ))
-            )}
-          </div>
-          <div className="flex gap-2">
-            <Textarea
+              ))}
+            </div>
+          ) : (
+            <p className="text-[10px] text-muted-foreground/60">Sin notas</p>
+          )}
+          <div className="flex gap-1.5">
+            <input
               value={newNote}
               onChange={(e) => onNewNoteChange(e.target.value)}
-              placeholder="Agregar nota interna..."
-              className="min-h-[60px] resize-none text-xs"
+              placeholder="Agregar nota..."
+              className="min-w-0 flex-1 rounded-md border bg-transparent px-2.5 py-1.5 text-xs outline-none placeholder:text-muted-foreground/50"
             />
             <Button
               size="sm"
               variant="outline"
-              className="shrink-0 self-end"
+              className="size-7 shrink-0 p-0"
               onClick={() => onAddNote(newNote)}
               disabled={!newNote.trim()}
             >
@@ -914,18 +927,19 @@ function CustomerContextPanel({
           </div>
         </div>
 
-        <Separator className="mb-4" />
-
-        <div className="space-y-1.5">
-          <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Acciones rápidas</h4>
-          <Button variant="outline" size="sm" className="w-full justify-start gap-2 text-xs">
-            <Package className="size-3.5" /> Crear pedido
+        <div className="space-y-1">
+          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Acciones</p>
+          <Button variant="outline" size="sm" className="w-full justify-start gap-2 h-7 text-[11px]">
+            <Package className="size-3" /> Crear pedido
           </Button>
-          <Button variant="outline" size="sm" className="w-full justify-start gap-2 text-xs">
-            <User className="size-3.5" /> Ver cliente
+          <Button variant="outline" size="sm" className="w-full justify-start gap-2 h-7 text-[11px]">
+            <User className="size-3" /> Ver en CRM
           </Button>
-          <Button variant="outline" size="sm" className="w-full justify-start gap-2 text-xs">
-            <Archive className="size-3.5" /> Archivar conversación
+          <Button variant="outline" size="sm" className="w-full justify-start gap-2 h-7 text-[11px]">
+            <Archive className="size-3" /> Archivar
+          </Button>
+          <Button variant="outline" size="sm" className="w-full justify-start gap-2 h-7 text-[11px]">
+            <Check className="size-3" /> Marcar resuelto
           </Button>
         </div>
       </div>
