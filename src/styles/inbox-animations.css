@@ -1,0 +1,108 @@
+@keyframes inbox-fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes inbox-scale-in {
+  from { opacity: 0.7; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes inbox-bounce-dot {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes inbox-pulse-badge {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+@keyframes inbox-slide-up {
+  from { opacity: 0; transform: translateY(12px); max-height: 0; }
+  to { opacity: 1; transform: translateY(0); max-height: 100px; }
+}
+
+@keyframes inbox-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes inbox-status-enter {
+  from { opacity: 0; transform: scale(0.7); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes inbox-skeleton-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-inbox-fade-in {
+  animation: inbox-fade-in 200ms ease-out both;
+}
+
+.animate-inbox-scale-in {
+  animation: inbox-scale-in 200ms ease-out both;
+}
+
+.animate-inbox-bounce-dot {
+  animation: inbox-bounce-dot 1.4s ease-in-out infinite both;
+}
+
+.animate-inbox-bounce-dot:nth-child(2) { animation-delay: 0.16s; }
+.animate-inbox-bounce-dot:nth-child(3) { animation-delay: 0.32s; }
+
+.animate-inbox-pulse-badge {
+  animation: inbox-pulse-badge 300ms ease-out;
+}
+
+.animate-inbox-slide-up {
+  animation: inbox-slide-up 220ms ease-out both;
+}
+
+.animate-inbox-spin {
+  animation: inbox-spin 600ms linear infinite;
+}
+
+.animate-inbox-status-enter {
+  animation: inbox-status-enter 200ms ease-out both;
+}
+
+.animate-inbox-skeleton-shimmer {
+  background: linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.04) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: inbox-skeleton-shimmer 1.5s ease-in-out infinite;
+}
+
+.inbox-message-actions {
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.inbox-message-row:hover .inbox-message-actions {
+  opacity: 1;
+}
+
+.inbox-message-row {
+  animation: inbox-fade-in 200ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-inbox-fade-in,
+  .animate-inbox-scale-in,
+  .animate-inbox-bounce-dot,
+  .animate-inbox-pulse-badge,
+  .animate-inbox-slide-up,
+  .animate-inbox-spin,
+  .animate-inbox-status-enter,
+  .animate-inbox-skeleton-shimmer,
+  .inbox-message-actions,
+  .inbox-message-row {
+    animation: none !important;
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

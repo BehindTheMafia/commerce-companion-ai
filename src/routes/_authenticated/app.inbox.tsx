@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import "@/styles/inbox-animations.css";
 import {
   useState, useMemo, useRef, useEffect, useCallback,
 } from "react";
@@ -18,13 +19,13 @@ import { format } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   MessageSquare, Search, Filter, ChevronRight, Check, X,
-  Send, Paperclip, Smile, Phone, Mail, MapPin,
+  Send, Paperclip, Smile, Phone, Mail, MapPin, Forward,
   Clock, User, Package, Tag, FileText, Star,
   MoreHorizontal, Archive, CheckCheck, AlertCircle,
   Image, Mic, File, Download, Plus, Minus,
   ArrowUpRight, Sparkles, Bot, Zap, Settings2,
   RefreshCw, Inbox, CornerDownRight, Ellipsis,
-  MessageCircle,
+  MessageCircle, ArrowDown,
 } from "lucide-react";
 import {
   type InboxConversation, type InboxMessage, type FilterValue,
@@ -529,7 +530,38 @@ function ChatPanel({
   messagesEndRef: React.RefObject<HTMLDivElement | null>;
   loading: boolean;
 }) {
-  const convTags = conversation.tags?.map((t) => t.tag) ?? [];
+  const [isAtBottom, setIsAtBottom] = useState(true);
+  const [showNewMsgBtn, setShowNewMsgBtn] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const prevMsgCount = useRef(messages.length);
+
+  const checkIsAtBottom = useCallback(() => {
+    if (!scrollRef.current) return true;
+    const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
+    return scrollHeight + scrollTop - clientHeight < 80;
+  }, []);
+
+  const handleScroll = useCallback(() => {
+    const bottom = checkIsAtBottom();
+    setIsAtBottom(bottom);
+    if (bottom) setShowNewMsgBtn(false);
+  }, [checkIsAtBottom]);
+
+  const scrollToBottom = useCallback(() => {
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    setShowNewMsgBtn(false);
+    setIsAtBottom(true);
+  }, []);
+
+  useEffect(() => {
+    if (messages.length > prevMsgCount.current && isAtBottom) {
+      scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
+    }
+    if (messages.length > prevMsgCount.current && !isAtBottom) {
+      setShowNewMsgBtn(true);
+    }
+    prevMsgCount.current = messages.length;
+  }, [messages.length, isAtBottom]);
 
   return (
     <>
@@ -541,7 +573,7 @@ function ChatPanel({
                 {conversation.customer_name?.charAt(0)?.toUpperCase() ?? "?"}
               </AvatarFallback>
             </Avatar>
-            <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full border-2 border-background bg-green-500" />
+            <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full border-2 border-background bg-green-500 transition-colors duration-300" />
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
@@ -560,12 +592,12 @@ function ChatPanel({
             <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
               <span className="font-medium">{conversation.customer_phone ?? ""}</span>
               <span>·</span>
-              <span>En línea</span>
+              <span className="transition-opacity duration-200">En línea</span>
             </div>
           </div>
         </div>
         <div className="flex items-center gap-0.5">
-          <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" title="Buscar">
+          <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" title="Buscar en conversación">
             <Search className="size-3.5" />
           </Button>
           <Button variant="ghost" size="icon" className="size-7 text-muted-foreground" title="Llamar">
@@ -581,97 +613,140 @@ function ChatPanel({
         </div>
       </div>
 
-      <div className="flex min-h-0 flex-1 flex-col-reverse overflow-y-auto px-4 py-3">
-        {loading ? (
-          <div className="space-y-3">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className={`flex gap-2.5 ${i % 2 === 0 ? "" : "flex-row-reverse"}`}>
-                <div className="size-7 shrink-0 animate-pulse rounded-full bg-muted" />
-                <div className={`space-y-1.5 ${i % 2 === 0 ? "" : "items-end flex flex-col"}`}>
-                  <div className={`h-7 animate-pulse rounded-lg bg-muted ${i % 2 === 0 ? "w-40" : "w-32"}`} />
+      <div className="relative flex min-h-0 flex-1">
+        <div
+          ref={scrollRef}
+          onScroll={handleScroll}
+          className="flex min-h-0 w-full flex-1 flex-col px-4 py-3 overflow-y-auto"
+        >
+          {loading ? (
+            <div className="mt-auto space-y-3">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className={`flex gap-2.5 ${i % 2 === 0 ? "" : "flex-row-reverse"}`}>
+                  <div className="size-7 shrink-0 animate-pulse rounded-full bg-muted" />
+                  <div className={`space-y-1.5 ${i % 2 === 0 ? "" : "items-end flex flex-col"}`}>
+                    <div className={`h-7 animate-pulse rounded-lg bg-muted ${i % 2 === 0 ? "w-40" : "w-32"}`} />
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        ) : messages.length === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-2 py-12 text-center">
-            <MessageCircle className="size-8 text-muted-foreground/30" />
-            <p className="text-sm text-muted-foreground">No hay mensajes todavía</p>
-            <p className="text-xs text-muted-foreground/60">Escribe para iniciar la conversación</p>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {[...messages].reverse().map((msg) => {
-              const isCustomer = msg.sender_type === "customer";
-              const isSystem = msg.sender_type === "system";
-              const StatusIcon = STATUS_ICONS[msg.status] || Check;
-              const statusColor = STATUS_COLORS[msg.status] || "text-muted-foreground";
+              ))}
+            </div>
+          ) : messages.length === 0 ? (
+            <div className="animate-inbox-fade-in mt-auto flex flex-col items-center justify-center gap-2 py-12 text-center">
+              <MessageCircle className="size-8 text-muted-foreground/30" />
+              <p className="text-sm text-muted-foreground">No hay mensajes todavía</p>
+              <p className="text-xs text-muted-foreground/60">Escribe para iniciar la conversación</p>
+            </div>
+          ) : (
+            <div className="mt-auto space-y-1.5">
+              {messages.map((msg, idx) => {
+                const isCustomer = msg.sender_type === "customer";
+                const isSystem = msg.sender_type === "system";
+                const StatusIcon = STATUS_ICONS[msg.status] || Check;
+                const statusColor = STATUS_COLORS[msg.status] || "text-muted-foreground";
 
-              if (isSystem) {
+                if (isSystem) {
+                  return (
+                    <div key={msg.id} className="flex justify-center py-1 animate-inbox-fade-in" style={{ animationDelay: `${idx * 15}ms` }}>
+                      <span className="rounded-full bg-muted/60 px-3 py-1 text-[10px] text-muted-foreground">
+                        {msg.content}
+                      </span>
+                    </div>
+                  );
+                }
+
                 return (
-                  <div key={msg.id} className="flex justify-center py-1">
-                    <span className="rounded-full bg-muted/60 px-3 py-1 text-[10px] text-muted-foreground">
-                      {msg.content}
-                    </span>
+                  <div
+                    key={msg.id}
+                    className="inbox-message-row flex gap-2.5 group"
+                    style={{ animationDelay: `${idx * 15}ms` }}
+                  >
+                    <div className={`flex gap-2.5 w-full ${isCustomer ? "" : "flex-row-reverse"}`}>
+                      <Avatar className="size-7 shrink-0">
+                        <AvatarFallback className={`text-[9px] ${isCustomer ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
+                          {isCustomer
+                            ? (conversation.customer_name?.charAt(0)?.toUpperCase() ?? "C")
+                            : "A"}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className={`max-w-[75%] ${!isCustomer ? "items-end flex flex-col" : ""} relative`}>
+                        <div className={`rounded-xl px-3.5 py-2 text-sm leading-relaxed ${
+                          isCustomer
+                            ? "rounded-bl-sm bg-muted/80"
+                            : "rounded-br-sm bg-primary text-primary-foreground"
+                        }`}>
+                          {msg.message_type === "image" ? (
+                            <div className="space-y-1.5">
+                              {msg.media_url && (
+                                <img src={msg.media_url} alt="" className="max-w-full rounded-lg object-cover" />
+                              )}
+                              {msg.content && <p className="animate-inbox-fade-in">{msg.content}</p>}
+                            </div>
+                          ) : msg.message_type === "document" ? (
+                            <div className="flex items-center gap-2">
+                              <File className="size-3.5 shrink-0" />
+                              <span className="truncate text-sm">{msg.content ?? "Documento"}</span>
+                            </div>
+                          ) : msg.message_type === "location" ? (
+                            <div className="flex items-center gap-2">
+                              <MapPin className="size-3.5 shrink-0" />
+                              <span className="text-sm">{msg.content ?? "Ubicación"}</span>
+                            </div>
+                          ) : (
+                            <p className="whitespace-pre-wrap break-words leading-snug">{msg.content}</p>
+                          )}
+                        </div>
+                        <div className={`mt-0.5 flex items-center gap-1 px-1 ${!isCustomer ? "flex-row-reverse" : ""}`}>
+                          <span className="text-[9px] text-muted-foreground/60">
+                            {format(new Date(msg.created_at), "HH:mm")}
+                          </span>
+                          {!isCustomer && (
+                            <span className="flex" key={`${msg.status}-${msg.id}`}>
+                              <StatusIcon className={`size-2.5 ${statusColor} animate-inbox-status-enter`} />
+                            </span>
+                          )}
+                        </div>
+                        {!isCustomer && (
+                          <div className="inbox-message-actions absolute -top-5 right-0 flex items-center gap-0.5 rounded-md border bg-background px-1 py-0.5 shadow-xs">
+                            <button className="rounded p-0.5 text-muted-foreground hover:text-foreground transition-colors" title="Responder">
+                              <CornerDownRight className="size-2.5" />
+                            </button>
+                            <button className="rounded p-0.5 text-muted-foreground hover:text-foreground transition-colors" title="Reenviar">
+                              <Forward className="size-2.5" />
+                            </button>
+                            <button className="rounded p-0.5 text-muted-foreground hover:text-foreground transition-colors" title="Copiar">
+                              <FileText className="size-2.5" />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 );
-              }
+              })}
+              <div ref={messagesEndRef} />
+            </div>
+          )}
+        </div>
 
-              return (
-                <div key={msg.id} className={`flex gap-2.5 ${isCustomer ? "" : "flex-row-reverse"}`}>
-                  <Avatar className="size-7 shrink-0">
-                    <AvatarFallback className={`text-[9px] ${isCustomer ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
-                      {isCustomer
-                        ? (conversation.customer_name?.charAt(0)?.toUpperCase() ?? "C")
-                        : "A"}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className={`max-w-[75%] ${!isCustomer ? "items-end flex flex-col" : ""}`}>
-                    <div className={`rounded-xl px-3.5 py-2 text-sm leading-relaxed ${
-                      isCustomer
-                        ? "rounded-bl-sm bg-muted/80"
-                        : "rounded-br-sm bg-primary text-primary-foreground"
-                    }`}>
-                      {msg.message_type === "image" ? (
-                        <div className="space-y-1.5">
-                          {msg.media_url && (
-                            <img src={msg.media_url} alt="" className="max-w-full rounded-lg object-cover" />
-                          )}
-                          {msg.content && <p>{msg.content}</p>}
-                        </div>
-                      ) : msg.message_type === "document" ? (
-                        <div className="flex items-center gap-2">
-                          <File className="size-3.5 shrink-0" />
-                          <span className="truncate text-sm">{msg.content ?? "Documento"}</span>
-                        </div>
-                      ) : msg.message_type === "location" ? (
-                        <div className="flex items-center gap-2">
-                          <MapPin className="size-3.5 shrink-0" />
-                          <span className="text-sm">{msg.content ?? "Ubicación"}</span>
-                        </div>
-                      ) : (
-                        <p className="whitespace-pre-wrap break-words leading-snug">{msg.content}</p>
-                      )}
-                    </div>
-                    <div className={`mt-0.5 flex items-center gap-1 px-1 ${!isCustomer ? "flex-row-reverse" : ""}`}>
-                      <span className="text-[9px] text-muted-foreground/60">
-                        {format(new Date(msg.created_at), "HH:mm")}
-                      </span>
-                      {!isCustomer && (
-                        <StatusIcon className={`size-2.5 ${statusColor}`} />
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-            <div ref={messagesEndRef} />
-          </div>
-        )}
+        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-10">
+          <TypingIndicator visible={false} />
+        </div>
+
+        <button
+          onClick={scrollToBottom}
+          className={`absolute bottom-3 right-4 z-10 flex items-center gap-1.5 rounded-full border bg-background px-3 py-1.5 text-[10px] font-medium text-primary shadow-md transition-all duration-200 ${
+            showNewMsgBtn
+              ? "translate-y-0 opacity-100 pointer-events-auto"
+              : "translate-y-2 opacity-0 pointer-events-none"
+          }`}
+        >
+          <ArrowDown className="size-3" />
+          Mensajes nuevos
+        </button>
       </div>
 
       {showQuickReplies && (
-        <div className="border-t bg-muted/30 px-4 py-2.5">
+        <div className="border-t bg-muted/30 px-4 py-2.5 animate-inbox-slide-up">
           <div className="mb-1.5 flex items-center gap-1.5">
             <Bot className="size-3 text-muted-foreground" />
             <span className="text-[10px] font-medium text-muted-foreground">Respuestas rápidas</span>
@@ -691,13 +766,13 @@ function ChatPanel({
       )}
 
       {showEmoji && (
-        <div className="border-t bg-muted/30 px-4 py-2.5">
+        <div className="border-t bg-muted/30 px-4 py-2.5 animate-inbox-slide-up">
           <div className="flex flex-wrap gap-0.5">
             {EMOJIS.slice(0, 28).map((emoji) => (
               <button
                 key={emoji}
                 onClick={() => onInsertEmoji(emoji)}
-                className="flex size-7 items-center justify-center rounded-md text-base transition-colors hover:bg-accent"
+                className="flex size-7 items-center justify-center rounded-md text-base transition-all duration-100 hover:scale-110 hover:bg-accent"
               >
                 {emoji}
               </button>
@@ -709,24 +784,24 @@ function ChatPanel({
       <div className="border-t px-4 py-3">
         <div className="flex items-end gap-2">
           <div className="flex items-center gap-0.5 pb-1">
-            <Button variant="ghost" size="icon" className="size-8 text-muted-foreground/70 hover:text-foreground" onClick={onToggleEmoji} title="Emojis">
+            <Button variant="ghost" size="icon" className="size-8 text-muted-foreground/70 hover:text-foreground transition-colors" onClick={onToggleEmoji} title="Emojis">
               <Smile className="size-4" />
             </Button>
-            <Button variant="ghost" size="icon" className="size-8 text-muted-foreground/70 hover:text-foreground" title="Adjuntar">
+            <Button variant="ghost" size="icon" className="size-8 text-muted-foreground/70 hover:text-foreground transition-colors" title="Adjuntar">
               <Paperclip className="size-4" />
             </Button>
-            <Button variant="ghost" size="icon" className="size-8 text-muted-foreground/70 hover:text-foreground" title="Plantillas">
+            <Button variant="ghost" size="icon" className="size-8 text-muted-foreground/70 hover:text-foreground transition-colors" title="Plantillas">
               <FileText className="size-4" />
             </Button>
-            <Button variant="ghost" size="icon" className="size-8 text-muted-foreground/70 hover:text-foreground" title="Asistente IA">
+            <Button variant="ghost" size="icon" className="size-8 text-muted-foreground/70 hover:text-foreground transition-colors" title="Asistente IA">
               <Bot className="size-4" />
             </Button>
-            <Button variant="ghost" size="icon" className="size-8 text-muted-foreground/70 hover:text-foreground" title="Nota de voz">
+            <Button variant="ghost" size="icon" className="size-8 text-muted-foreground/70 hover:text-foreground transition-colors" title="Nota de voz">
               <Mic className="size-4" />
             </Button>
           </div>
           <div className="relative flex-1">
-            <div className="flex items-center gap-2 rounded-xl border bg-background px-3 py-1.5">
+            <div className="flex items-center gap-2 rounded-xl border bg-background px-3 py-1.5 transition-shadow duration-200 focus-within:shadow-sm">
               <input
                 value={inputText}
                 onChange={(e) => onInputChange(e.target.value)}
@@ -736,17 +811,37 @@ function ChatPanel({
               />
               <Button
                 size="icon"
-                className="size-8 shrink-0 rounded-lg"
+                className="size-8 shrink-0 rounded-lg transition-transform duration-150 active:scale-95"
                 onClick={onSend}
                 disabled={!inputText.trim() || isPending}
               >
-                <Send className="size-4" />
+                {isPending ? (
+                  <span className="size-4 animate-inbox-spin rounded-full border-2 border-current border-t-transparent" />
+                ) : (
+                  <Send className="size-4" />
+                )}
               </Button>
             </div>
           </div>
         </div>
       </div>
     </>
+  );
+}
+
+function TypingIndicator({ visible }: { visible: boolean }) {
+  return (
+    <div
+      className={`flex items-center gap-1 rounded-full bg-muted/80 px-3 py-1.5 transition-all duration-200 ${
+        visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-1 pointer-events-none"
+      }`}
+    >
+      <div className="flex items-center gap-0.5">
+        <span className="size-1.5 rounded-full bg-muted-foreground/60 animate-inbox-bounce-dot" />
+        <span className="size-1.5 rounded-full bg-muted-foreground/60 animate-inbox-bounce-dot" />
+        <span className="size-1.5 rounded-full bg-muted-foreground/60 animate-inbox-bounce-dot" />
+      </div>
+    </div>
   );
 }
 
