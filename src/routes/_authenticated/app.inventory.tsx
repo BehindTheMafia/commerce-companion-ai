@@ -4,11 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useBusiness } from "@/lib/business-context";
 import { PageHeader } from "@/components/admin/page-header";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
@@ -291,13 +289,9 @@ function InventoryPage() {
                       >
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-3">
-                            {p.image_url ? (
-                              <img src={p.image_url} alt="" className="size-9 shrink-0 rounded-lg object-cover ring-1 ring-border/50" />
-                            ) : (
-                              <div className="grid size-9 shrink-0 place-items-center rounded-lg bg-muted text-muted-foreground/50">
+                              <div className="grid size-9 shrink-0 place-items-center rounded-full bg-primary/15 text-primary">
                                 <Package className="size-4" />
                               </div>
-                            )}
                             <div className="min-w-0">
                               <p className="truncate text-sm font-medium">{p.name}</p>
                               {p.brand?.name && <p className="text-xs text-muted-foreground">{p.brand.name}</p>}
@@ -408,13 +402,9 @@ function ProductPanel({
     <div className="sticky top-0 flex h-screen flex-col">
       <div className="flex items-center justify-between border-b px-5 py-4">
         <div className="flex items-center gap-3">
-          {product.image_url ? (
-            <img src={product.image_url} alt="" className="size-9 shrink-0 rounded-lg object-cover ring-1 ring-border/50" />
-          ) : (
-            <div className="grid size-9 shrink-0 place-items-center rounded-lg bg-muted text-muted-foreground/50">
-              <Package className="size-4" />
-            </div>
-          )}
+          <div className="grid size-9 shrink-0 place-items-center rounded-full bg-primary/15 text-primary">
+            <Package className="size-4" />
+          </div>
           <div className="min-w-0">
             <p className="truncate text-sm font-medium">{product.name}</p>
             {product.sku && <p className="font-mono text-xs text-muted-foreground">{product.sku}</p>}
@@ -666,11 +656,7 @@ function MobileInventory({
               const st = stockStatus(p.stock, p.min_stock);
               return (
                 <div key={p.id} className="flex items-center gap-3 px-4 py-3.5 transition-colors hover:bg-muted/50" onClick={() => setSelectedProduct(p)}>
-                  {p.image_url ? (
-                    <img src={p.image_url} alt="" className="size-10 shrink-0 rounded-lg object-cover ring-1 ring-border/50" />
-                  ) : (
-                    <div className="grid size-10 shrink-0 place-items-center rounded-lg bg-muted text-muted-foreground/50"><Package className="size-4" /></div>
-                  )}
+                  <div className="grid size-10 shrink-0 place-items-center rounded-full bg-primary/15 text-primary"><Package className="size-4" /></div>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium">{p.name}</p>
                     <p className="text-xs text-muted-foreground">{p.sku || p.category?.name || ""}</p>
@@ -693,11 +679,7 @@ function MobileInventory({
           <div className="fixed right-0 top-0 z-50 flex h-full w-full max-w-md flex-col bg-white shadow-xl transition-transform duration-300 ease-out translate-x-0">
             <div className="flex items-center justify-between border-b px-5 py-4">
               <div className="flex items-center gap-3">
-                {selectedProduct.image_url ? (
-                  <img src={selectedProduct.image_url} alt="" className="size-9 rounded-lg object-cover ring-1 ring-border/50" />
-                ) : (
-                  <div className="grid size-9 place-items-center rounded-lg bg-muted text-muted-foreground/50"><Package className="size-4" /></div>
-                )}
+                  <div className="grid size-9 shrink-0 place-items-center rounded-full bg-primary/15 text-primary"><Package className="size-4" /></div>
                 <p className="text-sm font-medium">{selectedProduct.name}</p>
               </div>
               <button onClick={() => setSelectedProduct(null)} className="grid size-8 place-items-center rounded-lg text-muted-foreground hover:bg-accent"><X className="size-4" /></button>
