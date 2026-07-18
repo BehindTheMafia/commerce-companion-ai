@@ -10,12 +10,13 @@ export const Route = createFileRoute("/go/$slug")({
   head: ({ params }) => ({
     meta: [
       { title: `${params.slug} | Commerce AI` },
-      { name: "description", content: `Compra en ${params.slug} — productos con envío rápido y pago seguro.` },
+      {
+        name: "description",
+        content: `Compra en ${params.slug} — productos con envío rápido y pago seguro.`,
+      },
       { property: "og:title", content: `${params.slug} | Commerce AI` },
       { property: "og:description", content: `Descubre los productos de ${params.slug}.` },
     ],
     links: [],
   }),
 });
-
-

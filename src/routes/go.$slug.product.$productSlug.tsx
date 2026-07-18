@@ -2,9 +2,23 @@ import { createFileRoute, useParams, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  Loader2, AlertCircle, Package, ArrowRight, ChevronRight,
-  Minus, Plus, ShoppingBag, Heart, Star, Sparkles,
-  ExternalLink, Facebook, Twitter, Instagram, ChevronDown, CheckCircle2,
+  Loader2,
+  AlertCircle,
+  Package,
+  ArrowRight,
+  ChevronRight,
+  Minus,
+  Plus,
+  ShoppingBag,
+  Heart,
+  Star,
+  Sparkles,
+  ExternalLink,
+  Facebook,
+  Twitter,
+  Instagram,
+  ChevronDown,
+  CheckCircle2,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
@@ -19,26 +33,42 @@ export const Route = createFileRoute("/go/$slug/product/$productSlug")({
   head: ({ params }) => ({
     meta: [
       { title: `${params.productSlug} | ${params.slug} — Commerce AI` },
-      { name: "description", content: `Detalles del producto ${params.productSlug} en la tienda ${params.slug}.` },
+      {
+        name: "description",
+        content: `Detalles del producto ${params.productSlug} en la tienda ${params.slug}.`,
+      },
     ],
     links: [],
   }),
 });
 
 type Business = {
-  id: string; name: string; slug: string;
-  logo_url: string | null; currency: string;
+  id: string;
+  name: string;
+  slug: string;
+  logo_url: string | null;
+  currency: string;
   whatsapp_phone: string | null;
 };
 type Product = {
-  id: string; name: string; slug: string; price: number;
-  sale_price: number | null; image_url: string | null;
-  description: string | null; created_at: string;
+  id: string;
+  name: string;
+  slug: string;
+  price: number;
+  sale_price: number | null;
+  image_url: string | null;
+  description: string | null;
+  created_at: string;
   category: { name: string; slug: string } | null;
 };
 
 const CURRENCY_SYMBOL: Record<string, string> = {
-  USD: "$", EUR: "€", GBP: "£", MXN: "$", COP: "$", BRL: "R$",
+  USD: "$",
+  EUR: "€",
+  GBP: "£",
+  MXN: "$",
+  COP: "$",
+  BRL: "R$",
 };
 const sym = (c: string) => CURRENCY_SYMBOL[c] || "$";
 
@@ -46,32 +76,59 @@ const sym = (c: string) => CURRENCY_SYMBOL[c] || "$";
 function getCategoryMocks(categoryName: string, productName: string) {
   const cat = (categoryName || "").toLowerCase();
   const prod = productName.toLowerCase();
-  
-  if (cat.includes("beauty") || cat.includes("cosmetic") || cat.includes("skin") || cat.includes("belleza") || cat.includes("cuidado") || prod.includes("serum") || prod.includes("crema") || prod.includes("shampoo")) {
+
+  if (
+    cat.includes("beauty") ||
+    cat.includes("cosmetic") ||
+    cat.includes("skin") ||
+    cat.includes("belleza") ||
+    cat.includes("cuidado") ||
+    prod.includes("serum") ||
+    prod.includes("crema") ||
+    prod.includes("shampoo")
+  ) {
     return {
       sizes: ["30ml", "50ml (+ $15.00)", "100ml (+ $30.00)"],
-      ingredients: "Aqua, Hyaluronic Acid, Vitamin C, Organic Aloe Barbadensis Leaf Juice, Glycerin, Phenoxyethanol.",
-      badges: ["Vegano", "Cruelty Free", "Probado Dermatológicamente"]
+      ingredients:
+        "Aqua, Hyaluronic Acid, Vitamin C, Organic Aloe Barbadensis Leaf Juice, Glycerin, Phenoxyethanol.",
+      badges: ["Vegano", "Cruelty Free", "Probado Dermatológicamente"],
     };
   }
-  if (cat.includes("burger") || cat.includes("hamburguesa") || cat.includes("pizza") || cat.includes("comida") || cat.includes("food") || cat.includes("bebida") || cat.includes("cafe")) {
+  if (
+    cat.includes("burger") ||
+    cat.includes("hamburguesa") ||
+    cat.includes("pizza") ||
+    cat.includes("comida") ||
+    cat.includes("food") ||
+    cat.includes("bebida") ||
+    cat.includes("cafe")
+  ) {
     return {
       sizes: ["Mediano", "Grande (+ $3.00)"],
-      ingredients: "Ingredientes 100% frescos y naturales seleccionados diariamente de productores locales.",
-      badges: ["Hecho Al Instante", "100% Natural", "Ingredientes Locales"]
+      ingredients:
+        "Ingredientes 100% frescos y naturales seleccionados diariamente de productores locales.",
+      badges: ["Hecho Al Instante", "100% Natural", "Ingredientes Locales"],
     };
   }
-  if (cat.includes("ropa") || cat.includes("clothing") || cat.includes("moda") || cat.includes("t-shirt") || cat.includes("camisa") || cat.includes("zapatos")) {
+  if (
+    cat.includes("ropa") ||
+    cat.includes("clothing") ||
+    cat.includes("moda") ||
+    cat.includes("t-shirt") ||
+    cat.includes("camisa") ||
+    cat.includes("zapatos")
+  ) {
     return {
       sizes: ["S", "M", "L (+ $2.00)", "XL (+ $4.00)"],
       ingredients: "100% Algodón orgánico premium, teñido ecológico certificado de larga duración.",
-      badges: ["Algodón Orgánico", "Producción Ética", "Ajuste Cómodo"]
+      badges: ["Algodón Orgánico", "Producción Ética", "Ajuste Cómodo"],
     };
   }
   return {
     sizes: ["Estándar", "Premium (+ $5.00)"],
-    ingredients: "Materiales e insumos premium seleccionados cuidadosamente para garantizar la mejor durabilidad y experiencia.",
-    badges: ["Calidad Garantizada", "Diseño Ergonómico", "Soporte Commerce AI"]
+    ingredients:
+      "Materiales e insumos premium seleccionados cuidadosamente para garantizar la mejor durabilidad y experiencia.",
+    badges: ["Calidad Garantizada", "Diseño Ergonómico", "Soporte Commerce AI"],
   };
 }
 
@@ -82,12 +139,12 @@ function getMockReview(productName: string) {
     `"Superó mis expectativas por completo. La calidad es increíble y el envío fue sumamente rápido. Definitivamente volveré a pedir."`,
     `"Excelente producto. El empaque es hermoso y los resultados se notan desde el primer día. Altamente recomendado."`,
     `"Increíble relación calidad-precio. Me encanta el minimalismo y el detalle en la presentación de la marca. 10/10."`,
-    `"Muy satisfecho con la compra. El proceso fue súper fluido y rápido a través de WhatsApp. ¡Recomendado!"`
+    `"Muy satisfecho con la compra. El proceso fue súper fluido y rápido a través de WhatsApp. ¡Recomendado!"`,
   ];
   const authors = ["María G.", "Julián R.", "Valeria M.", "Esteban C."];
   return {
     text: reviews[sum % reviews.length],
-    author: authors[sum % authors.length]
+    author: authors[sum % authors.length],
   };
 }
 
@@ -137,7 +194,9 @@ function ProductDetailPage() {
     queryFn: async (): Promise<Product | null> => {
       const { data } = await supabase
         .from("products")
-        .select("id, name, slug, price, sale_price, image_url, description, created_at, category:categories(name, slug)")
+        .select(
+          "id, name, slug, price, sale_price, image_url, description, created_at, category:categories(name, slug)",
+        )
         .eq("business_id", business!.id)
         .eq("slug", productSlug)
         .eq("status", "active")
@@ -151,9 +210,11 @@ function ProductDetailPage() {
     queryKey: ["sf-related", business?.id, product?.id],
     enabled: !!business && !!product,
     queryFn: async (): Promise<Product[]> => {
-      let query = supabase
+      const query = supabase
         .from("products")
-        .select("id, name, slug, price, sale_price, image_url, description, created_at, category:categories(name, slug)")
+        .select(
+          "id, name, slug, price, sale_price, image_url, description, created_at, category:categories(name, slug)",
+        )
         .eq("business_id", business!.id)
         .eq("status", "active")
         .neq("id", product!.id)
@@ -168,7 +229,9 @@ function ProductDetailPage() {
         if (cats?.id) {
           const { data } = await supabase
             .from("products")
-            .select("id, name, slug, price, sale_price, image_url, description, created_at, category:categories(name, slug)")
+            .select(
+              "id, name, slug, price, sale_price, image_url, description, created_at, category:categories(name, slug)",
+            )
             .eq("business_id", business!.id)
             .eq("status", "active")
             .eq("category_id", cats.id)
@@ -258,14 +321,17 @@ function ProductDetailPage() {
             <p className="text-[11px] opacity-60">Agregado al pedido</p>
           </div>
           <button
-            onClick={() => { toast.dismiss(id); setCartOpen(true); }}
+            onClick={() => {
+              toast.dismiss(id);
+              setCartOpen(true);
+            }}
             className="shrink-0 rounded-full bg-primary px-3 py-1 text-[11px] font-semibold text-primary-foreground hover:opacity-90 transition-opacity"
           >
             Ver pedido ({itemCount + quantity})
           </button>
         </div>
       ),
-      { duration: 3000, position: "bottom-center" }
+      { duration: 3000, position: "bottom-center" },
     );
   }
 
@@ -309,7 +375,7 @@ function ProductDetailPage() {
   const $ = sym(business.currency);
   const hasSale = product.sale_price != null && product.sale_price < product.price;
   const displayPrice = hasSale ? product.sale_price! : product.price;
-  
+
   const mocks = getCategoryMocks(product.category?.name || "", product.name);
   const review = getMockReview(product.name);
 
@@ -317,16 +383,15 @@ function ProductDetailPage() {
     <div className="flex min-h-screen flex-col bg-background text-foreground antialiased selection:bg-primary/20 font-sans">
       {/* ── Announcement bar ─────────────────────────────── */}
       <div className="bg-foreground text-background text-[11px] py-2 text-center tracking-widest uppercase font-light">
-        ✨ ENVÍO GRATIS EN PEDIDOS +{$}50 | CÓDIGO: <span className="font-semibold text-primary">COMPRAAI</span>
+        ✨ ENVÍO GRATIS EN PEDIDOS +{$}50 | CÓDIGO:{" "}
+        <span className="font-semibold text-primary">COMPRAAI</span>
       </div>
 
       {/* ── Sticky header ────────────────────────────────── */}
       <header
         className={cn(
           "sticky top-0 z-40 w-full transition-all duration-300 border-b bg-background/95 backdrop-blur-md",
-          isScrolled 
-            ? "shadow-sm border-border/60" 
-            : "border-transparent"
+          isScrolled ? "shadow-sm border-border/60" : "border-transparent",
         )}
       >
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
@@ -358,13 +423,16 @@ function ProductDetailPage() {
 
       <main className="flex-1">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8 lg:py-12">
-
           {/* ── Breadcrumb ───────────────────────────────── */}
           <nav
             aria-label="Breadcrumb"
             className="mb-8 flex items-center gap-1.5 text-[10px] uppercase tracking-widest text-muted-foreground font-light"
           >
-            <Link to="/go/$slug" params={{ slug }} className="hover:text-foreground transition-colors">
+            <Link
+              to="/go/$slug"
+              params={{ slug }}
+              className="hover:text-foreground transition-colors"
+            >
               Inicio
             </Link>
             <ChevronRight className="size-2.5 opacity-55" />
@@ -387,7 +455,6 @@ function ProductDetailPage() {
 
           {/* ── Product detail grid ──────────────────────── */}
           <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-16">
-
             {/* ── Gallery — left 7 cols ─────────────────── */}
             <div className="lg:col-span-7 flex flex-col gap-4">
               {/* Main image */}
@@ -424,14 +491,17 @@ function ProductDetailPage() {
                     key={i}
                     className={cn(
                       "aspect-square overflow-hidden rounded-md bg-muted border transition-all duration-200",
-                      i === 0 ? "border-primary" : "border-transparent hover:border-border"
+                      i === 0 ? "border-primary" : "border-transparent hover:border-border",
                     )}
                   >
                     {product.image_url ? (
                       <img
                         src={product.image_url}
                         alt={`Vista ${i + 1}`}
-                        className={cn("size-full object-cover transition-opacity", i === 0 ? "opacity-100" : "opacity-60 hover:opacity-100")}
+                        className={cn(
+                          "size-full object-cover transition-opacity",
+                          i === 0 ? "opacity-100" : "opacity-60 hover:opacity-100",
+                        )}
                       />
                     ) : (
                       <div className="flex size-full items-center justify-center">
@@ -445,7 +515,6 @@ function ProductDetailPage() {
 
             {/* ── Info panel — right 5 cols ─────────────── */}
             <div className="lg:col-span-5 flex flex-col">
-              
               {/* Rating stars */}
               <div className="mb-4 flex items-center gap-1.5 text-primary text-xs">
                 <div className="flex items-center gap-0.5">
@@ -459,9 +528,7 @@ function ProductDetailPage() {
               </div>
 
               {/* Product name */}
-              <h1 
-                className="mb-2 text-4xl lg:text-5xl font-light text-foreground tracking-tight leading-tight font-display"
-              >
+              <h1 className="mb-2 text-4xl lg:text-5xl font-light text-foreground tracking-tight leading-tight font-display">
                 {product.name}
               </h1>
 
@@ -469,15 +536,17 @@ function ProductDetailPage() {
               <div className="mb-6 pb-6 border-b border-border">
                 <div className="flex items-baseline gap-3">
                   <span className="text-2xl font-light text-foreground">
-                    {$}{displayPrice.toFixed(2)}
+                    {$}
+                    {displayPrice.toFixed(2)}
                   </span>
                   {hasSale && (
                     <span className="text-base text-muted-foreground line-through font-light">
-                      {$}{product.price.toFixed(2)}
+                      {$}
+                      {product.price.toFixed(2)}
                     </span>
                   )}
                 </div>
-                
+
                 {product.description && (
                   <p className="mt-4 text-sm font-light text-muted-foreground leading-relaxed">
                     {product.description}
@@ -499,7 +568,7 @@ function ProductDetailPage() {
                         "px-4 py-2 border rounded-md text-xs tracking-wider transition-all duration-200 font-light focus:outline-none",
                         selectedSize === index
                           ? "border-primary bg-primary text-primary-foreground shadow-sm font-normal"
-                          : "border-border text-muted-foreground bg-background hover:border-primary/60"
+                          : "border-border text-muted-foreground bg-background hover:border-primary/60",
                       )}
                     >
                       {size}
@@ -529,7 +598,7 @@ function ProductDetailPage() {
               {/* Quantity counter & CTA button */}
               <div className="flex gap-4 mb-6">
                 <div className="flex items-center border border-border rounded-md w-28 justify-between px-3.5 bg-background h-12">
-                  <button 
+                  <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
                     className="text-muted-foreground hover:text-foreground transition-colors"
                     aria-label="Restar uno"
@@ -537,7 +606,7 @@ function ProductDetailPage() {
                     <Minus className="size-3.5" />
                   </button>
                   <span className="text-sm font-medium tabular-nums">{quantity}</span>
-                  <button 
+                  <button
                     onClick={() => setQuantity(quantity + 1)}
                     className="text-muted-foreground hover:text-foreground transition-colors"
                     aria-label="Sumar uno"
@@ -545,16 +614,19 @@ function ProductDetailPage() {
                     <Plus className="size-3.5" />
                   </button>
                 </div>
-                
+
                 <button
                   onClick={handleAddToCart}
                   className="flex-1 bg-primary text-primary-foreground hover:bg-primary/95 active:scale-[0.98] transition-all rounded-md py-3 text-xs tracking-widest font-semibold flex items-center justify-center gap-2 h-12 uppercase"
                 >
                   <span>Agregar al pedido</span>
                   <span className="w-1 h-1 bg-primary-foreground/75 rounded-full"></span>
-                  <span>{$}{(displayPrice * quantity).toFixed(2)}</span>
+                  <span>
+                    {$}
+                    {(displayPrice * quantity).toFixed(2)}
+                  </span>
                 </button>
-                
+
                 <button
                   aria-label="Agregar a favoritos"
                   className="w-12 h-12 flex items-center justify-center border border-border rounded-md hover:border-primary transition-colors bg-background"
@@ -584,7 +656,10 @@ function ProductDetailPage() {
                     </span>
                   </summary>
                   <div className="mt-4 text-xs font-light text-muted-foreground leading-relaxed space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
-                    <p>{product.description || "Detalle seleccionado de la mejor calidad. Preparado con especial cuidado y dedicación para garantizar la satisfacción completa de nuestros clientes."}</p>
+                    <p>
+                      {product.description ||
+                        "Detalle seleccionado de la mejor calidad. Preparado con especial cuidado y dedicación para garantizar la satisfacción completa de nuestros clientes."}
+                    </p>
                     <ul className="list-disc list-inside space-y-1 ml-1 text-muted-foreground/80">
                       <li>Elaborado con procesos certificados</li>
                       <li>Detalles premium únicos en el mercado</li>
@@ -592,7 +667,7 @@ function ProductDetailPage() {
                     </ul>
                   </div>
                 </details>
-                
+
                 <details className="group py-4 border-b border-border cursor-pointer">
                   <summary className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-widest select-none list-none">
                     Detalles y Composición
@@ -613,7 +688,8 @@ function ProductDetailPage() {
                     </span>
                   </summary>
                   <div className="mt-4 text-xs font-light text-muted-foreground leading-relaxed animate-in fade-in slide-in-from-top-2 duration-300">
-                    Envío gratis en pedidos de más de {$}50. Los plazos y costos específicos se coordinan directamente en el chat al enviar tu pedido.
+                    Envío gratis en pedidos de más de {$}50. Los plazos y costos específicos se
+                    coordinan directamente en el chat al enviar tu pedido.
                   </div>
                 </details>
               </div>
@@ -621,13 +697,17 @@ function ProductDetailPage() {
               {/* Trust Badges */}
               <div className="grid grid-cols-3 gap-2 mt-8 pt-4">
                 {mocks.badges.map((badgeText, idx) => (
-                  <div key={idx} className="flex flex-col items-center justify-center text-center gap-2">
+                  <div
+                    key={idx}
+                    className="flex flex-col items-center justify-center text-center gap-2"
+                  >
                     <CheckCircle2 className="size-4 text-primary" strokeWidth={1.5} />
-                    <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">{badgeText}</span>
+                    <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">
+                      {badgeText}
+                    </span>
                   </div>
                 ))}
               </div>
-
             </div>
           </div>
 
@@ -635,9 +715,7 @@ function ProductDetailPage() {
           {related.length > 0 && (
             <section className="mt-20 border-t border-border pt-16">
               <div className="mb-10 flex items-center justify-between">
-                <h2 
-                  className="text-3xl font-light text-foreground tracking-tight font-display"
-                >
+                <h2 className="text-3xl font-light text-foreground tracking-tight font-display">
                   Completa tu Pedido
                 </h2>
                 <Link
@@ -678,17 +756,21 @@ function ProductDetailPage() {
                       params={{ slug, productSlug: p.slug }}
                       className="hover:underline"
                     >
-                      <h3 
-                        className="text-base font-normal text-foreground tracking-tight font-display"
-                      >
+                      <h3 className="text-base font-normal text-foreground tracking-tight font-display">
                         {p.name}
                       </h3>
                     </Link>
                     <p className="text-xs text-muted-foreground mt-1 font-light">
                       {p.sale_price ? (
                         <>
-                          <span className="text-destructive font-normal mr-1.5">{$}{p.sale_price.toFixed(2)}</span>
-                          <span className="line-through text-muted-foreground/60">{$}{p.price.toFixed(2)}</span>
+                          <span className="text-destructive font-normal mr-1.5">
+                            {$}
+                            {p.sale_price.toFixed(2)}
+                          </span>
+                          <span className="line-through text-muted-foreground/60">
+                            {$}
+                            {p.price.toFixed(2)}
+                          </span>
                         </>
                       ) : (
                         `$${p.price.toFixed(2)}`
@@ -708,9 +790,7 @@ function ProductDetailPage() {
                   <Star key={i} className="size-4 fill-current" />
                 ))}
               </div>
-              <h3 
-                className="text-2xl lg:text-3xl italic font-light leading-snug mb-6 text-foreground max-w-2xl mx-auto font-display"
-              >
+              <h3 className="text-2xl lg:text-3xl italic font-light leading-snug mb-6 text-foreground max-w-2xl mx-auto font-display">
                 {review.text}
               </h3>
               <div className="flex flex-col items-center gap-1">
@@ -723,7 +803,6 @@ function ProductDetailPage() {
               </div>
             </div>
           </section>
-
         </div>
       </main>
 
@@ -731,56 +810,104 @@ function ProductDetailPage() {
       <footer className="bg-foreground text-background pt-16 pb-8">
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8 mb-16">
           <div className="col-span-1 md:col-span-1">
-            <span 
-              className="text-2xl tracking-widest block mb-6 font-medium font-display"
-            >
+            <span className="text-2xl tracking-widest block mb-6 font-medium font-display">
               {business.name.toUpperCase()}
             </span>
             <p className="text-xs text-background/50 font-light leading-relaxed mb-6">
               Redefiniendo el comercio digital con un proceso limpio, rápido y directo por WhatsApp.
             </p>
             <div className="flex gap-4">
-              <a href="#" aria-label="Instagram" className="text-background/50 hover:text-background transition-colors">
+              <a
+                href="#"
+                aria-label="Instagram"
+                className="text-background/50 hover:text-background transition-colors"
+              >
                 <Instagram className="size-4" />
               </a>
-              <a href="#" aria-label="Facebook" className="text-background/50 hover:text-background transition-colors">
+              <a
+                href="#"
+                aria-label="Facebook"
+                className="text-background/50 hover:text-background transition-colors"
+              >
                 <Facebook className="size-4" />
               </a>
-              <a href="#" aria-label="Twitter" className="text-background/50 hover:text-background transition-colors">
+              <a
+                href="#"
+                aria-label="Twitter"
+                className="text-background/50 hover:text-background transition-colors"
+              >
                 <Twitter className="size-4" />
               </a>
             </div>
           </div>
-          
+
           <div>
             <h4 className="text-xs font-semibold uppercase tracking-widest mb-6">Tienda</h4>
             <ul className="space-y-3 text-xs font-light text-background/50">
-              <li><Link to="/go/$slug" params={{ slug }} className="hover:text-background transition-colors">Catálogo Completo</Link></li>
-              <li><a href="#" className="hover:text-background transition-colors">Nuevos Ingresos</a></li>
-              <li><a href="#" className="hover:text-background transition-colors">Populares</a></li>
+              <li>
+                <Link
+                  to="/go/$slug"
+                  params={{ slug }}
+                  className="hover:text-background transition-colors"
+                >
+                  Catálogo Completo
+                </Link>
+              </li>
+              <li>
+                <a href="#" className="hover:text-background transition-colors">
+                  Nuevos Ingresos
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:text-background transition-colors">
+                  Populares
+                </a>
+              </li>
             </ul>
           </div>
 
           <div>
             <h4 className="text-xs font-semibold uppercase tracking-widest mb-6">Soporte</h4>
             <ul className="space-y-3 text-xs font-light text-background/50">
-              <li><a href="#" className="hover:text-background transition-colors">Contacto</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">FAQ</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Envíos</a></li>
+              <li>
+                <a href="#" className="hover:text-background transition-colors">
+                  Contacto
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:text-white transition-colors">
+                  FAQ
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:text-white transition-colors">
+                  Envíos
+                </a>
+              </li>
             </ul>
           </div>
 
           <div>
             <h4 className="text-xs font-semibold uppercase tracking-widest mb-6">Legal</h4>
             <ul className="space-y-3 text-xs font-light text-background/50">
-              <li><a href="#" className="hover:text-background transition-colors">Privacidad</a></li>
-              <li><a href="#" className="hover:text-background transition-colors">Términos</a></li>
+              <li>
+                <a href="#" className="hover:text-background transition-colors">
+                  Privacidad
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:text-background transition-colors">
+                  Términos
+                </a>
+              </li>
             </ul>
           </div>
         </div>
-        
+
         <div className="max-w-7xl mx-auto px-6 pt-8 border-t border-background/10 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-[10px] text-background/40 font-light">© 2024 {business.name}. Todos los derechos reservados.</p>
+          <p className="text-[10px] text-background/40 font-light">
+            © 2024 {business.name}. Todos los derechos reservados.
+          </p>
           <div className="flex gap-1.5 items-center text-[10px] text-background/40 font-light">
             Powered by{" "}
             <a
