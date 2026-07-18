@@ -8,7 +8,6 @@ import {
   Package,
   ArrowRight,
   Search,
-  Heart,
   X,
   Instagram,
   Facebook,
@@ -19,9 +18,12 @@ import { Button } from "@/components/ui/button";
 import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/lib/cart-context";
+import { useBusinessQuery } from "@/hooks/use-business-query";
+import { useCheckout } from "@/hooks/use-checkout";
+import { useCurrency } from "@/hooks/use-currency";
+import { hasSalePrice, getDisplayPrice, isNewProduct } from "@/lib/product";
 import { CartDrawerV2 } from "@/components/storefront/cart-drawer-v2";
-import { buildWhatsAppMessage, getWhatsAppLink } from "@/lib/whatsapp";
-import type { CustomerData } from "@/components/storefront/checkout-form";
+import type { Business, Product, Category } from "@/types/storefront";
 
 export const Route = createFileRoute("/go/$slug/")({
   component: StorefrontPage,
@@ -36,42 +38,6 @@ export const Route = createFileRoute("/go/$slug/")({
     links: [],
   }),
 });
-
-type Business = {
-  id: string;
-  name: string;
-  slug: string;
-  logo_url: string | null;
-  currency: string;
-  whatsapp_phone: string | null;
-};
-type Category = { id: string; name: string; slug: string };
-type Product = {
-  id: string;
-  name: string;
-  slug: string;
-  price: number;
-  sale_price: number | null;
-  image_url: string | null;
-  description: string | null;
-  created_at: string;
-  category: { name: string } | null;
-};
-
-const CURRENCY_SYMBOL: Record<string, string> = {
-  USD: "$",
-  EUR: "€",
-  GBP: "£",
-  MXN: "$",
-  COP: "$",
-  BRL: "R$",
-};
-const sym = (c: string) => CURRENCY_SYMBOL[c] || "$";
-
-function isNewProduct(createdAt: string) {
-  const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-  return new Date(createdAt).getTime() > weekAgo;
-}
 
 function SkeletonCard() {
   return (
@@ -91,13 +57,16 @@ function StorefrontPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
-  const [checkoutBusy, setCheckoutBusy] = useState(false);
-  const [checkoutError, setCheckoutError] = useState<string | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
   const categoryBarRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  const { itemCount, items, clearCart, subtotal } = useCart();
+  const { itemCount } = useCart();
+
+  const { data: business, isLoading: bizLoading, error: bizError } = useBusinessQuery(slug);
+
+  const { handleCheckout, busy: checkoutBusy, error: checkoutError } = useCheckout(business);
+  const { symbol: $ } = useCurrency(business?.currency ?? "USD");
 
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 10);
@@ -110,33 +79,6 @@ function StorefrontPage() {
       searchInputRef.current.focus();
     }
   }, [searchOpen]);
-
-  const {
-    data: business,
-    isLoading: bizLoading,
-    error: bizError,
-  } = useQuery({
-    queryKey: ["sf-business", slug],
-    queryFn: async (): Promise<Business> => {
-      const { data, error } = await supabase
-        .from("businesses")
-        .select("id, name, slug, logo_url, currency")
-        .eq("slug", slug)
-        .maybeSingle();
-      if (error) throw error;
-      if (!data) throw new Error("Business not found");
-      let whatsapp_phone: string | null = null;
-      const wa = await supabase
-        .from("businesses")
-        .select("whatsapp_phone")
-        .eq("id", data.id)
-        .maybeSingle();
-      if (!wa.error && wa.data?.whatsapp_phone) {
-        whatsapp_phone = wa.data.whatsapp_phone;
-      }
-      return { ...data, whatsapp_phone };
-    },
-  });
 
   const { data: categories = [] } = useQuery({
     queryKey: ["sf-categories", business?.id],
@@ -158,7 +100,7 @@ function StorefrontPage() {
       const { data, error } = await supabase
         .from("products")
         .select(
-          "id, name, slug, price, sale_price, image_url, description, created_at, category:categories(name)",
+          "id, name, slug, price, sale_price, image_url, description, created_at, category:categories(name, slug)",
         )
         .eq("business_id", business!.id)
         .eq("status", "active")
@@ -207,8 +149,6 @@ function StorefrontPage() {
     );
   }
 
-  const $ = sym(business.currency);
-
   const filtered = products.filter((p) => {
     const matchesCategory = !selectedCategory || p.category?.name === selectedCategory;
     const matchesSearch =
@@ -218,66 +158,8 @@ function StorefrontPage() {
     return matchesCategory && matchesSearch;
   });
 
-  async function handleCheckout(data: CustomerData) {
-    if (!business) return;
-    const waPhone = business.whatsapp_phone;
-    if (!waPhone) {
-      setCheckoutError("El negocio no tiene configurado un número de WhatsApp.");
-      return;
-    }
-    setCheckoutBusy(true);
-    setCheckoutError(null);
-    const message = buildWhatsAppMessage(
-      business.name,
-      items.map((i) => ({
-        name: i.product.name,
-        quantity: i.quantity,
-        price: i.product.sale_price ?? i.product.price,
-        notes: i.notes,
-      })),
-      subtotal,
-      {
-        name: data.name,
-        phone: data.phone,
-        deliveryType: data.deliveryType,
-        address: data.address || undefined,
-        neighborhood: data.neighborhood || undefined,
-        reference: data.reference || undefined,
-        notes: data.notes || undefined,
-        paymentMethod: data.paymentMethod,
-        cashAmount: data.cashAmount || undefined,
-      },
-    );
-    location.href = getWhatsAppLink(waPhone, message);
-    try {
-      await supabase.rpc("create_order", {
-        p_business_id: business.id,
-        p_customer_name: data.name,
-        p_customer_phone: data.phone,
-        p_customer_address: data.address || "",
-        p_notes: data.notes || null,
-        p_items: items.map((i) => ({
-          product_id: i.product.id,
-          product_name: i.product.name,
-          quantity: i.quantity,
-        })),
-      });
-      clearCart();
-      setCartOpen(false);
-    } catch (err) {
-      console.error("Error creating order:", err);
-    } finally {
-      setCheckoutBusy(false);
-    }
-  }
-
   return (
     <div className="flex min-h-dvh flex-col bg-background text-foreground antialiased font-sans selection:bg-primary/20 selection:text-primary">
-      {/* Announcement bar */}
-      <div className="bg-foreground text-background text-[11px] sm:text-xs py-2 text-center tracking-widest uppercase font-medium">
-        Envío gratis en pedidos mayores a {$}50
-      </div>
-
       {/* Sticky header */}
       <header
         className={cn(
@@ -420,7 +302,6 @@ function StorefrontPage() {
                   </p>
                 </div>
 
-                {/* Hero Quick Categories */}
                 {categories.length > 0 && (
                   <div className="flex flex-wrap justify-center lg:justify-start gap-2 pt-2">
                     {categories.slice(0, 3).map((cat) => (
@@ -436,7 +317,6 @@ function StorefrontPage() {
                 )}
               </div>
 
-              {/* Hero Image / Graphic */}
               <div className="hidden lg:flex items-center justify-end">
                 <div className="relative w-full max-w-md aspect-[4/5] rotate-2 hover:rotate-0 transition-transform duration-700 ease-out">
                   <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 to-transparent rounded-[2rem] -m-4 blur-3xl opacity-50" />
@@ -459,7 +339,6 @@ function StorefrontPage() {
 
         {/* Product Grid Section */}
         <section className="mx-auto max-w-7xl px-6 lg:px-8 py-16 lg:py-24">
-          {/* Section heading */}
           <div className="mb-10 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
               <h2 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight font-display">
@@ -492,7 +371,6 @@ function StorefrontPage() {
             )}
           </div>
 
-          {/* Skeleton Loader */}
           {productsLoading && (
             <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:gap-x-6 md:grid-cols-3 lg:grid-cols-4 lg:gap-y-10">
               {Array.from({ length: 8 }).map((_, i) => (
@@ -501,7 +379,6 @@ function StorefrontPage() {
             </div>
           )}
 
-          {/* Empty State */}
           {!productsLoading && filtered.length === 0 && (
             <div className="py-24 text-center flex flex-col items-center justify-center border-2 border-dashed border-border/60 rounded-3xl bg-muted/10">
               <div className="grid size-20 place-items-center rounded-full bg-muted text-muted-foreground/50 mb-5">
@@ -533,7 +410,6 @@ function StorefrontPage() {
             </div>
           )}
 
-          {/* Product Cards Grid */}
           {!productsLoading && filtered.length > 0 && (
             <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:gap-x-6 md:grid-cols-3 lg:grid-cols-4 lg:gap-y-12">
               {filtered.map((product) => (
@@ -671,7 +547,6 @@ function StorefrontPage() {
         </div>
       </footer>
 
-      {/* Cart Drawer */}
       <CartDrawerV2
         open={cartOpen}
         onClose={() => setCartOpen(false)}
@@ -684,7 +559,6 @@ function StorefrontPage() {
   );
 }
 
-// Subcomponente de Icono Social
 function SocialLink({
   icon: Icon,
   href,
@@ -715,8 +589,8 @@ function ProductCard({
 }) {
   const [imgError, setImgError] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
-  const hasSale = product.sale_price != null && product.sale_price < product.price;
-  const displayPrice = hasSale ? product.sale_price! : product.price;
+  const onSale = hasSalePrice(product.price, product.sale_price);
+  const displayPrice = getDisplayPrice(product.price, product.sale_price);
   const showNewBadge = isNewProduct(product.created_at);
 
   return (
@@ -749,21 +623,19 @@ function ProductCard({
           </div>
         )}
 
-        {/* Badges Premium */}
         <div className="absolute left-3 top-3 flex flex-col gap-2">
           {showNewBadge && (
             <span className="rounded-md bg-background/90 backdrop-blur-md text-foreground border border-border/50 px-2.5 py-1 text-[10px] uppercase tracking-wider font-bold shadow-sm">
               Nuevo
             </span>
           )}
-          {hasSale && (
+          {onSale && (
             <span className="rounded-md bg-destructive/90 backdrop-blur-md text-destructive-foreground px-2.5 py-1 text-[10px] uppercase tracking-wider font-bold shadow-sm">
               Oferta
             </span>
           )}
         </div>
 
-        {/* Hover Action Overlay */}
         <div className="absolute inset-0 flex items-end justify-center bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 p-4">
           <div className="w-full rounded-xl bg-background/95 backdrop-blur-md py-2.5 text-center text-sm font-semibold text-foreground shadow-lg translate-y-4 transition-transform duration-300 group-hover:translate-y-0">
             Ver detalles
@@ -783,12 +655,12 @@ function ProductCard({
 
         <div className="mt-auto flex items-center gap-2">
           <span
-            className={cn("text-base font-bold", hasSale ? "text-destructive" : "text-foreground")}
+            className={cn("text-base font-bold", onSale ? "text-destructive" : "text-foreground")}
           >
             {$}
             {displayPrice.toFixed(2)}
           </span>
-          {hasSale && (
+          {onSale && (
             <span className="text-sm text-muted-foreground line-through decoration-muted-foreground/50">
               {$}
               {product.price.toFixed(2)}

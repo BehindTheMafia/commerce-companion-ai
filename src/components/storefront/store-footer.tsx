@@ -1,0 +1,121 @@
+import { Link } from "@tanstack/react-router";
+import { ShoppingBag, ExternalLink, Instagram, Facebook, Twitter } from "lucide-react";
+import type { Business } from "@/types/storefront";
+
+type StoreFooterProps = {
+  business: Business;
+  slug: string;
+};
+
+const SOCIAL_ICONS = [
+  { icon: Instagram, key: "instagram" },
+  { icon: Facebook, key: "facebook" },
+  { icon: Twitter, key: "twitter" },
+] as const;
+
+export function StoreFooter({ business, slug }: StoreFooterProps) {
+  return (
+    <footer className="border-t border-border/40 bg-muted/20 pt-16 pb-10 mt-auto">
+      <div className="max-w-[1440px] mx-auto px-5 md:px-8 lg:px-12 grid grid-cols-2 md:grid-cols-4 gap-10 mb-14">
+        <div className="col-span-2 md:col-span-1">
+          <div className="flex items-center gap-2.5 text-lg font-bold tracking-tight mb-4">
+            {business.logo_url && (
+              <img
+                src={business.logo_url}
+                alt=""
+                className="size-7 rounded-xl object-cover ring-1 ring-border/50"
+              />
+            )}
+            {business.name}
+          </div>
+          <div className="flex gap-2.5">
+            {SOCIAL_ICONS.map(({ icon: Icon, key }) => (
+              <a
+                key={key}
+                href="#"
+                className="grid size-9 place-items-center rounded-xl border border-border/50 text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-all"
+              >
+                <Icon className="size-3.5" />
+              </a>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <h4 className="text-[10px] font-semibold uppercase tracking-widest mb-4 text-foreground">
+            Tienda
+          </h4>
+          <ul className="space-y-2.5 text-xs text-muted-foreground">
+            <li>
+              <Link
+                to="/go/$slug"
+                params={{ slug }}
+                className="hover:text-foreground transition-colors"
+              >
+                Catalogo Completo
+              </Link>
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 className="text-[10px] font-semibold uppercase tracking-widest mb-4 text-foreground">
+            Soporte
+          </h4>
+          <ul className="space-y-2.5 text-xs text-muted-foreground">
+            <li>
+              <a href="#" className="hover:text-foreground transition-colors">
+                Contacto
+              </a>
+            </li>
+            <li>
+              <a href="#" className="hover:text-foreground transition-colors">
+                FAQ
+              </a>
+            </li>
+            <li>
+              <a href="#" className="hover:text-foreground transition-colors">
+                Envios
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 className="text-[10px] font-semibold uppercase tracking-widest mb-4 text-foreground">
+            Legal
+          </h4>
+          <ul className="space-y-2.5 text-xs text-muted-foreground">
+            <li>
+              <a href="#" className="hover:text-foreground transition-colors">
+                Privacidad
+              </a>
+            </li>
+            <li>
+              <a href="#" className="hover:text-foreground transition-colors">
+                Terminos
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div className="max-w-[1440px] mx-auto px-5 md:px-8 lg:px-12 pt-8 border-t border-border/40 flex flex-col sm:flex-row justify-between items-center gap-3">
+        <p className="text-[10px] text-muted-foreground">
+          &copy; {new Date().getFullYear()} {business.name}. Todos los derechos reservados.
+        </p>
+        <p className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+          Powered by{" "}
+          <a
+            href="https://hyperbeecommerce.vercel.app/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 font-semibold text-foreground hover:text-primary transition-colors"
+          >
+            Commerce AI <ExternalLink className="size-2.5" />
+          </a>
+        </p>
+      </div>
+    </footer>
+  );
+}
