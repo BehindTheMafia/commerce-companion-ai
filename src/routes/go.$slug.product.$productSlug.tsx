@@ -388,7 +388,7 @@ function ProductDetailPage() {
           isScrolled ? "shadow-sm border-b border-border/50" : "border-b border-transparent",
         )}
       >
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 lg:px-8">
+        <div className="mx-auto flex h-16 w-full items-center justify-between px-6 lg:px-10">
           <Link
             to="/go/$slug"
             params={{ slug }}
@@ -414,7 +414,7 @@ function ProductDetailPage() {
       </header>
 
       <main className="flex-1">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8 py-10 lg:py-16">
+        <div className="mx-auto w-full px-6 lg:px-10 py-10 lg:py-16">
           <nav
             aria-label="Breadcrumb"
             className="mb-10 flex items-center gap-2 text-[10px] uppercase tracking-widest text-muted-foreground font-light"
@@ -713,7 +713,7 @@ function ProductDetailPage() {
                 </Link>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-10 lg:gap-8">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-6 gap-y-10 lg:gap-8">
                 {related.map((p) => (
                   <div key={p.id} className="group cursor-pointer">
                     <Link
@@ -791,7 +791,7 @@ function ProductDetailPage() {
       </main>
 
       <footer className="bg-muted/10 border-t border-border/40 pt-20 pb-10 mt-auto">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 grid grid-cols-1 md:grid-cols-12 gap-12 lg:gap-8 mb-20">
+        <div className="w-full px-6 lg:px-10 grid grid-cols-1 md:grid-cols-12 gap-12 lg:gap-8 mb-20">
           <div className="md:col-span-5 lg:col-span-4">
             <span className="text-xl tracking-widest block mb-6 font-light">{business.name}</span>
             <p className="text-sm text-muted-foreground font-light leading-relaxed mb-8 max-w-sm">
@@ -894,7 +894,7 @@ function ProductDetailPage() {
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 pt-8 border-t border-border/40 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="w-full px-6 lg:px-10 pt-8 border-t border-border/40 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-[10px] text-muted-foreground font-light tracking-wide">
             © {new Date().getFullYear()} {business.name}. Todos los derechos reservados.
           </p>
