@@ -1,7 +1,7 @@
 import { createFileRoute, useParams } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, type ReactNode } from "react";
 import { useCart, type CartProduct } from "@/lib/cart-context";
 import { useBusinessQuery } from "@/hooks/use-business-query";
 import { useStoreSettings } from "@/hooks/use-store-settings";
@@ -29,7 +29,7 @@ import { CartDrawerV2 } from "@/components/storefront/cart-drawer-v2";
 import { toast } from "sonner";
 import { AlertCircle, ArrowRight, ShoppingBag, Heart, Share2, MessageCircle, Box, Star, Lock } from "lucide-react";
 import { Link } from "@tanstack/react-router";
-import type { Product } from "@/types/storefront";
+import type { Product, ProductVariant } from "@/types/storefront";
 
 export const Route = createFileRoute("/go/$slug/product/$productSlug")({
   component: ProductDetailPage,
@@ -65,20 +65,33 @@ function ProductDetailPage() {
     queryKey: ["sf-product", slug, productSlug],
     enabled: !!business,
     queryFn: async (): Promise<Product | null> => {
-      const { data } = await supabase
+      const { data } = await (supabase as any)
         .from("products")
         .select(
-          "id, name, slug, price, sale_price, image_url, description, sku, stock, created_at, category:categories(name, slug), brand:brands(name)",
+          "id, name, slug, price, sale_price, image_url, description, sku, stock, created_at, pricing_modes, specifications, shipping_info, warranty_info, wholesale_info, category:categories(name, slug), brand:brands(name)",
         )
         .eq("business_id", business!.id)
         .eq("slug", productSlug)
         .eq("status", "active")
         .maybeSingle();
-      return data ?? null;
+      return (data ?? null) as Product | null;
     },
   });
 
   const { data: images = [] } = useProductImages(product?.id);
+
+  const { data: variants = [] } = useQuery({
+    queryKey: ["sf-product-variants", product?.id],
+    enabled: !!product,
+    queryFn: async () => {
+      const { data } = await (supabase as any)
+        .from("product_variants")
+        .select("*, values:product_variant_values(*)")
+        .eq("product_id", product!.id)
+        .order("sort_order");
+      return (data ?? []) as ProductVariant[];
+    },
+  });
 
   const { data: related = [] } = useQuery({
     queryKey: ["sf-related", business?.id, product?.id],
@@ -126,7 +139,7 @@ function ProductDetailPage() {
     showSelector,
   } = usePricingMode(product?.pricing_modes ?? null);
 
-  const { hasVariants, defaultSelection } = useVariants(product?.variants ?? null);
+  const { hasVariants, defaultSelection } = useVariants(variants);
 
   const variantState = useMemo(() => {
     if (!hasVariants) return variantSelection;
@@ -174,15 +187,15 @@ function ProductDetailPage() {
   }, []);
 
   const variantLabel = useMemo(() => {
-    if (!product?.variants || !hasVariants) return "";
-    for (const v of product.variants) {
+    if (!variants || !hasVariants) return "";
+    for (const v of variants) {
       const selectedId = variantState[v.type];
       if (!selectedId) continue;
       const val = v.values.find((vv) => vv.id === selectedId);
       if (val) return val.label;
     }
     return "";
-  }, [product?.variants, hasVariants, variantState]);
+  }, [variants, hasVariants, variantState]);
 
   const handleAddToCart = useCallback(() => {
     if (!product || !canAddToCart) return;
@@ -288,18 +301,38 @@ function ProductDetailPage() {
 
   const brandName = product.brand?.name ?? business.name;
 
-  const accordionSections: { title: string; content: string }[] = [];
+  const accordionSections: { title: string; content: ReactNode }[] = [];
   if (product.description) {
     accordionSections.push({ title: "Description", content: product.description });
   }
-  if (settings.shipping.enabled && settings.shipping.banner_text) {
-    accordionSections.push({ title: "Shipping Information", content: settings.shipping.banner_text });
+  if (product.specifications && product.specifications.length > 0) {
+    accordionSections.push({
+      title: "Specifications",
+      content: (
+        <ul className="flex flex-col gap-3">
+          {product.specifications.map((spec, idx) => (
+            <li key={idx} className="flex justify-between items-center border-b border-gray-100 pb-2 last:border-0">
+              <span className="text-[#6B7280]">{spec.label}</span>
+              <span className="font-semibold text-[#111827]">{spec.value}</span>
+            </li>
+          ))}
+        </ul>
+      ),
+    });
+  }
+  const shippingText = product.shipping_info || (settings.shipping.enabled ? settings.shipping.banner_text : null);
+  if (shippingText) {
+    accordionSections.push({ title: "Shipping Information", content: shippingText });
+  }
+  if (product.warranty_info) {
+    accordionSections.push({ title: "Returns & Exchanges", content: product.warranty_info });
   }
   const wholesaleMode = product.pricing_modes?.find(
     (m) => m.name.toLowerCase().includes("wholesale") && m.description,
   );
-  if (wholesaleMode?.description) {
-    accordionSections.push({ title: "Wholesale Information", content: wholesaleMode.description });
+  const wholesaleInfo = product.wholesale_info || wholesaleMode?.description || null;
+  if (wholesaleInfo) {
+    accordionSections.push({ title: "Wholesale Information", content: wholesaleInfo });
   }
 
   return (
@@ -413,7 +446,7 @@ function ProductDetailPage() {
                 {/* VARIANTS */}
                 {hasVariants && (
                   <ProductVariants
-                    variants={product.variants ?? []}
+                    variants={variants}
                     selected={variantState}
                     onChange={(type, valueId) =>
                       setVariantSelection((prev) => ({ ...prev, [type]: valueId }))

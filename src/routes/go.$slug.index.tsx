@@ -86,7 +86,7 @@ function StorefrontPage() {
     queryFn: async (): Promise<Category[]> => {
       const { data } = await supabase
         .from("categories")
-        .select("id, name, slug")
+        .select("id, name, slug, image_url")
         .eq("business_id", business!.id)
         .order("sort_order", { ascending: true });
       return data ?? [];
@@ -302,19 +302,6 @@ function StorefrontPage() {
                   </p>
                 </div>
 
-                {categories.length > 0 && (
-                  <div className="flex flex-wrap justify-center lg:justify-start gap-2 pt-2">
-                    {categories.slice(0, 3).map((cat) => (
-                      <button
-                        key={cat.id}
-                        onClick={() => setSelectedCategory(cat.name)}
-                        className="rounded-full border border-border/60 bg-background/50 backdrop-blur-sm px-4 py-2 text-sm font-medium text-muted-foreground transition-all hover:border-primary/30 hover:text-foreground hover:shadow-sm"
-                      >
-                        {cat.name}
-                      </button>
-                    ))}
-                  </div>
-                )}
               </div>
 
               <div className="hidden lg:flex items-center justify-end">
@@ -336,6 +323,75 @@ function StorefrontPage() {
             </div>
           </div>
         </section>
+
+        {/* Categories Section */}
+        {categories.length > 0 && (
+          <section className="border-b border-border/30">
+            <div className="mx-auto max-w-7xl px-6 lg:px-8 py-8 lg:py-12">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-lg font-semibold text-foreground tracking-tight">
+                  Categorías
+                </h2>
+                {selectedCategory && (
+                  <button
+                    onClick={() => setSelectedCategory(null)}
+                    className="text-xs font-medium text-primary hover:text-primary/80 transition-colors"
+                  >
+                    Ver todo
+                  </button>
+                )}
+              </div>
+              <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none [-webkit-overflow-scrolling:touch]">
+                {categories.map((cat) => {
+                  const isActive = selectedCategory === cat.name;
+                  return (
+                    <button
+                      key={cat.id}
+                      onClick={() =>
+                        setSelectedCategory(isActive ? null : cat.name)
+                      }
+                      className={cn(
+                        "group shrink-0 rounded-2xl border transition-all duration-300 overflow-hidden",
+                        isActive
+                          ? "border-primary bg-primary/5 shadow-sm"
+                          : "border-border/50 bg-card hover:border-foreground/20 hover:shadow-sm",
+                      )}
+                    >
+                      <div className="flex items-center gap-3 px-5 py-3">
+                        {cat.image_url && (
+                          <div className="size-10 rounded-xl overflow-hidden shrink-0 bg-muted">
+                            <img
+                              src={cat.image_url}
+                              alt=""
+                              className="size-full object-cover"
+                              loading="lazy"
+                            />
+                          </div>
+                        )}
+                        <div className="text-left">
+                          <span
+                            className={cn(
+                              "text-sm font-semibold whitespace-nowrap",
+                              isActive ? "text-primary" : "text-foreground",
+                            )}
+                          >
+                            {cat.name}
+                          </span>
+                          <p className="text-xs text-muted-foreground">
+                            {products.filter((p) => p.category?.name === cat.name).length} productos
+                          </p>
+                        </div>
+                        {isActive && (
+                          <div className="size-2 rounded-full bg-primary shrink-0" />
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Product Grid Section */}
         <section className="mx-auto max-w-7xl px-6 lg:px-8 py-16 lg:py-24">

@@ -23,9 +23,13 @@ export type Product = {
   sku: string | null;
   stock: number | null;
   brand: { name: string } | null;
+  specifications?: Specification[] | null;
+  shipping_info?: string | null;
+  warranty_info?: string | null;
+  wholesale_info?: string | null;
 };
 
-export type ProductSpec = {
+export type Specification = {
   label: string;
   value: string;
 };
@@ -68,6 +72,7 @@ export type Category = {
   id: string;
   name: string;
   slug: string;
+  image_url?: string | null;
 };
 
 export type ProductBenefit = {
