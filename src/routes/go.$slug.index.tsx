@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   Loader2, ShoppingBag, Sparkles, AlertCircle, Package,
   ArrowRight, ExternalLink, Search, Heart, X,
-  Facebook, Twitter, Instagram,
+  Facebook, Twitter, Instagram, ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect, useRef } from "react";
@@ -14,6 +14,10 @@ import { CartDrawerV2 } from "@/components/storefront/cart-drawer-v2";
 import { buildWhatsAppMessage, getWhatsAppLink } from "@/lib/whatsapp";
 import type { CustomerData } from "@/components/storefront/checkout-form";
 import { toast } from "sonner";
+
+export const Route = createFileRoute("/go/$slug/")({
+  component: StorefrontPage,
+});
 
 type Business = {
   id: string; name: string; slug: string;
@@ -33,7 +37,6 @@ const CURRENCY_SYMBOL: Record<string, string> = {
 };
 const sym = (c: string) => CURRENCY_SYMBOL[c] || "$";
 
-// Deterministic badge per product
 const BADGES = [
   { emoji: "🔥", label: "Más vendido", bg: "bg-orange-100 text-orange-700" },
   { emoji: "⭐", label: "Popular", bg: "bg-yellow-100 text-yellow-700" },
@@ -49,45 +52,16 @@ function getBadge(id: string) {
   return null;
 }
 
-// ─── Skeleton card ───────────────────────────────────────────────────
 function SkeletonCard() {
   return (
     <div className="animate-pulse">
       <div className="aspect-[3/4] rounded-2xl bg-muted mb-3" />
-      <div className="h-3.5 w-3/4 rounded bg-muted mb-1.5" />
-      <div className="h-3 w-1/3 rounded bg-muted" />
+      <div className="h-4 w-3/4 rounded-lg bg-muted mb-2" />
+      <div className="h-3 w-1/3 rounded-lg bg-muted" />
     </div>
   );
 }
 
-// ─── Toast helper ────────────────────────────────────────────────────
-function showAddedToast(productName: string, itemCount: number, onViewCart: () => void) {
-  toast.custom(
-    (id) => (
-      <div className="flex items-center gap-3 rounded-2xl bg-foreground px-4 py-3 text-background shadow-xl min-w-[260px]">
-        <div className="grid size-7 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground">
-          <Sparkles className="size-3.5" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-xs font-semibold truncate">{productName}</p>
-          <p className="text-[11px] opacity-60">Agregado al pedido</p>
-        </div>
-        <button
-          onClick={() => {
-            toast.dismiss(id);
-            onViewCart();
-          }}
-          className="shrink-0 rounded-full bg-primary px-3 py-1 text-[11px] font-semibold text-primary-foreground hover:opacity-90 transition-opacity"
-        >
-          Ver pedido ({itemCount})
-        </button>
-      </div>
-    ),
-    { duration: 3000, position: "bottom-center" }
-  );
-}
-
-// ─── Main page ──────────────────────────────────────────────────────
 function StorefrontPage() {
   const { slug } = useParams({ from: "/go/$slug" });
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -98,15 +72,21 @@ function StorefrontPage() {
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
   const categoryBarRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   const { itemCount, items, clearCart, subtotal } = useCart();
 
-  // Scroll detection for header shadow
   useEffect(() => {
-    const onScroll = () => setIsScrolled(window.scrollY > 10);
+    const onScroll = () => setIsScrolled(window.scrollY > 8);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  useEffect(() => {
+    if (searchOpen && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [searchOpen]);
 
   const { data: business, isLoading: bizLoading, error: bizError } = useQuery({
     queryKey: ["sf-business", slug],
@@ -159,7 +139,6 @@ function StorefrontPage() {
     },
   });
 
-  // ─── Loading ──────────────────────────────────────────────────────
   if (bizLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
@@ -198,7 +177,6 @@ function StorefrontPage() {
 
   const $ = sym(business.currency);
 
-  // Filtering
   const filtered = products.filter((p) => {
     const matchesCategory = !selectedCategory || p.category?.name === selectedCategory;
     const matchesSearch =
@@ -208,7 +186,6 @@ function StorefrontPage() {
     return matchesCategory && matchesSearch;
   });
 
-  // ─── Handlers ────────────────────────────────────────────────────
   async function handleCheckout(data: CustomerData) {
     if (!business) return;
     const waPhone = business.whatsapp_phone;
@@ -269,27 +246,33 @@ function StorefrontPage() {
     }
   }
 
-  // ─── Render ───────────────────────────────────────────────────────
+  const showFilters = categories.length > 0 || searchQuery;
+
   return (
     <div className="flex min-h-screen flex-col bg-background">
 
       {/* ── Announcement bar ───────────────────────────────── */}
-      <div className="bg-foreground text-background text-[11px] py-1.5 text-center tracking-wide font-light">
-        <Sparkles className="mr-1.5 inline size-3 align-text-top opacity-60" />
-        ENVÍO GRATIS EN PEDIDOS +{$}50
+      <div className="relative overflow-hidden bg-foreground text-background">
+        <div className="relative z-10 text-[11px] py-2 text-center tracking-wide font-light px-4">
+          <Sparkles className="mr-1.5 inline size-3 align-text-top opacity-60" />
+          ENVÍO GRATIS EN PEDIDOS +{$}50
+        </div>
       </div>
 
       {/* ── Sticky header ──────────────────────────────────── */}
       <header
         className={cn(
-          "sticky top-0 z-40 w-full bg-background/90 backdrop-blur-xl transition-shadow duration-200",
+          "sticky top-0 z-40 w-full bg-background/90 backdrop-blur-xl transition-all duration-200",
           isScrolled ? "shadow-sm border-b border-border/40" : "border-b border-transparent"
         )}
       >
         <div className="mx-auto flex h-14 max-w-7xl items-center gap-3 px-4 sm:px-6">
 
-          {/* Logo + Name */}
-          <div className="flex items-center gap-2 min-w-0 flex-1 sm:flex-none">
+          <Link
+            to="/go/$slug"
+            params={{ slug }}
+            className="flex items-center gap-2 min-w-0 flex-1 sm:flex-none"
+          >
             {business.logo_url && (
               <img
                 src={business.logo_url}
@@ -300,12 +283,13 @@ function StorefrontPage() {
             <span className="text-base font-bold tracking-tight text-foreground truncate">
               {business.name}
             </span>
-          </div>
+          </Link>
 
           {/* Desktop search */}
-          <div className="hidden sm:flex flex-1 items-center gap-2 mx-4 rounded-xl bg-muted/60 border border-border/40 px-3.5 h-9 transition-all focus-within:border-primary/50 focus-within:bg-background">
+          <div className="hidden sm:flex flex-1 items-center gap-2 max-w-md mx-auto rounded-xl bg-muted/60 border border-border/40 px-3.5 h-9 transition-all focus-within:border-primary/50 focus-within:bg-background">
             <Search className="size-3.5 text-muted-foreground/60 shrink-0" strokeWidth={1.5} />
             <input
+              ref={searchInputRef}
               type="search"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -326,13 +310,12 @@ function StorefrontPage() {
 
           {/* Actions */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            {/* Mobile search toggle */}
             <button
               className="sm:hidden text-muted-foreground hover:text-foreground transition-colors"
-              onClick={() => setSearchOpen(!searchOpen)}
+              onClick={() => { setSearchOpen(!searchOpen); if (!searchOpen) setSearchQuery(""); }}
               aria-label="Buscar"
             >
-              <Search className="size-4.5" strokeWidth={1.5} />
+              {searchOpen ? <X className="size-4.5" strokeWidth={1.5} /> : <Search className="size-4.5" strokeWidth={1.5} />}
             </button>
 
             <button
@@ -342,7 +325,6 @@ function StorefrontPage() {
               <Heart className="size-4.5" strokeWidth={1.5} />
             </button>
 
-            {/* Cart button */}
             <button
               onClick={() => setCartOpen(true)}
               className="relative text-muted-foreground hover:text-foreground transition-colors"
@@ -350,7 +332,7 @@ function StorefrontPage() {
             >
               <ShoppingBag className="size-5" strokeWidth={1.5} />
               {itemCount > 0 && (
-                <span className="absolute -right-1.5 -top-1.5 grid size-4 place-items-center rounded-full bg-primary text-[9px] font-bold text-primary-foreground ring-2 ring-background transition-all duration-200">
+                <span className="absolute -right-1.5 -top-1.5 grid min-w-[16px] h-4 place-items-center rounded-full bg-primary text-[9px] font-bold text-primary-foreground ring-2 ring-background px-1 transition-all duration-200">
                   {itemCount > 99 ? "99+" : itemCount}
                 </span>
               )}
@@ -358,14 +340,14 @@ function StorefrontPage() {
           </div>
         </div>
 
-        {/* Mobile search bar (expandable) */}
+        {/* Mobile search bar */}
         {searchOpen && (
-          <div className="border-t border-border/40 bg-background px-4 py-2.5 sm:hidden">
+          <div className="border-t border-border/40 bg-background px-4 py-2.5 sm:hidden animate-in slide-in-from-top-1 duration-150">
             <div className="flex items-center gap-2 rounded-xl bg-muted/60 border border-border/40 px-3 h-9 focus-within:border-primary/50">
               <Search className="size-3.5 text-muted-foreground/60 shrink-0" strokeWidth={1.5} />
               <input
+                ref={searchInputRef}
                 type="search"
-                autoFocus
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Buscar productos..."
@@ -381,96 +363,120 @@ function StorefrontPage() {
           </div>
         )}
 
-        {/* Category pill bar */}
+        {/* Category pills */}
         {categories.length > 0 && (
-          <div
-            ref={categoryBarRef}
-            className="flex gap-2 overflow-x-auto border-t border-border/40 px-4 py-2 scrollbar-none"
-            role="navigation"
-            aria-label="Categorías"
-          >
-            <button
-              onClick={() => setSelectedCategory(null)}
-              className={cn(
-                "shrink-0 rounded-full px-4 py-1.5 text-xs font-semibold transition-all duration-200",
-                !selectedCategory
-                  ? "bg-primary text-primary-foreground shadow-sm"
-                  : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground"
-              )}
-            >
-              Todos
-            </button>
-            {categories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() =>
-                  setSelectedCategory(selectedCategory === cat.name ? null : cat.name)
-                }
-                className={cn(
-                  "shrink-0 rounded-full px-4 py-1.5 text-xs font-semibold transition-all duration-200 whitespace-nowrap",
-                  selectedCategory === cat.name
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground"
-                )}
+          <div className="border-t border-border/40">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6">
+              <div
+                ref={categoryBarRef}
+                className="flex gap-2 overflow-x-auto py-2 scrollbar-none [-webkit-overflow-scrolling:touch]"
+                role="navigation"
+                aria-label="Categorías"
               >
-                {cat.name}
-              </button>
-            ))}
+                <button
+                  onClick={() => setSelectedCategory(null)}
+                  className={cn(
+                    "shrink-0 rounded-full px-4 py-1.5 text-xs font-semibold transition-all duration-200",
+                    !selectedCategory
+                      ? "bg-primary text-primary-foreground shadow-sm shadow-primary/20"
+                      : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground"
+                  )}
+                >
+                  Todos
+                </button>
+                {categories.map((cat) => (
+                  <button
+                    key={cat.id}
+                    onClick={() =>
+                      setSelectedCategory(selectedCategory === cat.name ? null : cat.name)
+                    }
+                    className={cn(
+                      "shrink-0 rounded-full px-4 py-1.5 text-xs font-semibold transition-all duration-200 whitespace-nowrap",
+                      selectedCategory === cat.name
+                        ? "bg-primary text-primary-foreground shadow-sm shadow-primary/20"
+                        : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground"
+                    )}
+                  >
+                    {cat.name}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         )}
       </header>
 
       <main className="flex-1">
 
-        {/* ── Compact hero ───────────────────────────────────── */}
-        <section className="border-b border-border/40 bg-gradient-to-b from-primary/[0.03] to-transparent">
-          <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10">
-            <div className="flex flex-col items-center text-center gap-3">
+        {/* ── Hero ──────────────────────────────────────────── */}
+        <section className="relative border-b border-border/40 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.03] via-transparent to-transparent pointer-events-none" />
+          <div className="relative mx-auto max-w-7xl px-4 py-12 sm:py-16 sm:px-6">
+            <div className="flex flex-col items-center text-center gap-4 max-w-lg mx-auto">
               {business.logo_url && (
-                <img
-                  src={business.logo_url}
-                  alt={business.name}
-                  className="size-14 rounded-2xl object-cover ring-1 ring-border/50 shadow-sm"
-                />
+                <div className="relative">
+                  <div className="absolute inset-0 rounded-2xl bg-primary/10 blur-xl" />
+                  <img
+                    src={business.logo_url}
+                    alt={business.name}
+                    className="relative size-16 rounded-2xl object-cover ring-1 ring-border/50 shadow-sm"
+                  />
+                </div>
               )}
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-                {business.name}
-              </h1>
-              <p className="text-sm text-muted-foreground font-light max-w-sm">
-                Descubre nuestra colección. Ordena directo por WhatsApp.
-              </p>
+              <div className="space-y-2">
+                <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground leading-tight">
+                  {business.name}
+                </h1>
+                <p className="text-sm text-muted-foreground font-light max-w-sm mx-auto leading-relaxed">
+                  Descubre nuestra colección. Ordena directo por WhatsApp.
+                </p>
+              </div>
+              {!showFilters && categories.length > 0 && (
+                <div className="flex gap-2 pt-1">
+                  {categories.slice(0, 3).map((cat) => (
+                    <button
+                      key={cat.id}
+                      onClick={() => setSelectedCategory(cat.name)}
+                      className="rounded-full border border-border/60 px-3.5 py-1.5 text-[11px] font-medium text-muted-foreground hover:border-foreground/30 hover:text-foreground transition-all"
+                    >
+                      {cat.name}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </section>
 
         {/* ── Product grid ───────────────────────────────────── */}
-        <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-10">
+        <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12">
 
           {/* Section heading */}
           <div className="mb-6 flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-bold tracking-tight">
+              <h2 className="text-lg font-bold tracking-tight text-foreground">
                 {searchQuery
                   ? `Resultados para "${searchQuery}"`
-                  : selectedCategory || "Todos los productos"}
+                  : selectedCategory || "Productos"}
               </h2>
               {!productsLoading && (
                 <p className="mt-0.5 text-xs text-muted-foreground">
                   {filtered.length} producto{filtered.length !== 1 ? "s" : ""}
+                  {selectedCategory && ` en ${selectedCategory}`}
                 </p>
               )}
             </div>
             {(selectedCategory || searchQuery) && (
               <button
                 onClick={() => { setSelectedCategory(null); setSearchQuery(""); }}
-                className="text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground transition-colors"
+                className="text-xs font-semibold text-primary underline underline-offset-4 hover:opacity-80 transition-opacity"
               >
-                Ver todos
+                Limpiar filtros
               </button>
             )}
           </div>
 
-          {/* Skeleton loading */}
+          {/* Skeleton */}
           {productsLoading && (
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 sm:gap-5 lg:gap-6">
               {Array.from({ length: 8 }).map((_, i) => (
@@ -481,25 +487,23 @@ function StorefrontPage() {
 
           {/* Empty state */}
           {!productsLoading && filtered.length === 0 && (
-            <div className="py-16 text-center">
-              <div className="mx-auto grid size-16 place-items-center rounded-2xl bg-muted text-muted-foreground/40">
+            <div className="py-20 text-center">
+              <div className="mx-auto grid size-16 place-items-center rounded-2xl bg-muted text-muted-foreground/40 mb-4">
                 <Package className="size-7" />
               </div>
-              <h3 className="mt-4 text-base font-semibold">
-                {searchQuery ? "Sin resultados" : "No hay productos"}
+              <h3 className="text-base font-semibold text-foreground">
+                {searchQuery ? "Sin resultados" : selectedCategory ? `No hay productos en "${selectedCategory}"` : "No hay productos"}
               </h3>
-              <p className="mt-1.5 text-sm text-muted-foreground">
+              <p className="mt-1.5 text-sm text-muted-foreground max-w-xs mx-auto">
                 {searchQuery
                   ? `No encontramos "${searchQuery}". Intenta con otro término.`
-                  : selectedCategory
-                  ? `No hay productos en "${selectedCategory}"`
-                  : "Esta tienda aún no tiene productos publicados."}
+                  : "Esta tienda aún no tiene productos publicados. Vuelve pronto."}
               </p>
               {(searchQuery || selectedCategory) && (
                 <Button
                   variant="outline"
                   size="sm"
-                  className="mt-4"
+                  className="mt-6 rounded-xl"
                   onClick={() => { setSelectedCategory(null); setSearchQuery(""); }}
                 >
                   Ver todos los productos
@@ -508,9 +512,9 @@ function StorefrontPage() {
             </div>
           )}
 
-          {/* Product cards */}
+          {/* Products */}
           {!productsLoading && filtered.length > 0 && (
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 sm:gap-5 lg:gap-6">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4 lg:gap-5">
               {filtered.map((product) => (
                 <ProductCard
                   key={product.id}
@@ -525,94 +529,95 @@ function StorefrontPage() {
       </main>
 
       {/* ── Footer ─────────────────────────────────────────── */}
-      <footer className="border-t border-border/40 bg-foreground text-background pt-12 pb-6">
-        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-10 md:gap-8 mb-10">
-          <div className="col-span-1 md:col-span-1">
-            <div className="flex items-center gap-2 text-lg font-bold tracking-tight mb-4">
-              {business.logo_url && (
-                <img src={business.logo_url} alt="" className="size-6 rounded-lg object-cover ring-1 ring-white/10" />
-              )}
-              {business.name}
+      <footer className="border-t border-border/40 bg-foreground text-background pt-12 pb-8">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-10 mb-10">
+            <div className="col-span-2 md:col-span-1">
+              <div className="flex items-center gap-2.5 text-lg font-bold tracking-tight mb-4">
+                {business.logo_url && (
+                  <img src={business.logo_url} alt="" className="size-7 rounded-xl object-cover ring-1 ring-white/10" />
+                )}
+                {business.name}
+              </div>
+              <p className="text-xs text-background/50 font-light leading-relaxed mb-5 max-w-xs">
+                Productos de calidad. Pedidos directos por WhatsApp. Rápido y sin complicaciones.
+              </p>
+              <div className="flex gap-2.5">
+                <a href="#" aria-label="Instagram" className="grid size-8 place-items-center rounded-xl border border-background/10 text-background/50 hover:text-background hover:border-background/30 transition-all">
+                  <Instagram className="size-3.5" />
+                </a>
+                <a href="#" aria-label="Facebook" className="grid size-8 place-items-center rounded-xl border border-background/10 text-background/50 hover:text-background hover:border-background/30 transition-all">
+                  <Facebook className="size-3.5" />
+                </a>
+                <a href="#" aria-label="Twitter/X" className="grid size-8 place-items-center rounded-xl border border-background/10 text-background/50 hover:text-background hover:border-background/30 transition-all">
+                  <Twitter className="size-3.5" />
+                </a>
+              </div>
             </div>
-            <p className="text-xs text-background/50 font-light leading-relaxed mb-5">
-              Productos de calidad. Pedidos directos por WhatsApp. Rápido y sin complicaciones.
-            </p>
-            <div className="flex gap-3">
-              <a href="#" aria-label="Instagram" className="grid size-8 place-items-center rounded-full border border-background/10 text-background/50 hover:text-background hover:border-background/30 transition-all">
-                <Instagram className="size-3.5" />
-              </a>
-              <a href="#" aria-label="Facebook" className="grid size-8 place-items-center rounded-full border border-background/10 text-background/50 hover:text-background hover:border-background/30 transition-all">
-                <Facebook className="size-3.5" />
-              </a>
-              <a href="#" aria-label="Twitter/X" className="grid size-8 place-items-center rounded-full border border-background/10 text-background/50 hover:text-background hover:border-background/30 transition-all">
-                <Twitter className="size-3.5" />
-              </a>
-            </div>
-          </div>
 
-          <div>
-            <h4 className="text-[10px] font-semibold uppercase tracking-widest mb-5 text-background/60">
-              Categorías
-            </h4>
-            <ul className="space-y-2.5 text-xs text-background/50">
-              <li>
-                <button onClick={() => setSelectedCategory(null)} className="hover:text-background transition-colors">
-                  Todos los productos
-                </button>
-              </li>
-              {categories.slice(0, 5).map((cat) => (
-                <li key={cat.id}>
-                  <button onClick={() => setSelectedCategory(cat.name)} className="hover:text-background transition-colors">
-                    {cat.name}
+            <div>
+              <h4 className="text-[10px] font-semibold uppercase tracking-widest mb-4 text-background/60">
+                Categorías
+              </h4>
+              <ul className="space-y-2.5 text-xs text-background/50">
+                <li>
+                  <button onClick={() => setSelectedCategory(null)} className="hover:text-background transition-colors">
+                    Todos los productos
                   </button>
                 </li>
-              ))}
-            </ul>
+                {categories.slice(0, 5).map((cat) => (
+                  <li key={cat.id}>
+                    <button onClick={() => setSelectedCategory(cat.name)} className="hover:text-background transition-colors">
+                      {cat.name}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="text-[10px] font-semibold uppercase tracking-widest mb-4 text-background/60">
+                Soporte
+              </h4>
+              <ul className="space-y-2.5 text-xs text-background/50">
+                <li><a href="#" className="hover:text-background transition-colors">Contacto</a></li>
+                <li><a href="#" className="hover:text-background transition-colors">FAQ</a></li>
+                <li><a href="#" className="hover:text-background transition-colors">Envíos</a></li>
+                <li><a href="#" className="hover:text-background transition-colors">Devoluciones</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="text-[10px] font-semibold uppercase tracking-widest mb-4 text-background/60">
+                Legal
+              </h4>
+              <ul className="space-y-2.5 text-xs text-background/50">
+                <li><a href="#" className="hover:text-background transition-colors">Privacidad</a></li>
+                <li><a href="#" className="hover:text-background transition-colors">Términos</a></li>
+                <li><a href="#" className="hover:text-background transition-colors">Cookies</a></li>
+              </ul>
+            </div>
           </div>
 
-          <div>
-            <h4 className="text-[10px] font-semibold uppercase tracking-widest mb-5 text-background/60">
-              Soporte
-            </h4>
-            <ul className="space-y-2.5 text-xs text-background/50">
-              <li><a href="#" className="hover:text-background transition-colors">Contacto</a></li>
-              <li><a href="#" className="hover:text-background transition-colors">FAQ</a></li>
-              <li><a href="#" className="hover:text-background transition-colors">Envíos</a></li>
-              <li><a href="#" className="hover:text-background transition-colors">Devoluciones</a></li>
-            </ul>
+          <div className="pt-6 border-t border-background/10 flex flex-col sm:flex-row justify-between items-center gap-3">
+            <p className="text-[10px] text-background/30">
+              © 2024 {business.name}. Todos los derechos reservados.
+            </p>
+            <p className="flex items-center gap-1.5 text-[10px] text-background/30">
+              Powered by{" "}
+              <a
+                href="https://commerceai.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 font-medium text-background/50 underline underline-offset-4 hover:text-background transition-colors"
+              >
+                Commerce AI <ExternalLink className="size-2.5" />
+              </a>
+            </p>
           </div>
-
-          <div>
-            <h4 className="text-[10px] font-semibold uppercase tracking-widest mb-5 text-background/60">
-              Legal
-            </h4>
-            <ul className="space-y-2.5 text-xs text-background/50">
-              <li><a href="#" className="hover:text-background transition-colors">Privacidad</a></li>
-              <li><a href="#" className="hover:text-background transition-colors">Términos</a></li>
-              <li><a href="#" className="hover:text-background transition-colors">Cookies</a></li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="max-w-7xl mx-auto px-6 pt-6 border-t border-background/10 flex flex-col sm:flex-row justify-between items-center gap-3">
-          <p className="text-[10px] text-background/30">
-            © 2024 {business.name}. Todos los derechos reservados.
-          </p>
-          <p className="flex items-center gap-1.5 text-[10px] text-background/30">
-            Powered by{" "}
-            <a
-              href="https://commerceai.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 font-medium text-background/50 underline underline-offset-4 hover:text-background transition-colors"
-            >
-              Commerce AI <ExternalLink className="size-2.5" />
-            </a>
-          </p>
         </div>
       </footer>
 
-      {/* ── Cart Drawer (multi-step) ───────────────────────── */}
       <CartDrawerV2
         open={cartOpen}
         onClose={() => setCartOpen(false)}
@@ -625,7 +630,6 @@ function StorefrontPage() {
   );
 }
 
-// ─── Product Card ─────────────────────────────────────────────────────
 function ProductCard({
   product,
   currencySymbol: $,
@@ -636,6 +640,7 @@ function ProductCard({
   storeSlug: string;
 }) {
   const [imgError, setImgError] = useState(false);
+  const [imgLoaded, setImgLoaded] = useState(false);
   const hasSale = product.sale_price != null && product.sale_price < product.price;
   const displayPrice = hasSale ? product.sale_price! : product.price;
   const badge = getBadge(product.id);
@@ -647,55 +652,61 @@ function ProductCard({
       className="group block w-full text-left cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-2xl"
       aria-label={`Ver ${product.name}, ${$}${displayPrice.toFixed(2)}`}
     >
-      {/* Image */}
-      <div className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl bg-muted mb-3 transition-shadow duration-300 group-hover:shadow-lg">
+      <div className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl bg-muted mb-3 transition-all duration-300 group-hover:shadow-lg group-hover:shadow-black/5">
         {product.image_url && !imgError ? (
-          <img
-            src={product.image_url}
-            alt={product.name}
-            className="size-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-            loading="lazy"
-            onError={() => setImgError(true)}
-          />
+          <>
+            {!imgLoaded && (
+              <div className="absolute inset-0 bg-muted animate-pulse" />
+            )}
+            <img
+              src={product.image_url}
+              alt={product.name}
+              className={cn(
+                "size-full object-cover transition-all duration-500 ease-out",
+                imgLoaded ? "opacity-100" : "opacity-0",
+                "group-hover:scale-[1.03]"
+              )}
+              loading="lazy"
+              onLoad={() => setImgLoaded(true)}
+              onError={() => setImgError(true)}
+            />
+          </>
         ) : (
           <div className="flex size-full items-center justify-center">
             <Package className="size-10 text-muted-foreground/15" />
           </div>
         )}
 
-        {/* Badge */}
+        {/* Badges */}
         {badge && (
           <span
             className={cn(
-              "absolute left-2.5 top-2.5 rounded-full px-2 py-0.5 text-[10px] font-semibold",
+              "absolute left-2.5 top-2.5 rounded-full px-2 py-0.5 text-[10px] font-semibold shadow-sm",
               badge.bg
             )}
           >
             {badge.emoji} {badge.label}
           </span>
         )}
-
-        {/* Sale badge */}
         {hasSale && (
-          <span className="absolute right-2.5 top-2.5 rounded-full bg-destructive px-2 py-0.5 text-[10px] font-semibold text-white">
+          <span className="absolute right-2.5 top-2.5 rounded-full bg-destructive px-2 py-0.5 text-[10px] font-semibold text-white shadow-sm">
             Oferta
           </span>
         )}
 
         {/* Hover overlay */}
-        <div className="absolute inset-0 flex items-end justify-center bg-gradient-to-t from-black/30 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 p-3">
-          <span className="rounded-xl bg-white/95 backdrop-blur px-4 py-2 text-xs font-semibold text-foreground shadow-sm translate-y-2 transition-transform duration-300 group-hover:translate-y-0">
+        <div className="absolute inset-0 flex items-end justify-center bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 p-3">
+          <span className="rounded-xl bg-white/95 backdrop-blur-sm px-4 py-2 text-xs font-semibold text-foreground shadow-sm translate-y-2 transition-transform duration-300 group-hover:translate-y-0">
             Ver producto
           </span>
         </div>
       </div>
 
-      {/* Info */}
-      <div className="px-0.5">
+      <div className="px-0.5 space-y-1">
         <h3 className="text-sm font-semibold text-foreground leading-snug line-clamp-2 group-hover:text-primary transition-colors duration-200">
           {product.name}
         </h3>
-        <div className="mt-1 flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           <span className={cn("text-sm font-bold", hasSale ? "text-destructive" : "text-foreground")}>
             {$}{displayPrice.toFixed(2)}
           </span>
@@ -709,7 +720,3 @@ function ProductCard({
     </Link>
   );
 }
-
-export const Route = createFileRoute("/go/$slug/")({
-  component: StorefrontPage,
-});
