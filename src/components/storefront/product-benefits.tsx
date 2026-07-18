@@ -22,16 +22,20 @@ export function ProductBenefits({ benefits }: ProductBenefitsProps) {
   if (enabled.length === 0) return null;
 
   return (
-    <div className="mt-8 flex flex-wrap gap-2">
+    <div className="grid grid-cols-2 gap-4 mt-8">
       {enabled.map((benefit, i) => {
         const Icon = BENEFIT_ICONS[benefit.icon];
         return (
           <div
             key={i}
-            className="flex items-center gap-2 rounded-full border border-border/40 bg-muted/30 px-4 py-2 text-xs text-muted-foreground"
+            className="bg-[#FAFAFA] border border-[#E5E7EB] rounded-[16px] p-4 flex gap-4 items-start group hover:bg-white hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all duration-300"
           >
-            {Icon && <Icon className="size-3.5" strokeWidth={1.5} />}
-            <span>{benefit.label}</span>
+            <div className="bg-white border border-[#E5E7EB] w-10 h-10 rounded-[12px] flex items-center justify-center shrink-0 shadow-sm group-hover:scale-110 transition-transform duration-300">
+              {Icon && <Icon className="text-[#111827] size-[18px]" strokeWidth={1.5} />}
+            </div>
+            <div>
+              <h4 className="font-bold text-[#111827] text-sm mb-1">{benefit.label}</h4>
+            </div>
           </div>
         );
       })}

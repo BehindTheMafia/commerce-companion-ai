@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { Package, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ProductImage } from "@/types/storefront";
@@ -7,14 +7,24 @@ type ProductGalleryProps = {
   images: ProductImage[];
   mainImageUrl: string | null;
   productName: string;
+  discountPercent?: number | null;
   badges?: React.ReactNode;
 };
 
-export function ProductGallery({ images, mainImageUrl, productName, badges }: ProductGalleryProps) {
+export function ProductGallery({
+  images,
+  mainImageUrl,
+  productName,
+  discountPercent,
+  badges,
+}: ProductGalleryProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [imgLoaded, setImgLoaded] = useState(false);
   const [imgError, setImgError] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [isZoomed, setIsZoomed] = useState(false);
+  const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
+  const imageRef = useRef<HTMLDivElement>(null);
 
   const allImages =
     images.length > 0
@@ -45,114 +55,141 @@ export function ProductGallery({ images, mainImageUrl, productName, badges }: Pr
     [activeIndex, goTo, lightboxOpen],
   );
 
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!imageRef.current) return;
+    const { left, top, width, height } = imageRef.current.getBoundingClientRect();
+    const x = ((e.pageX - left) / width) * 100;
+    const y = ((e.pageY - top) / height) * 100;
+    setMousePos({ x, y });
+  };
+
   return (
     <>
       <div className="relative" role="region" aria-label="Galería del producto">
         <div className="lg:sticky lg:top-[110px]">
-          {/* Main Image */}
-          <div
-            className="relative w-full overflow-hidden bg-[#FAFAFA] cursor-zoom-in rounded-[28px]"
-            style={{ aspectRatio: "1 / 1", padding: "clamp(16px, 2vw, 24px)" }}
-            onClick={() => currentImage && setLightboxOpen(true)}
-            onKeyDown={handleKeyDown}
-            tabIndex={0}
-            role="button"
-            aria-label="Ampliar imagen"
-          >
-            {currentImage && !imgError ? (
-              <>
-                {!imgLoaded && (
-                  <div className="absolute inset-[clamp(16px,2vw,24px)] rounded-[20px] bg-muted animate-pulse" />
-                )}
-                <img
-                  src={currentImage.url}
-                  alt={currentImage.alt ?? productName}
-                  className="absolute inset-[clamp(16px,2vw,24px)] w-[calc(100%-clamp(32px,4vw,48px))] h-[calc(100%-clamp(32px,4vw,48px))] object-cover rounded-[20px]"
-                  style={{
-                    opacity: imgLoaded ? 1 : 0,
-                    transition: "opacity .3s cubic-bezier(.22,.61,.36,1)",
-                  }}
-                  loading="eager"
-                  fetchPriority="high"
-                  onLoad={() => setImgLoaded(true)}
-                  onError={() => setImgError(true)}
-                />
-              </>
-            ) : (
-              <div className="absolute inset-[clamp(16px,2vw,24px)] rounded-[20px] flex items-center justify-center bg-muted/30">
-                <Package className="size-16 text-muted-foreground/15" strokeWidth={1} />
+          {/* Desktop: vertical thumbs + main image side by side */}
+          <div className="flex flex-col-reverse lg:flex-row gap-6">
+            {/* Thumbnails - vertical on desktop, horizontal on mobile */}
+            {hasMultiple && (
+              <div
+                className="flex lg:flex-col gap-4 overflow-x-auto lg:overflow-y-auto lg:w-24 pb-2 lg:pb-0 shrink-0"
+                role="tablist"
+                aria-label="Vistas del producto"
+              >
+                {allImages.map((img, i) => (
+                  <button
+                    key={img.id}
+                    onClick={() => goTo(i)}
+                    className={cn(
+                      "relative w-20 h-24 lg:w-full lg:h-32 rounded-[14px] overflow-hidden border-2 transition-all duration-300 ease-out shrink-0 focus:outline-none focus:ring-2 focus:ring-[#111827] focus:ring-offset-2",
+                      i === activeIndex
+                        ? "border-[#111827] shadow-md"
+                        : "border-transparent opacity-60 hover:opacity-100 hover:border-gray-300",
+                    )}
+                    role="tab"
+                    aria-selected={i === activeIndex}
+                    aria-label={img.alt ?? `Vista ${i + 1}`}
+                  >
+                    <img
+                      src={img.url}
+                      alt={img.alt ?? `Vista ${i + 1}`}
+                      className="size-full object-cover"
+                      loading="lazy"
+                    />
+                  </button>
+                ))}
               </div>
             )}
 
-            {/* Navigation arrows (multiple images) */}
-            {hasMultiple && (
-              <>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    goTo(activeIndex - 1);
-                  }}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 z-10 size-9 rounded-full bg-background/80 backdrop-blur-md border border-border/40 flex items-center justify-center text-foreground/60 hover:text-foreground hover:bg-background transition-all"
-                  aria-label="Imagen anterior"
-                >
-                  <ChevronLeft className="size-4" />
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    goTo(activeIndex + 1);
-                  }}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 z-10 size-9 rounded-full bg-background/80 backdrop-blur-md border border-border/40 flex items-center justify-center text-foreground/60 hover:text-foreground hover:bg-background transition-all"
-                  aria-label="Imagen siguiente"
-                >
-                  <ChevronRight className="size-4" />
-                </button>
-              </>
-            )}
-
-            {/* Badges */}
-            {badges && (
-              <div className="absolute left-5 top-5 flex flex-col gap-2 z-10">{badges}</div>
-            )}
-          </div>
-
-          {/* Thumbnails */}
-          {hasMultiple && (
+            {/* Main Image with Hover Zoom */}
             <div
-              className="mt-3 flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-none pb-1"
-              role="tablist"
-              aria-label="Vistas del producto"
+              ref={imageRef}
+              className="flex-1 bg-[#FAFAFA] rounded-[18px] overflow-hidden relative cursor-crosshair aspect-square lg:aspect-[4/5] shadow-[0_8px_30px_rgb(0,0,0,0.04)] group"
+              onMouseEnter={() => setIsZoomed(true)}
+              onMouseLeave={() => setIsZoomed(false)}
+              onMouseMove={handleMouseMove}
+              onClick={() => currentImage && setLightboxOpen(true)}
+              onKeyDown={handleKeyDown}
+              tabIndex={0}
+              role="button"
+              aria-label="Ampliar imagen"
             >
-              {allImages.map((img, i) => (
-                <button
-                  key={img.id}
-                  onClick={() => goTo(i)}
-                  className={cn(
-                    "shrink-0 snap-start rounded-2xl overflow-hidden border-2 transition-all duration-250",
-                    i === activeIndex
-                      ? "border-primary shadow-lg shadow-black/8"
-                      : "border-primary/20",
+              {currentImage && !imgError ? (
+                <>
+                  {!imgLoaded && (
+                    <div className="absolute inset-0 bg-[#FAFAFA] animate-pulse" />
                   )}
-                  style={{ width: "96px", height: "96px" }}
-                  role="tab"
-                  aria-selected={i === activeIndex}
-                  aria-label={img.alt ?? `Vista ${i + 1}`}
-                >
-                  <img
-                    src={img.url}
-                    alt={img.alt ?? `Vista ${i + 1}`}
-                    className={cn(
-                      "size-full object-cover transition-all duration-250",
-                      i === activeIndex
-                        ? "opacity-100"
-                        : "opacity-50 hover:opacity-100 hover:scale-[1.04]",
-                    )}
-                    loading="lazy"
-                  />
-                </button>
-              ))}
+                  {allImages.map((img, idx) => (
+                    <img
+                      key={img.id}
+                      src={img.url}
+                      alt={img.alt ?? productName}
+                      className={cn(
+                        "absolute inset-0 w-full h-full object-cover transition-all duration-500 ease-out",
+                        activeIndex === idx ? "opacity-100 z-0" : "opacity-0 -z-10",
+                      )}
+                      style={
+                        activeIndex === idx && isZoomed
+                          ? {
+                              transformOrigin: `${mousePos.x}% ${mousePos.y}%`,
+                              transform: "scale(1.8)",
+                            }
+                          : { transform: "scale(1)" }
+                      }
+                      loading={idx === 0 ? "eager" : "lazy"}
+                      fetchPriority={idx === 0 ? "high" : "low"}
+                      onLoad={() => idx === activeIndex && setImgLoaded(true)}
+                      onError={() => idx === activeIndex && setImgError(true)}
+                    />
+                  ))}
+                </>
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center bg-muted/30">
+                  <Package className="size-16 text-muted-foreground/15" strokeWidth={1} />
+                </div>
+              )}
+
+              {/* Discount Badge */}
+              {discountPercent && discountPercent > 0 && (
+                <div className="absolute top-6 left-6 z-10 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-lg shadow-sm border border-white/20">
+                  <span className="text-[#DC2626] font-bold text-sm tracking-wide">
+                    -{discountPercent}%
+                  </span>
+                </div>
+              )}
+
+              {/* Badges */}
+              {badges && (
+                <div className="absolute top-6 right-6 z-10 flex flex-col gap-2">{badges}</div>
+              )}
+
+              {/* Navigation arrows (multiple images) */}
+              {hasMultiple && (
+                <>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      goTo(activeIndex - 1);
+                    }}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 z-10 size-9 rounded-full bg-background/80 backdrop-blur-md border border-border/40 flex items-center justify-center text-foreground/60 hover:text-foreground hover:bg-background transition-all"
+                    aria-label="Imagen anterior"
+                  >
+                    <ChevronLeft className="size-4" />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      goTo(activeIndex + 1);
+                    }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 z-10 size-9 rounded-full bg-background/80 backdrop-blur-md border border-border/40 flex items-center justify-center text-foreground/60 hover:text-foreground hover:bg-background transition-all"
+                    aria-label="Imagen siguiente"
+                  >
+                    <ChevronRight className="size-4" />
+                  </button>
+                </>
+              )}
             </div>
-          )}
+          </div>
         </div>
       </div>
 

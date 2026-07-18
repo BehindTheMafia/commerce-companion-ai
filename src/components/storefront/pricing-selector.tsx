@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 import { cn } from "@/lib/utils";
 import type { PricingMode } from "@/types/storefront";
 
@@ -17,30 +17,37 @@ export function PricingSelector({ modes, selectedId, onChange }: PricingSelector
   if (enabled.length <= 1) return null;
 
   return (
-    <div className="mt-6">
-      <span className="text-[11px] font-semibold uppercase tracking-widest text-foreground mb-3 block">
-        Pricing
-      </span>
-      <div className="flex flex-wrap gap-2">
+    <div className="flex flex-col gap-3">
+      <div className="flex justify-between items-center">
+        <span className="text-[13px] font-bold uppercase tracking-wider text-[#111827]">
+          Purchase Type
+        </span>
+        <span className="text-[13px] font-semibold text-[#6B7280]">
+          {enabled.find((m) => m.id === selectedId)?.name ?? ""}
+        </span>
+      </div>
+      <div className="bg-[#FAFAFA] border border-[#E5E7EB] p-1.5 rounded-[14px] flex w-full shadow-inner relative">
         {enabled.map((mode) => (
           <button
             key={mode.id}
             onClick={() => onChange(mode)}
             className={cn(
-              "min-h-[52px] px-6 rounded-full text-sm font-medium transition-all duration-200 border-2",
+              "flex-1 py-2.5 px-4 rounded-[10px] text-sm font-semibold transition-all duration-300 ease-out relative z-10",
               selectedId === mode.id
-                ? "border-primary bg-primary text-primary-foreground"
-                : "border-border/60 bg-transparent text-muted-foreground hover:border-foreground/30 hover:text-foreground",
+                ? "text-[#111827] shadow-[0_2px_10px_rgb(0,0,0,0.08)] bg-white"
+                : "text-[#6B7280] hover:text-[#111827] hover:bg-gray-100/50",
             )}
             aria-pressed={selectedId === mode.id}
           >
             <span>{mode.name}</span>
-            {mode.badge && <span className="ml-1.5 text-[10px] opacity-60">({mode.badge})</span>}
+            {mode.badge && (
+              <span className="ml-1 text-[10px] opacity-60">({mode.badge})</span>
+            )}
           </button>
         ))}
       </div>
       {enabled.find((m) => m.id === selectedId)?.description && (
-        <p className="mt-2 text-xs text-muted-foreground">
+        <p className="text-xs text-[#6B7280]">
           {enabled.find((m) => m.id === selectedId)?.description}
         </p>
       )}

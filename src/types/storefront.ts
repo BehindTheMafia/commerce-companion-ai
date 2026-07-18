@@ -20,6 +20,14 @@ export type Product = {
   category: { name: string; slug: string } | null;
   pricing_modes?: PricingMode[] | null;
   variants?: ProductVariant[] | null;
+  sku: string | null;
+  stock: number | null;
+  brand: { name: string } | null;
+};
+
+export type ProductSpec = {
+  label: string;
+  value: string;
 };
 
 export type PricingMode = {

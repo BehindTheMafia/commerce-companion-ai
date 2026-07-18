@@ -100,7 +100,7 @@ function StorefrontPage() {
       const { data, error } = await supabase
         .from("products")
         .select(
-          "id, name, slug, price, sale_price, image_url, description, created_at, category:categories(name, slug)",
+          "id, name, slug, price, sale_price, image_url, description, sku, stock, created_at, category:categories(name, slug), brand:brands(name)",
         )
         .eq("business_id", business!.id)
         .eq("status", "active")
