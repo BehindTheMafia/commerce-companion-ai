@@ -14,8 +14,8 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as GoSlugRouteImport } from './routes/go.$slug'
-import { Route as GoSlugProductSlugRouteImport } from './routes/go.$slug.$productSlug'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
+import { Route as GoSlugIndexRouteImport } from './routes/go.$slug.index'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
 import { Route as ApiTwilioWebhookRouteImport } from './routes/api.twilio.webhook'
 import { Route as AuthenticatedAppSettingsRouteImport } from './routes/_authenticated/app.settings'
@@ -25,6 +25,7 @@ import { Route as AuthenticatedAppInventoryRouteImport } from './routes/_authent
 import { Route as AuthenticatedAppInboxRouteImport } from './routes/_authenticated/app.inbox'
 import { Route as AuthenticatedAppCustomersRouteImport } from './routes/_authenticated/app.customers'
 import { Route as AuthenticatedAppCategoriesRouteImport } from './routes/_authenticated/app.categories'
+import { Route as GoSlugProductProductSlugRouteImport } from './routes/go.$slug.product.$productSlug'
 
 const OnboardingRoute = OnboardingRouteImport.update({
   id: '/onboarding',
@@ -50,15 +51,15 @@ const GoSlugRoute = GoSlugRouteImport.update({
   path: '/go/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const GoSlugProductSlugRoute = GoSlugProductSlugRouteImport.update({
-  id: '/go/$slug/$productSlug',
-  path: '/go/$slug/$productSlug',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthenticatedAppRoute = AuthenticatedAppRouteImport.update({
   id: '/app',
   path: '/app',
   getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const GoSlugIndexRoute = GoSlugIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => GoSlugRoute,
 } as any)
 const AuthenticatedAppIndexRoute = AuthenticatedAppIndexRouteImport.update({
   id: '/',
@@ -110,14 +111,19 @@ const AuthenticatedAppCategoriesRoute =
     path: '/categories',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
+const GoSlugProductProductSlugRoute =
+  GoSlugProductProductSlugRouteImport.update({
+    id: '/product/$productSlug',
+    path: '/product/$productSlug',
+    getParentRoute: () => GoSlugRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/onboarding': typeof OnboardingRoute
   '/app': typeof AuthenticatedAppRouteWithChildren
-  '/go/$slug': typeof GoSlugRoute
-  '/go/$slug/$productSlug': typeof GoSlugProductSlugRoute
+  '/go/$slug': typeof GoSlugRouteWithChildren
   '/app/categories': typeof AuthenticatedAppCategoriesRoute
   '/app/customers': typeof AuthenticatedAppCustomersRoute
   '/app/inbox': typeof AuthenticatedAppInboxRoute
@@ -127,13 +133,13 @@ export interface FileRoutesByFullPath {
   '/app/settings': typeof AuthenticatedAppSettingsRoute
   '/api/twilio/webhook': typeof ApiTwilioWebhookRoute
   '/app/': typeof AuthenticatedAppIndexRoute
+  '/go/$slug/': typeof GoSlugIndexRoute
+  '/go/$slug/product/$productSlug': typeof GoSlugProductProductSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/onboarding': typeof OnboardingRoute
-  '/go/$slug': typeof GoSlugRoute
-  '/go/$slug/$productSlug': typeof GoSlugProductSlugRoute
   '/app/categories': typeof AuthenticatedAppCategoriesRoute
   '/app/customers': typeof AuthenticatedAppCustomersRoute
   '/app/inbox': typeof AuthenticatedAppInboxRoute
@@ -143,6 +149,8 @@ export interface FileRoutesByTo {
   '/app/settings': typeof AuthenticatedAppSettingsRoute
   '/api/twilio/webhook': typeof ApiTwilioWebhookRoute
   '/app': typeof AuthenticatedAppIndexRoute
+  '/go/$slug': typeof GoSlugIndexRoute
+  '/go/$slug/product/$productSlug': typeof GoSlugProductProductSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -151,7 +159,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/onboarding': typeof OnboardingRoute
   '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
-  '/go/$slug': typeof GoSlugRoute
+  '/go/$slug': typeof GoSlugRouteWithChildren
   '/_authenticated/app/categories': typeof AuthenticatedAppCategoriesRoute
   '/_authenticated/app/customers': typeof AuthenticatedAppCustomersRoute
   '/_authenticated/app/inbox': typeof AuthenticatedAppInboxRoute
@@ -161,6 +169,8 @@ export interface FileRoutesById {
   '/_authenticated/app/settings': typeof AuthenticatedAppSettingsRoute
   '/api/twilio/webhook': typeof ApiTwilioWebhookRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
+  '/go/$slug/': typeof GoSlugIndexRoute
+  '/go/$slug/product/$productSlug': typeof GoSlugProductProductSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -179,13 +189,13 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/api/twilio/webhook'
     | '/app/'
+    | '/go/$slug/'
+    | '/go/$slug/product/$productSlug'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
     | '/onboarding'
-    | '/go/$slug'
-    | '/go/$slug/$productSlug'
     | '/app/categories'
     | '/app/customers'
     | '/app/inbox'
@@ -195,6 +205,8 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/api/twilio/webhook'
     | '/app'
+    | '/go/$slug'
+    | '/go/$slug/product/$productSlug'
   id:
     | '__root__'
     | '/'
@@ -203,7 +215,6 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/_authenticated/app'
     | '/go/$slug'
-    | '/go/$slug/$productSlug'
     | '/_authenticated/app/categories'
     | '/_authenticated/app/customers'
     | '/_authenticated/app/inbox'
@@ -213,6 +224,8 @@ export interface FileRouteTypes {
     | '/_authenticated/app/settings'
     | '/api/twilio/webhook'
     | '/_authenticated/app/'
+    | '/go/$slug/'
+    | '/go/$slug/product/$productSlug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -220,8 +233,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   OnboardingRoute: typeof OnboardingRoute
-  GoSlugRoute: typeof GoSlugRoute
-  GoSlugProductSlugRoute: typeof GoSlugProductSlugRoute
+  GoSlugRoute: typeof GoSlugRouteWithChildren
   ApiTwilioWebhookRoute: typeof ApiTwilioWebhookRoute
 }
 
@@ -262,19 +274,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GoSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/go/$slug/$productSlug': {
-      id: '/go/$slug/$productSlug'
-      path: '/go/$slug/$productSlug'
-      fullPath: '/go/$slug/$productSlug'
-      preLoaderRoute: typeof GoSlugProductSlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_authenticated/app': {
       id: '/_authenticated/app'
       path: '/app'
       fullPath: '/app'
       preLoaderRoute: typeof AuthenticatedAppRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/go/$slug/': {
+      id: '/go/$slug/'
+      path: '/'
+      fullPath: '/go/$slug/'
+      preLoaderRoute: typeof GoSlugIndexRouteImport
+      parentRoute: typeof GoSlugRoute
     }
     '/_authenticated/app/': {
       id: '/_authenticated/app/'
@@ -339,6 +351,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppCategoriesRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/go/$slug/product/$productSlug': {
+      id: '/go/$slug/product/$productSlug'
+      path: '/product/$productSlug'
+      fullPath: '/go/$slug/product/$productSlug'
+      preLoaderRoute: typeof GoSlugProductProductSlugRouteImport
+      parentRoute: typeof GoSlugRoute
+    }
   }
 }
 
@@ -378,13 +397,25 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface GoSlugRouteChildren {
+  GoSlugIndexRoute: typeof GoSlugIndexRoute
+  GoSlugProductProductSlugRoute: typeof GoSlugProductProductSlugRoute
+}
+
+const GoSlugRouteChildren: GoSlugRouteChildren = {
+  GoSlugIndexRoute: GoSlugIndexRoute,
+  GoSlugProductProductSlugRoute: GoSlugProductProductSlugRoute,
+}
+
+const GoSlugRouteWithChildren =
+  GoSlugRoute._addFileChildren(GoSlugRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   OnboardingRoute: OnboardingRoute,
-  GoSlugRoute: GoSlugRoute,
-  GoSlugProductSlugRoute: GoSlugProductSlugRoute,
+  GoSlugRoute: GoSlugRouteWithChildren,
   ApiTwilioWebhookRoute: ApiTwilioWebhookRoute,
 }
 export const routeTree = rootRouteImport

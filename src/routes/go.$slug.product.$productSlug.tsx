@@ -8,18 +8,14 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { CartProvider, useCart, type CartProduct } from "@/lib/cart-context";
+import { useCart, type CartProduct } from "@/lib/cart-context";
 import { CartDrawerV2 } from "@/components/storefront/cart-drawer-v2";
 import { buildWhatsAppMessage, getWhatsAppLink } from "@/lib/whatsapp";
 import type { CustomerData } from "@/components/storefront/checkout-form";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/go/$slug/$productSlug")({
-  component: () => (
-    <CartProvider>
-      <ProductDetailPage />
-    </CartProvider>
-  ),
+export const Route = createFileRoute("/go/$slug/product/$productSlug")({
+  component: ProductDetailPage,
   head: ({ params }) => ({
     meta: [
       { title: `${params.productSlug} | ${params.slug} — Commerce AI` },
@@ -105,7 +101,7 @@ function getMockReview(productName: string) {
 
 // ─── Page ─────────────────────────────────────────────────────────────
 function ProductDetailPage() {
-  const { slug, productSlug } = useParams({ from: "/go/$slug/$productSlug" });
+  const { slug, productSlug } = useParams({ from: "/go/$slug/product/$productSlug" });
   const [quantity, setQuantity] = useState(1);
   const [notes, setNotes] = useState("");
   const [cartOpen, setCartOpen] = useState(false);
@@ -654,7 +650,7 @@ function ProductDetailPage() {
                 {related.map((p) => (
                   <div key={p.id} className="group cursor-pointer">
                     <Link
-                      to="/go/$slug/$productSlug"
+                      to="/go/$slug/product/$productSlug"
                       params={{ slug, productSlug: p.slug }}
                     >
                       <div className="aspect-[3/4] bg-[#F0EFED] mb-4 relative overflow-hidden rounded-md border border-stone-200/40">
@@ -675,7 +671,7 @@ function ProductDetailPage() {
                       </div>
                     </Link>
                     <Link
-                      to="/go/$slug/$productSlug"
+                      to="/go/$slug/product/$productSlug"
                       params={{ slug, productSlug: p.slug }}
                       className="hover:underline"
                     >
