@@ -14,14 +14,7 @@ export const Route = createFileRoute("/go/$slug")({
       { property: "og:title", content: `${params.slug} | Commerce AI` },
       { property: "og:description", content: `Descubre los productos de ${params.slug}.` },
     ],
-    links: [
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Montserrat:wght@200;300;400;500;600&display=swap",
-      },
-    ],
+    links: [],
   }),
 });
 

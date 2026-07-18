@@ -21,14 +21,7 @@ export const Route = createFileRoute("/go/$slug/")({
       { title: `${params.slug} | Commerce AI` },
       { name: "description", content: `Compra en ${params.slug} — productos con envío rápido y pago seguro.` },
     ],
-    links: [
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Montserrat:wght@200;300;400;500;600&display=swap",
-      },
-    ],
+    links: [],
   }),
 });
 
@@ -258,10 +251,7 @@ function StorefrontPage() {
   }
 
   return (
-    <div 
-      className="flex min-h-screen flex-col bg-background text-foreground antialiased"
-      style={{ fontFamily: "'Montserrat', sans-serif" }}
-    >
+    <div className="flex min-h-screen flex-col bg-background text-foreground antialiased font-sans">
       {/* Announcement bar */}
       <div className="bg-foreground text-background text-[11px] py-2 text-center tracking-widest uppercase font-light">
         ✨ ENVÍO GRATIS EN PEDIDOS +{$}50 | CÓDIGO: <span className="font-semibold text-primary">COMPRAAI</span>
@@ -280,8 +270,7 @@ function StorefrontPage() {
           <Link
             to="/go/$slug"
             params={{ slug }}
-            className="text-2xl font-medium tracking-widest text-foreground hover:text-primary transition-colors"
-            style={{ fontFamily: "'Cormorant Garamond', serif" }}
+            className="text-2xl font-medium tracking-widest text-foreground hover:text-primary transition-colors font-display"
           >
             {business.name.toUpperCase()}
           </Link>
@@ -395,8 +384,7 @@ function StorefrontPage() {
                 />
               )}
               <h1 
-                className="text-4xl lg:text-5xl font-light text-foreground tracking-tight leading-none"
-                style={{ fontFamily: "'Cormorant Garamond', serif" }}
+                className="text-4xl lg:text-5xl font-light text-foreground tracking-tight leading-none font-display"
               >
                 {business.name}
               </h1>
@@ -413,8 +401,7 @@ function StorefrontPage() {
           <div className="mb-8 flex items-end justify-between border-b border-border pb-4">
             <div>
               <h2 
-                className="text-2xl lg:text-3xl font-light text-foreground tracking-tight"
-                style={{ fontFamily: "'Cormorant Garamond', serif" }}
+                className="text-2xl lg:text-3xl font-light text-foreground tracking-tight font-display"
               >
                 {searchQuery
                   ? `Resultados para "${searchQuery}"`
@@ -452,8 +439,7 @@ function StorefrontPage() {
                 <Package className="size-7" />
               </div>
               <h3 
-                className="text-lg font-light text-foreground"
-                style={{ fontFamily: "'Cormorant Garamond', serif" }}
+                className="text-lg font-light text-foreground font-display"
               >
                 {searchQuery ? "Sin resultados" : "No hay productos disponibles"}
               </h3>
@@ -496,8 +482,7 @@ function StorefrontPage() {
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8 mb-16">
           <div className="col-span-1 md:col-span-1">
             <span 
-              className="text-2xl tracking-widest block mb-6 font-medium"
-              style={{ fontFamily: "'Cormorant Garamond', serif" }}
+              className="text-2xl tracking-widest block mb-6 font-medium font-display"
             >
               {business.name.toUpperCase()}
             </span>
@@ -651,8 +636,7 @@ function ProductCard({
 
       <div className="px-0.5">
         <h3 
-          className="text-base font-normal text-foreground leading-snug line-clamp-1"
-          style={{ fontFamily: "'Cormorant Garamond', serif" }}
+          className="text-base font-normal text-foreground leading-snug line-clamp-1 font-display"
         >
           {product.name}
         </h3>

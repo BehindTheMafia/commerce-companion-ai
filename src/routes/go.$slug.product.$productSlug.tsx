@@ -21,14 +21,7 @@ export const Route = createFileRoute("/go/$slug/product/$productSlug")({
       { title: `${params.productSlug} | ${params.slug} — Commerce AI` },
       { name: "description", content: `Detalles del producto ${params.productSlug} en la tienda ${params.slug}.` },
     ],
-    links: [
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Montserrat:wght@200;300;400;500;600&display=swap",
-      },
-    ],
+    links: [],
   }),
 });
 
@@ -321,10 +314,7 @@ function ProductDetailPage() {
   const review = getMockReview(product.name);
 
   return (
-    <div 
-      className="flex min-h-screen flex-col bg-background text-foreground antialiased selection:bg-primary/20"
-      style={{ fontFamily: "'Montserrat', sans-serif" }}
-    >
+    <div className="flex min-h-screen flex-col bg-background text-foreground antialiased selection:bg-primary/20 font-sans">
       {/* ── Announcement bar ─────────────────────────────── */}
       <div className="bg-foreground text-background text-[11px] py-2 text-center tracking-widest uppercase font-light">
         ✨ ENVÍO GRATIS EN PEDIDOS +{$}50 | CÓDIGO: <span className="font-semibold text-primary">COMPRAAI</span>
@@ -343,8 +333,7 @@ function ProductDetailPage() {
           <Link
             to="/go/$slug"
             params={{ slug }}
-            className="text-2xl font-medium tracking-widest text-foreground hover:text-primary transition-colors"
-            style={{ fontFamily: "'Cormorant Garamond', serif" }}
+            className="text-2xl font-medium tracking-widest text-foreground hover:text-primary transition-colors font-display"
           >
             {business.name.toUpperCase()}
           </Link>
@@ -471,8 +460,7 @@ function ProductDetailPage() {
 
               {/* Product name */}
               <h1 
-                className="mb-2 text-4xl lg:text-5xl font-light text-foreground tracking-tight leading-tight"
-                style={{ fontFamily: "'Cormorant Garamond', serif" }}
+                className="mb-2 text-4xl lg:text-5xl font-light text-foreground tracking-tight leading-tight font-display"
               >
                 {product.name}
               </h1>
@@ -648,8 +636,7 @@ function ProductDetailPage() {
             <section className="mt-20 border-t border-border pt-16">
               <div className="mb-10 flex items-center justify-between">
                 <h2 
-                  className="text-3xl font-light text-foreground tracking-tight"
-                  style={{ fontFamily: "'Cormorant Garamond', serif" }}
+                  className="text-3xl font-light text-foreground tracking-tight font-display"
                 >
                   Completa tu Pedido
                 </h2>
@@ -692,8 +679,7 @@ function ProductDetailPage() {
                       className="hover:underline"
                     >
                       <h3 
-                        className="text-base font-normal text-foreground tracking-tight"
-                        style={{ fontFamily: "'Cormorant Garamond', serif" }}
+                        className="text-base font-normal text-foreground tracking-tight font-display"
                       >
                         {p.name}
                       </h3>
@@ -723,8 +709,7 @@ function ProductDetailPage() {
                 ))}
               </div>
               <h3 
-                className="text-2xl lg:text-3xl italic font-light leading-snug mb-6 text-foreground max-w-2xl mx-auto"
-                style={{ fontFamily: "'Cormorant Garamond', serif" }}
+                className="text-2xl lg:text-3xl italic font-light leading-snug mb-6 text-foreground max-w-2xl mx-auto font-display"
               >
                 {review.text}
               </h3>
@@ -747,8 +732,7 @@ function ProductDetailPage() {
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8 mb-16">
           <div className="col-span-1 md:col-span-1">
             <span 
-              className="text-2xl tracking-widest block mb-6 font-medium"
-              style={{ fontFamily: "'Cormorant Garamond', serif" }}
+              className="text-2xl tracking-widest block mb-6 font-medium font-display"
             >
               {business.name.toUpperCase()}
             </span>
