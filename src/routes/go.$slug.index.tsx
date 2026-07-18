@@ -28,7 +28,7 @@ type Category = { id: string; name: string; slug: string };
 type Product = {
   id: string; name: string; slug: string; price: number;
   sale_price: number | null; image_url: string | null;
-  description: string | null;
+  description: string | null; created_at: string;
   category: { name: string } | null;
 };
 
@@ -37,19 +37,9 @@ const CURRENCY_SYMBOL: Record<string, string> = {
 };
 const sym = (c: string) => CURRENCY_SYMBOL[c] || "$";
 
-const BADGES = [
-  { emoji: "🔥", label: "Más vendido", bg: "bg-orange-100 text-orange-700" },
-  { emoji: "⭐", label: "Popular", bg: "bg-yellow-100 text-yellow-700" },
-  { emoji: "🆕", label: "Nuevo", bg: "bg-blue-100 text-blue-700" },
-  { emoji: "❤️", label: "Recomendado", bg: "bg-pink-100 text-pink-700" },
-];
-function getBadge(id: string) {
-  const n = id.charCodeAt(0) + id.charCodeAt(id.length - 1);
-  if (n % 6 === 0) return BADGES[0];
-  if (n % 6 === 1) return BADGES[1];
-  if (n % 6 === 2) return BADGES[2];
-  if (n % 6 === 3) return BADGES[3];
-  return null;
+function isNewProduct(createdAt: string) {
+  const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  return new Date(createdAt).getTime() > weekAgo;
 }
 
 function SkeletonCard() {
@@ -130,7 +120,7 @@ function StorefrontPage() {
     queryFn: async (): Promise<Product[]> => {
       const { data, error } = await supabase
         .from("products")
-        .select("id, name, slug, price, sale_price, image_url, description, category:categories(name)")
+        .select("id, name, slug, price, sale_price, image_url, description, created_at, category:categories(name)")
         .eq("business_id", business!.id)
         .eq("status", "active")
         .order("created_at", { ascending: false });
@@ -643,7 +633,7 @@ function ProductCard({
   const [imgLoaded, setImgLoaded] = useState(false);
   const hasSale = product.sale_price != null && product.sale_price < product.price;
   const displayPrice = hasSale ? product.sale_price! : product.price;
-  const badge = getBadge(product.id);
+  const showNewBadge = isNewProduct(product.created_at);
 
   return (
     <Link
@@ -678,21 +668,18 @@ function ProductCard({
         )}
 
         {/* Badges */}
-        {badge && (
-          <span
-            className={cn(
-              "absolute left-2.5 top-2.5 rounded-full px-2 py-0.5 text-[10px] font-semibold shadow-sm",
-              badge.bg
-            )}
-          >
-            {badge.emoji} {badge.label}
-          </span>
-        )}
-        {hasSale && (
-          <span className="absolute right-2.5 top-2.5 rounded-full bg-destructive px-2 py-0.5 text-[10px] font-semibold text-white shadow-sm">
-            Oferta
-          </span>
-        )}
+        <div className="absolute left-2.5 top-2.5 flex flex-col gap-1.5">
+          {showNewBadge && (
+            <span className="rounded-full bg-blue-100 text-blue-700 px-2 py-0.5 text-[10px] font-semibold shadow-sm">
+              🆕 Nuevo
+            </span>
+          )}
+          {hasSale && (
+            <span className="rounded-full bg-destructive px-2 py-0.5 text-[10px] font-semibold text-white shadow-sm">
+              Oferta
+            </span>
+          )}
+        </div>
 
         {/* Hover overlay */}
         <div className="absolute inset-0 flex items-end justify-center bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 p-3">
