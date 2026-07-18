@@ -256,17 +256,17 @@ function ProductDetailPage() {
     addItem(cartProduct, quantity, notes || undefined);
     toast.custom(
       (id) => (
-        <div className="flex items-center gap-3 rounded-2xl bg-[#1A1A1A] px-4 py-3 text-[#FAF8F5] shadow-xl min-w-[280px]">
-          <div className="grid size-7 shrink-0 place-items-center rounded-full bg-[#C9A96E] text-[#1A1A1A]">
+        <div className="flex items-center gap-3 rounded-2xl bg-foreground px-4 py-3 text-background shadow-xl min-w-[280px]">
+          <div className="grid size-7 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground">
             <Sparkles className="size-3.5" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-semibold truncate text-[#FAF8F5]">{product.name}</p>
-            <p className="text-[11px] text-[#FAF8F5]/60">Agregado al pedido</p>
+            <p className="text-xs font-semibold truncate text-background">{product.name}</p>
+            <p className="text-[11px] opacity-60">Agregado al pedido</p>
           </div>
           <button
             onClick={() => { toast.dismiss(id); setCartOpen(true); }}
-            className="shrink-0 rounded-full bg-[#C9A96E] px-3 py-1 text-[11px] font-semibold text-[#1A1A1A] hover:opacity-90 transition-opacity"
+            className="shrink-0 rounded-full bg-primary px-3 py-1 text-[11px] font-semibold text-primary-foreground hover:opacity-90 transition-opacity"
           >
             Ver pedido ({itemCount + quantity})
           </button>
@@ -279,12 +279,12 @@ function ProductDetailPage() {
   // ─── Loading / Not Found ──────────────────────────────────────────
   if (bizLoading || productLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#FAF8F5]">
+      <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-3">
-          <div className="grid size-14 place-items-center rounded-2xl bg-[#1A1A1A] text-[#C9A96E] shadow-lg shadow-black/10 animate-pulse">
+          <div className="grid size-14 place-items-center rounded-2xl bg-primary text-primary-foreground shadow-lg shadow-primary/10 animate-pulse">
             <Sparkles className="size-6 animate-spin duration-1000" />
           </div>
-          <Loader2 className="size-5 animate-spin text-[#C9A96E]" />
+          <Loader2 className="size-5 animate-spin text-primary" />
         </div>
       </div>
     );
@@ -292,7 +292,7 @@ function ProductDetailPage() {
 
   if (!business || !product) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#FAF8F5] px-4">
+      <div className="flex min-h-screen items-center justify-center bg-background px-4">
         <div className="max-w-md text-center">
           <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-destructive/10 text-destructive">
             <AlertCircle className="size-6" />
@@ -322,28 +322,28 @@ function ProductDetailPage() {
 
   return (
     <div 
-      className="flex min-h-screen flex-col bg-[#FAF8F5] text-[#1A1A1A] antialiased selection:bg-[#C9A96E]/20"
+      className="flex min-h-screen flex-col bg-background text-foreground antialiased selection:bg-primary/20"
       style={{ fontFamily: "'Montserrat', sans-serif" }}
     >
       {/* ── Announcement bar ─────────────────────────────── */}
-      <div className="bg-[#1A1A1A] text-white text-[11px] py-2 text-center tracking-widest uppercase font-light">
-        ✨ ENVÍO GRATIS EN PEDIDOS +{$}50 | CÓDIGO: <span className="font-semibold text-[#C9A96E]">COMPRAAI</span>
+      <div className="bg-foreground text-background text-[11px] py-2 text-center tracking-widest uppercase font-light">
+        ✨ ENVÍO GRATIS EN PEDIDOS +{$}50 | CÓDIGO: <span className="font-semibold text-primary">COMPRAAI</span>
       </div>
 
       {/* ── Sticky header ────────────────────────────────── */}
       <header
         className={cn(
-          "sticky top-0 z-40 w-full transition-all duration-300 border-b",
+          "sticky top-0 z-40 w-full transition-all duration-300 border-b bg-background/95 backdrop-blur-md",
           isScrolled 
-            ? "bg-[#FAF8F5]/95 backdrop-blur-md shadow-sm border-stone-200/60" 
-            : "bg-[#FAF8F5]/80 backdrop-blur-md border-transparent"
+            ? "shadow-sm border-border/60" 
+            : "border-transparent"
         )}
       >
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
           <Link
             to="/go/$slug"
             params={{ slug }}
-            className="text-2xl font-medium tracking-widest text-[#1A1A1A] hover:text-[#C9A96E] transition-colors"
+            className="text-2xl font-medium tracking-widest text-foreground hover:text-primary transition-colors"
             style={{ fontFamily: "'Cormorant Garamond', serif" }}
           >
             {business.name.toUpperCase()}
@@ -352,13 +352,13 @@ function ProductDetailPage() {
           {/* Cart button */}
           <button
             onClick={() => setCartOpen(true)}
-            className="relative text-[#1A1A1A] hover:text-[#C9A96E] transition-colors"
+            className="relative text-foreground hover:text-primary transition-colors"
             aria-label={`Carrito (${itemCount} productos)`}
           >
             <div className="relative p-1">
               <ShoppingBag className="size-5" strokeWidth={1.5} />
               {itemCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 grid size-4 place-items-center rounded-full bg-[#1A1A1A] text-[9px] font-semibold text-white ring-2 ring-[#FAF8F5]">
+                <span className="absolute -top-0.5 -right-0.5 grid size-4 place-items-center rounded-full bg-primary text-[9px] font-semibold text-primary-foreground ring-2 ring-background">
                   {itemCount}
                 </span>
               )}
@@ -373,9 +373,9 @@ function ProductDetailPage() {
           {/* ── Breadcrumb ───────────────────────────────── */}
           <nav
             aria-label="Breadcrumb"
-            className="mb-8 flex items-center gap-1.5 text-[10px] uppercase tracking-widest text-stone-500 font-light"
+            className="mb-8 flex items-center gap-1.5 text-[10px] uppercase tracking-widest text-muted-foreground font-light"
           >
-            <Link to="/go/$slug" params={{ slug }} className="hover:text-[#1A1A1A] transition-colors">
+            <Link to="/go/$slug" params={{ slug }} className="hover:text-foreground transition-colors">
               Inicio
             </Link>
             <ChevronRight className="size-2.5 opacity-55" />
@@ -384,14 +384,14 @@ function ProductDetailPage() {
                 <Link
                   to="/go/$slug"
                   params={{ slug }}
-                  className="hover:text-[#1A1A1A] transition-colors"
+                  className="hover:text-foreground transition-colors"
                 >
                   {product.category.name}
                 </Link>
                 <ChevronRight className="size-2.5 opacity-55" />
               </>
             )}
-            <span className="text-[#1A1A1A] font-medium truncate max-w-[160px]">
+            <span className="text-foreground font-medium truncate max-w-[160px]">
               {product.name}
             </span>
           </nav>
@@ -402,7 +402,7 @@ function ProductDetailPage() {
             {/* ── Gallery — left 7 cols ─────────────────── */}
             <div className="lg:col-span-7 flex flex-col gap-4">
               {/* Main image */}
-              <div className="relative aspect-[4/5] w-full overflow-hidden rounded-md bg-[#F0EFED] group border border-stone-200/40">
+              <div className="relative aspect-[4/5] w-full overflow-hidden rounded-md bg-muted group border border-border/40">
                 {product.image_url ? (
                   <img
                     src={product.image_url}
@@ -411,17 +411,17 @@ function ProductDetailPage() {
                   />
                 ) : (
                   <div className="flex size-full items-center justify-center">
-                    <Package className="size-20 text-stone-300" />
+                    <Package className="size-20 text-muted-foreground/30" />
                   </div>
                 )}
 
                 {/* BESTSELLER / Sale Badge */}
                 <div className="absolute left-4 top-4 flex flex-col gap-2">
-                  <span className="bg-[#1A1A1A]/5 backdrop-blur-md border border-black/10 px-3 py-1 rounded-full text-[9px] font-semibold tracking-widest text-[#1A1A1A]">
+                  <span className="bg-background/80 backdrop-blur-md border border-border px-3 py-1 rounded-full text-[9px] font-semibold tracking-widest text-foreground">
                     BESTSELLER
                   </span>
                   {hasSale && (
-                    <span className="bg-red-900/10 backdrop-blur-md border border-red-900/20 px-3 py-1 rounded-full text-[9px] font-semibold tracking-widest text-red-900">
+                    <span className="bg-destructive/10 backdrop-blur-md border border-destructive/20 px-3 py-1 rounded-full text-[9px] font-semibold tracking-widest text-destructive">
                       OFERTA
                     </span>
                   )}
@@ -434,8 +434,8 @@ function ProductDetailPage() {
                   <button
                     key={i}
                     className={cn(
-                      "aspect-square overflow-hidden rounded-md bg-[#F0EFED] border transition-all duration-200",
-                      i === 0 ? "border-[#1A1A1A]" : "border-transparent hover:border-stone-400"
+                      "aspect-square overflow-hidden rounded-md bg-muted border transition-all duration-200",
+                      i === 0 ? "border-primary" : "border-transparent hover:border-border"
                     )}
                   >
                     {product.image_url ? (
@@ -446,7 +446,7 @@ function ProductDetailPage() {
                       />
                     ) : (
                       <div className="flex size-full items-center justify-center">
-                        <Package className="size-5 text-stone-300" />
+                        <Package className="size-5 text-muted-foreground/20" />
                       </div>
                     )}
                   </button>
@@ -458,40 +458,40 @@ function ProductDetailPage() {
             <div className="lg:col-span-5 flex flex-col">
               
               {/* Rating stars */}
-              <div className="mb-4 flex items-center gap-1.5 text-[#C9A96E] text-xs">
+              <div className="mb-4 flex items-center gap-1.5 text-primary text-xs">
                 <div className="flex items-center gap-0.5">
                   {[1, 2, 3, 4, 5].map((starIndex) => (
                     <Star key={starIndex} className="size-3.5 fill-current" />
                   ))}
                 </div>
-                <span className="text-stone-500 font-light text-[11px] underline cursor-pointer hover:text-[#1A1A1A] transition-colors ml-1">
+                <span className="text-muted-foreground font-light text-[11px] underline cursor-pointer hover:text-foreground transition-colors ml-1">
                   124 Reseñas
                 </span>
               </div>
 
               {/* Product name */}
               <h1 
-                className="mb-2 text-4xl lg:text-5xl font-light text-[#1A1A1A] tracking-tight leading-tight"
+                className="mb-2 text-4xl lg:text-5xl font-light text-foreground tracking-tight leading-tight"
                 style={{ fontFamily: "'Cormorant Garamond', serif" }}
               >
                 {product.name}
               </h1>
 
               {/* Price */}
-              <div className="mb-6 pb-6 border-b border-stone-200">
+              <div className="mb-6 pb-6 border-b border-border">
                 <div className="flex items-baseline gap-3">
-                  <span className="text-2xl font-light text-[#1A1A1A]">
+                  <span className="text-2xl font-light text-foreground">
                     {$}{displayPrice.toFixed(2)}
                   </span>
                   {hasSale && (
-                    <span className="text-base text-stone-400 line-through font-light">
+                    <span className="text-base text-muted-foreground line-through font-light">
                       {$}{product.price.toFixed(2)}
                     </span>
                   )}
                 </div>
                 
                 {product.description && (
-                  <p className="mt-4 text-sm font-light text-stone-500 leading-relaxed">
+                  <p className="mt-4 text-sm font-light text-muted-foreground leading-relaxed">
                     {product.description}
                   </p>
                 )}
@@ -499,7 +499,7 @@ function ProductDetailPage() {
 
               {/* Size / Option Selector */}
               <div className="mb-6">
-                <span className="text-[11px] font-semibold uppercase tracking-widest text-[#1A1A1A] mb-3 block">
+                <span className="text-[11px] font-semibold uppercase tracking-widest text-foreground mb-3 block">
                   Opción / Tamaño
                 </span>
                 <div className="flex flex-wrap gap-2.5">
@@ -510,8 +510,8 @@ function ProductDetailPage() {
                       className={cn(
                         "px-4 py-2 border rounded-md text-xs tracking-wider transition-all duration-200 font-light focus:outline-none",
                         selectedSize === index
-                          ? "border-[#1A1A1A] bg-[#1A1A1A] text-white shadow-sm font-normal"
-                          : "border-stone-200 text-stone-600 bg-white hover:border-[#1A1A1A]/60"
+                          ? "border-primary bg-primary text-primary-foreground shadow-sm font-normal"
+                          : "border-border text-muted-foreground bg-background hover:border-primary/60"
                       )}
                     >
                       {size}
@@ -524,7 +524,7 @@ function ProductDetailPage() {
               <div className="mb-5">
                 <label
                   htmlFor="pd-notes"
-                  className="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-stone-500"
+                  className="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-muted-foreground"
                 >
                   Observaciones (opcional)
                 </label>
@@ -534,16 +534,16 @@ function ProductDetailPage() {
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="Sin picante, sin cebolla, alergia a..."
                   rows={2}
-                  className="w-full resize-none rounded-md border border-stone-200 bg-white px-3.5 py-3 text-sm text-[#1A1A1A] placeholder-stone-400/80 transition-colors focus:border-[#1A1A1A] focus:outline-none"
+                  className="w-full resize-none rounded-md border border-border bg-background px-3.5 py-3 text-sm text-foreground placeholder-muted-foreground/50 transition-colors focus:border-primary focus:outline-none"
                 />
               </div>
 
               {/* Quantity counter & CTA button */}
               <div className="flex gap-4 mb-6">
-                <div className="flex items-center border border-stone-200 rounded-md w-28 justify-between px-3.5 bg-white h-12">
+                <div className="flex items-center border border-border rounded-md w-28 justify-between px-3.5 bg-background h-12">
                   <button 
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="text-stone-400 hover:text-[#1A1A1A] transition-colors"
+                    className="text-muted-foreground hover:text-foreground transition-colors"
                     aria-label="Restar uno"
                   >
                     <Minus className="size-3.5" />
@@ -551,7 +551,7 @@ function ProductDetailPage() {
                   <span className="text-sm font-medium tabular-nums">{quantity}</span>
                   <button 
                     onClick={() => setQuantity(quantity + 1)}
-                    className="text-stone-400 hover:text-[#1A1A1A] transition-colors"
+                    className="text-muted-foreground hover:text-foreground transition-colors"
                     aria-label="Sumar uno"
                   >
                     <Plus className="size-3.5" />
@@ -560,44 +560,44 @@ function ProductDetailPage() {
                 
                 <button
                   onClick={handleAddToCart}
-                  className="flex-1 bg-[#1A1A1A] text-white hover:bg-[#1A1A1A]/90 active:scale-[0.98] transition-all rounded-md py-3 text-xs tracking-widest font-semibold flex items-center justify-center gap-2 h-12 uppercase"
+                  className="flex-1 bg-primary text-primary-foreground hover:bg-primary/95 active:scale-[0.98] transition-all rounded-md py-3 text-xs tracking-widest font-semibold flex items-center justify-center gap-2 h-12 uppercase"
                 >
                   <span>Agregar al pedido</span>
-                  <span className="w-1 h-1 bg-white/70 rounded-full"></span>
+                  <span className="w-1 h-1 bg-primary-foreground/75 rounded-full"></span>
                   <span>{$}{(displayPrice * quantity).toFixed(2)}</span>
                 </button>
                 
                 <button
                   aria-label="Agregar a favoritos"
-                  className="w-12 h-12 flex items-center justify-center border border-stone-200 rounded-md hover:border-[#1A1A1A] transition-colors bg-white"
+                  className="w-12 h-12 flex items-center justify-center border border-border rounded-md hover:border-primary transition-colors bg-background"
                 >
                   <Heart className="size-4.5" strokeWidth={1.5} />
                 </button>
               </div>
 
               {/* Social Proof / Urgency banner */}
-              <div className="flex items-center gap-2.5 bg-[#FAF8F5] border border-stone-200 p-3.5 rounded-md mb-8">
+              <div className="flex items-center gap-2.5 bg-muted border border-border p-3.5 rounded-md mb-8">
                 <div className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#C9A96E] opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-[#C9A96E]"></span>
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
                 </div>
-                <span className="text-[11px] font-medium text-stone-700">
+                <span className="text-[11px] font-medium text-muted-foreground">
                   12 personas están viendo este producto en este momento
                 </span>
               </div>
 
               {/* Accordions */}
-              <div className="space-y-0 border-t border-stone-200">
-                <details className="group py-4 border-b border-stone-200 cursor-pointer" open>
+              <div className="space-y-0 border-t border-border">
+                <details className="group py-4 border-b border-border cursor-pointer" open>
                   <summary className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-widest select-none list-none">
                     Descripción
-                    <span className="transition-transform duration-300 group-open:rotate-180 text-stone-400">
+                    <span className="transition-transform duration-300 group-open:rotate-180 text-muted-foreground">
                       <ChevronDown className="size-4" />
                     </span>
                   </summary>
-                  <div className="mt-4 text-xs font-light text-stone-500 leading-relaxed space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                  <div className="mt-4 text-xs font-light text-muted-foreground leading-relaxed space-y-2 animate-in fade-in slide-in-from-top-2 duration-300">
                     <p>{product.description || "Detalle seleccionado de la mejor calidad. Preparado con especial cuidado y dedicación para garantizar la satisfacción completa de nuestros clientes."}</p>
-                    <ul className="list-disc list-inside space-y-1 ml-1 text-stone-400">
+                    <ul className="list-disc list-inside space-y-1 ml-1 text-muted-foreground/80">
                       <li>Elaborado con procesos certificados</li>
                       <li>Detalles premium únicos en el mercado</li>
                       <li>Entrega y soporte directo por WhatsApp</li>
@@ -605,26 +605,26 @@ function ProductDetailPage() {
                   </div>
                 </details>
                 
-                <details className="group py-4 border-b border-stone-200 cursor-pointer">
+                <details className="group py-4 border-b border-border cursor-pointer">
                   <summary className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-widest select-none list-none">
                     Detalles y Composición
-                    <span className="transition-transform duration-300 group-open:rotate-180 text-stone-400">
+                    <span className="transition-transform duration-300 group-open:rotate-180 text-muted-foreground">
                       <ChevronDown className="size-4" />
                     </span>
                   </summary>
-                  <div className="mt-4 text-xs font-mono text-stone-500 leading-relaxed animate-in fade-in slide-in-from-top-2 duration-300">
+                  <div className="mt-4 text-xs font-mono text-muted-foreground leading-relaxed animate-in fade-in slide-in-from-top-2 duration-300">
                     {mocks.ingredients}
                   </div>
                 </details>
 
-                <details className="group py-4 border-b border-stone-200 cursor-pointer">
+                <details className="group py-4 border-b border-border cursor-pointer">
                   <summary className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-widest select-none list-none">
                     Envíos y Devoluciones
-                    <span className="transition-transform duration-300 group-open:rotate-180 text-stone-400">
+                    <span className="transition-transform duration-300 group-open:rotate-180 text-muted-foreground">
                       <ChevronDown className="size-4" />
                     </span>
                   </summary>
-                  <div className="mt-4 text-xs font-light text-stone-500 leading-relaxed animate-in fade-in slide-in-from-top-2 duration-300">
+                  <div className="mt-4 text-xs font-light text-muted-foreground leading-relaxed animate-in fade-in slide-in-from-top-2 duration-300">
                     Envío gratis en pedidos de más de {$}50. Los plazos y costos específicos se coordinan directamente en el chat al enviar tu pedido.
                   </div>
                 </details>
@@ -634,8 +634,8 @@ function ProductDetailPage() {
               <div className="grid grid-cols-3 gap-2 mt-8 pt-4">
                 {mocks.badges.map((badgeText, idx) => (
                   <div key={idx} className="flex flex-col items-center justify-center text-center gap-2">
-                    <CheckCircle2 className="size-4 text-[#C9A96E]" strokeWidth={1.5} />
-                    <span className="text-[9px] uppercase tracking-wider text-stone-500 font-medium">{badgeText}</span>
+                    <CheckCircle2 className="size-4 text-primary" strokeWidth={1.5} />
+                    <span className="text-[9px] uppercase tracking-wider text-muted-foreground font-medium">{badgeText}</span>
                   </div>
                 ))}
               </div>
@@ -645,10 +645,10 @@ function ProductDetailPage() {
 
           {/* ── Complete your routine (Cross-Sell) ─────────── */}
           {related.length > 0 && (
-            <section className="mt-20 border-t border-stone-200 pt-16">
+            <section className="mt-20 border-t border-border pt-16">
               <div className="mb-10 flex items-center justify-between">
                 <h2 
-                  className="text-3xl font-light text-[#1A1A1A] tracking-tight"
+                  className="text-3xl font-light text-foreground tracking-tight"
                   style={{ fontFamily: "'Cormorant Garamond', serif" }}
                 >
                   Completa tu Pedido
@@ -656,7 +656,7 @@ function ProductDetailPage() {
                 <Link
                   to="/go/$slug"
                   params={{ slug }}
-                  className="text-xs font-medium underline underline-offset-4 decoration-stone-300 hover:decoration-[#1A1A1A] transition-all"
+                  className="text-xs font-medium underline underline-offset-4 decoration-border hover:decoration-foreground transition-all"
                 >
                   Ver Todos
                 </Link>
@@ -669,7 +669,7 @@ function ProductDetailPage() {
                       to="/go/$slug/product/$productSlug"
                       params={{ slug, productSlug: p.slug }}
                     >
-                      <div className="aspect-[3/4] bg-[#F0EFED] mb-4 relative overflow-hidden rounded-md border border-stone-200/40">
+                      <div className="aspect-[3/4] bg-muted mb-4 relative overflow-hidden rounded-md border border-border/40">
                         {p.image_url ? (
                           <img
                             src={p.image_url}
@@ -678,11 +678,11 @@ function ProductDetailPage() {
                           />
                         ) : (
                           <div className="flex size-full items-center justify-center">
-                            <Package className="size-10 text-stone-300" />
+                            <Package className="size-10 text-muted-foreground/30" />
                           </div>
                         )}
-                        <span className="absolute bottom-3 right-3 w-8 h-8 bg-[#FAF8F5]/90 backdrop-blur rounded-full flex items-center justify-center opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 shadow-sm border border-stone-200">
-                          <Plus className="size-4 text-[#1A1A1A]" />
+                        <span className="absolute bottom-3 right-3 w-8 h-8 bg-background/90 backdrop-blur rounded-full flex items-center justify-center opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 shadow-sm border border-border">
+                          <Plus className="size-4 text-foreground" />
                         </span>
                       </div>
                     </Link>
@@ -692,17 +692,17 @@ function ProductDetailPage() {
                       className="hover:underline"
                     >
                       <h3 
-                        className="text-base font-normal text-[#1A1A1A] tracking-tight"
+                        className="text-base font-normal text-foreground tracking-tight"
                         style={{ fontFamily: "'Cormorant Garamond', serif" }}
                       >
                         {p.name}
                       </h3>
                     </Link>
-                    <p className="text-xs text-stone-500 mt-1 font-light">
+                    <p className="text-xs text-muted-foreground mt-1 font-light">
                       {p.sale_price ? (
                         <>
-                          <span className="text-red-900 font-normal mr-1.5">{$}{p.sale_price.toFixed(2)}</span>
-                          <span className="line-through text-stone-400">{$}{p.price.toFixed(2)}</span>
+                          <span className="text-destructive font-normal mr-1.5">{$}{p.sale_price.toFixed(2)}</span>
+                          <span className="line-through text-muted-foreground/60">{$}{p.price.toFixed(2)}</span>
                         </>
                       ) : (
                         `$${p.price.toFixed(2)}`
@@ -715,25 +715,25 @@ function ProductDetailPage() {
           )}
 
           {/* ── Testimonial Snippet ───────────────────────── */}
-          <section className="py-20 mt-20 border-t border-stone-200 bg-[#FAF8F5]">
+          <section className="py-20 mt-20 border-t border-border bg-muted/30">
             <div className="max-w-4xl mx-auto text-center px-4">
-              <div className="flex justify-center gap-0.5 text-[#C9A96E] mb-6">
+              <div className="flex justify-center gap-0.5 text-primary mb-6">
                 {[1, 2, 3, 4, 5].map((i) => (
                   <Star key={i} className="size-4 fill-current" />
                 ))}
               </div>
               <h3 
-                className="text-2xl lg:text-3xl italic font-light leading-snug mb-6 text-[#1A1A1A] max-w-2xl mx-auto"
+                className="text-2xl lg:text-3xl italic font-light leading-snug mb-6 text-foreground max-w-2xl mx-auto"
                 style={{ fontFamily: "'Cormorant Garamond', serif" }}
               >
                 {review.text}
               </h3>
               <div className="flex flex-col items-center gap-1">
-                <span className="text-xs font-semibold uppercase tracking-widest text-[#1A1A1A]">
+                <span className="text-xs font-semibold uppercase tracking-widest text-foreground">
                   {review.author}
                 </span>
-                <span className="text-[10px] text-stone-500 flex items-center gap-1">
-                  <CheckCircle2 className="size-3 text-[#C9A96E]" /> Comprador verificado
+                <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                  <CheckCircle2 className="size-3 text-primary" /> Comprador verificado
                 </span>
               </div>
             </div>
@@ -743,7 +743,7 @@ function ProductDetailPage() {
       </main>
 
       {/* ── Footer ───────────────────────────────────────── */}
-      <footer className="bg-[#1A1A1A] text-white pt-16 pb-8">
+      <footer className="bg-foreground text-background pt-16 pb-8">
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8 mb-16">
           <div className="col-span-1 md:col-span-1">
             <span 
@@ -752,17 +752,17 @@ function ProductDetailPage() {
             >
               {business.name.toUpperCase()}
             </span>
-            <p className="text-xs text-white/50 font-light leading-relaxed mb-6">
+            <p className="text-xs text-background/50 font-light leading-relaxed mb-6">
               Redefiniendo el comercio digital con un proceso limpio, rápido y directo por WhatsApp.
             </p>
             <div className="flex gap-4">
-              <a href="#" aria-label="Instagram" className="text-white/50 hover:text-white transition-colors">
+              <a href="#" aria-label="Instagram" className="text-background/50 hover:text-background transition-colors">
                 <Instagram className="size-4" />
               </a>
-              <a href="#" aria-label="Facebook" className="text-white/50 hover:text-white transition-colors">
+              <a href="#" aria-label="Facebook" className="text-background/50 hover:text-background transition-colors">
                 <Facebook className="size-4" />
               </a>
-              <a href="#" aria-label="Twitter" className="text-white/50 hover:text-white transition-colors">
+              <a href="#" aria-label="Twitter" className="text-background/50 hover:text-background transition-colors">
                 <Twitter className="size-4" />
               </a>
             </div>
@@ -770,17 +770,17 @@ function ProductDetailPage() {
           
           <div>
             <h4 className="text-xs font-semibold uppercase tracking-widest mb-6">Tienda</h4>
-            <ul className="space-y-3 text-xs font-light text-white/50">
-              <li><Link to="/go/$slug" params={{ slug }} className="hover:text-white transition-colors">Catálogo Completo</Link></li>
-              <li><a href="#" className="hover:text-white transition-colors">Nuevos Ingresos</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Populares</a></li>
+            <ul className="space-y-3 text-xs font-light text-background/50">
+              <li><Link to="/go/$slug" params={{ slug }} className="hover:text-background transition-colors">Catálogo Completo</Link></li>
+              <li><a href="#" className="hover:text-background transition-colors">Nuevos Ingresos</a></li>
+              <li><a href="#" className="hover:text-background transition-colors">Populares</a></li>
             </ul>
           </div>
 
           <div>
             <h4 className="text-xs font-semibold uppercase tracking-widest mb-6">Soporte</h4>
-            <ul className="space-y-3 text-xs font-light text-white/50">
-              <li><a href="#" className="hover:text-white transition-colors">Contacto</a></li>
+            <ul className="space-y-3 text-xs font-light text-background/50">
+              <li><a href="#" className="hover:text-background transition-colors">Contacto</a></li>
               <li><a href="#" className="hover:text-white transition-colors">FAQ</a></li>
               <li><a href="#" className="hover:text-white transition-colors">Envíos</a></li>
             </ul>
@@ -788,22 +788,22 @@ function ProductDetailPage() {
 
           <div>
             <h4 className="text-xs font-semibold uppercase tracking-widest mb-6">Legal</h4>
-            <ul className="space-y-3 text-xs font-light text-white/50">
-              <li><a href="#" className="hover:text-white transition-colors">Privacidad</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Términos</a></li>
+            <ul className="space-y-3 text-xs font-light text-background/50">
+              <li><a href="#" className="hover:text-background transition-colors">Privacidad</a></li>
+              <li><a href="#" className="hover:text-background transition-colors">Términos</a></li>
             </ul>
           </div>
         </div>
         
-        <div className="max-w-7xl mx-auto px-6 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-[10px] text-white/40 font-light">© 2024 {business.name}. Todos los derechos reservados.</p>
-          <div className="flex gap-1.5 items-center text-[10px] text-white/40 font-light">
+        <div className="max-w-7xl mx-auto px-6 pt-8 border-t border-background/10 flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-[10px] text-background/40 font-light">© 2024 {business.name}. Todos los derechos reservados.</p>
+          <div className="flex gap-1.5 items-center text-[10px] text-background/40 font-light">
             Powered by{" "}
             <a
               href="https://commerceai.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 font-medium text-white/60 underline underline-offset-4 hover:text-white transition-colors"
+              className="inline-flex items-center gap-1 font-medium text-background/60 underline underline-offset-4 hover:text-background transition-colors"
             >
               Commerce AI <ExternalLink className="size-2.5" />
             </a>

@@ -57,10 +57,10 @@ function isNewProduct(createdAt: string) {
 
 // Deterministic badge per product
 const BADGES = [
-  { emoji: "🔥", label: "Más vendido", bg: "bg-orange-100 text-orange-700" },
-  { emoji: "⭐", label: "Popular", bg: "bg-yellow-100 text-yellow-700" },
-  { emoji: "🆕", label: "Nuevo", bg: "bg-blue-100 text-blue-700" },
-  { emoji: "❤️", label: "Recomendado", bg: "bg-pink-100 text-pink-700" },
+  { emoji: "🔥", label: "Más vendido", bg: "bg-primary/10 text-primary" },
+  { emoji: "⭐", label: "Popular", bg: "bg-primary/10 text-primary" },
+  { emoji: "🆕", label: "Nuevo", bg: "bg-primary/10 text-primary" },
+  { emoji: "❤️", label: "Recomendado", bg: "bg-primary/10 text-primary" },
 ];
 function getBadge(id: string) {
   const n = id.charCodeAt(0) + id.charCodeAt(id.length - 1);
@@ -74,9 +74,9 @@ function getBadge(id: string) {
 function SkeletonCard() {
   return (
     <div className="animate-pulse">
-      <div className="aspect-[3/4] rounded-xl bg-stone-200 mb-3" />
-      <div className="h-4 w-3/4 rounded bg-stone-200 mb-2" />
-      <div className="h-3 w-1/3 rounded bg-stone-200" />
+      <div className="aspect-[3/4] rounded-xl bg-muted mb-3" />
+      <div className="h-4 w-3/4 rounded bg-muted mb-2" />
+      <div className="h-3 w-1/3 rounded bg-muted" />
     </div>
   );
 }
@@ -160,12 +160,12 @@ function StorefrontPage() {
 
   if (bizLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#FAF8F5]">
+      <div className="flex min-h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4 text-center">
-          <div className="grid size-14 place-items-center rounded-2xl bg-[#1A1A1A] text-[#C9A96E] shadow-lg animate-pulse">
+          <div className="grid size-14 place-items-center rounded-2xl bg-primary text-primary-foreground shadow-lg animate-pulse">
             <Sparkles className="size-6 animate-spin duration-1000" />
           </div>
-          <Loader2 className="size-4 animate-spin text-[#C9A96E]" />
+          <Loader2 className="size-4 animate-spin text-primary" />
         </div>
       </div>
     );
@@ -173,18 +173,18 @@ function StorefrontPage() {
 
   if (bizError || !business) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#FAF8F5] px-4">
+      <div className="flex min-h-screen items-center justify-center bg-background px-4">
         <div className="max-w-sm text-center">
           <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-destructive/10 text-destructive">
             <AlertCircle className="size-6" />
           </div>
-          <h1 className="mt-4 text-lg font-semibold text-[#1A1A1A]">Tienda no encontrada</h1>
-          <p className="mt-1.5 text-sm text-stone-500 font-light">
+          <h1 className="mt-4 text-lg font-semibold text-foreground">Tienda no encontrada</h1>
+          <p className="mt-1.5 text-sm text-muted-foreground font-light">
             La tienda que buscas no existe o ha sido removida.
           </p>
           <Link
             to="/"
-            className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-[#C9A96E] underline underline-offset-4"
+            className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-primary underline underline-offset-4"
           >
             Volver al inicio <ArrowRight className="size-3" />
           </Link>
@@ -259,28 +259,28 @@ function StorefrontPage() {
 
   return (
     <div 
-      className="flex min-h-screen flex-col bg-[#FAF8F5] text-[#1A1A1A] antialiased"
+      className="flex min-h-screen flex-col bg-background text-foreground antialiased"
       style={{ fontFamily: "'Montserrat', sans-serif" }}
     >
       {/* Announcement bar */}
-      <div className="bg-[#1A1A1A] text-white text-[11px] py-2 text-center tracking-widest uppercase font-light">
-        ✨ ENVÍO GRATIS EN PEDIDOS +{$}50 | CÓDIGO: <span className="font-semibold text-[#C9A96E]">COMPRAAI</span>
+      <div className="bg-foreground text-background text-[11px] py-2 text-center tracking-widest uppercase font-light">
+        ✨ ENVÍO GRATIS EN PEDIDOS +{$}50 | CÓDIGO: <span className="font-semibold text-primary">COMPRAAI</span>
       </div>
 
       {/* Sticky header */}
       <header
         className={cn(
-          "sticky top-0 z-40 w-full transition-all duration-300 border-b",
+          "sticky top-0 z-40 w-full transition-all duration-300 border-b bg-background/95 backdrop-blur-md",
           isScrolled 
-            ? "bg-[#FAF8F5]/95 backdrop-blur-md shadow-sm border-stone-200/60" 
-            : "bg-[#FAF8F5]/80 backdrop-blur-md border-transparent"
+            ? "shadow-sm border-border/60" 
+            : "border-transparent"
         )}
       >
         <div className="mx-auto flex h-16 max-w-7xl items-center gap-4 px-6 justify-between">
           <Link
             to="/go/$slug"
             params={{ slug }}
-            className="text-2xl font-medium tracking-widest text-[#1A1A1A] hover:text-[#C9A96E] transition-colors"
+            className="text-2xl font-medium tracking-widest text-foreground hover:text-primary transition-colors"
             style={{ fontFamily: "'Cormorant Garamond', serif" }}
           >
             {business.name.toUpperCase()}
@@ -288,10 +288,10 @@ function StorefrontPage() {
 
           {/* Actions */}
           <div className="flex items-center gap-5 shrink-0">
-            {/* Search toggle (Desktop & Mobile input) */}
+            {/* Search toggle */}
             <div className="relative flex items-center">
               <button
-                className="text-[#1A1A1A] hover:text-[#C9A96E] transition-colors p-1"
+                className="text-foreground hover:text-primary transition-colors p-1"
                 onClick={() => { setSearchOpen(!searchOpen); if (!searchOpen) setSearchQuery(""); }}
                 aria-label="Buscar"
               >
@@ -301,13 +301,13 @@ function StorefrontPage() {
 
             <button
               onClick={() => setCartOpen(true)}
-              className="relative text-[#1A1A1A] hover:text-[#C9A96E] transition-colors"
+              className="relative text-foreground hover:text-primary transition-colors"
               aria-label={`Carrito (${itemCount} productos)`}
             >
               <div className="relative p-1">
                 <ShoppingBag className="size-5" strokeWidth={1.5} />
                 {itemCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 grid size-4 place-items-center rounded-full bg-[#1A1A1A] text-[9px] font-semibold text-white ring-2 ring-[#FAF8F5]">
+                  <span className="absolute -top-0.5 -right-0.5 grid size-4 place-items-center rounded-full bg-primary text-[9px] font-semibold text-primary-foreground ring-2 ring-background">
                     {itemCount}
                   </span>
                 )}
@@ -318,9 +318,9 @@ function StorefrontPage() {
 
         {/* Search Input Panel */}
         {searchOpen && (
-          <div className="border-t border-stone-200/60 bg-[#FAF8F5] px-6 py-3.5 animate-in slide-in-from-top-1 duration-150">
-            <div className="mx-auto max-w-2xl flex items-center gap-2 rounded-md bg-white border border-stone-200 px-3.5 h-11 focus-within:border-[#1A1A1A]">
-              <Search className="size-4 text-stone-400 shrink-0" strokeWidth={1.5} />
+          <div className="border-t border-border/60 bg-background px-6 py-3.5 animate-in slide-in-from-top-1 duration-150">
+            <div className="mx-auto max-w-2xl flex items-center gap-2 rounded-md bg-background border border-border px-3.5 h-11 focus-within:border-primary">
+              <Search className="size-4 text-muted-foreground shrink-0" strokeWidth={1.5} />
               <input
                 ref={searchInputRef}
                 type="search"
@@ -328,10 +328,10 @@ function StorefrontPage() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Buscar productos..."
                 aria-label="Buscar productos"
-                className="flex-1 bg-transparent text-xs text-[#1A1A1A] placeholder-stone-400 focus:outline-none"
+                className="flex-1 bg-transparent text-xs text-foreground placeholder-muted-foreground focus:outline-none"
               />
               {searchQuery && (
-                <button onClick={() => setSearchQuery("")} className="text-stone-400 hover:text-black transition-colors">
+                <button onClick={() => setSearchQuery("")} className="text-muted-foreground hover:text-foreground transition-colors">
                   <X className="size-4" />
                 </button>
               )}
@@ -341,7 +341,7 @@ function StorefrontPage() {
 
         {/* Categories Bar */}
         {categories.length > 0 && (
-          <div className="border-t border-stone-200/60">
+          <div className="border-t border-border/60">
             <div className="mx-auto max-w-7xl px-6">
               <div
                 ref={categoryBarRef}
@@ -354,8 +354,8 @@ function StorefrontPage() {
                   className={cn(
                     "shrink-0 rounded-full px-4 py-1.5 text-xs font-light tracking-wide transition-all duration-200 border",
                     !selectedCategory
-                      ? "border-[#1A1A1A] bg-[#1A1A1A] text-white shadow-sm font-normal"
-                      : "border-stone-200 text-stone-600 bg-white hover:border-[#1A1A1A]/60"
+                      ? "border-primary bg-primary text-primary-foreground shadow-sm font-normal"
+                      : "border-border text-muted-foreground bg-background hover:border-primary/60"
                   )}
                 >
                   Todos
@@ -369,8 +369,8 @@ function StorefrontPage() {
                     className={cn(
                       "shrink-0 rounded-full px-4 py-1.5 text-xs font-light tracking-wide transition-all duration-200 whitespace-nowrap border",
                       selectedCategory === cat.name
-                        ? "border-[#1A1A1A] bg-[#1A1A1A] text-white shadow-sm font-normal"
-                        : "border-stone-200 text-stone-600 bg-white hover:border-[#1A1A1A]/60"
+                        ? "border-primary bg-primary text-primary-foreground shadow-sm font-normal"
+                        : "border-border text-muted-foreground bg-background hover:border-primary/60"
                     )}
                   >
                     {cat.name}
@@ -384,23 +384,23 @@ function StorefrontPage() {
 
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="border-b border-stone-200/60 bg-gradient-to-b from-[#1A1A1A]/[0.02] to-transparent">
+        <section className="border-b border-border/60 bg-gradient-to-b from-primary/[0.02] to-transparent">
           <div className="mx-auto max-w-7xl px-6 py-12 lg:py-16 text-center">
             <div className="flex flex-col items-center gap-4">
               {business.logo_url && (
                 <img
                   src={business.logo_url}
                   alt={business.name}
-                  className="size-16 rounded-full object-cover ring-2 ring-stone-200 shadow-sm mb-2"
+                  className="size-16 rounded-full object-cover ring-2 ring-border shadow-sm mb-2"
                 />
               )}
               <h1 
-                className="text-4xl lg:text-5xl font-light text-[#1A1A1A] tracking-tight leading-none"
+                className="text-4xl lg:text-5xl font-light text-foreground tracking-tight leading-none"
                 style={{ fontFamily: "'Cormorant Garamond', serif" }}
               >
                 {business.name}
               </h1>
-              <p className="text-sm font-light text-stone-500 max-w-sm leading-relaxed">
+              <p className="text-sm font-light text-muted-foreground max-w-sm leading-relaxed">
                 Descubre nuestra cuidada selección de productos. Haz tu pedido y envíalo directo por WhatsApp.
               </p>
             </div>
@@ -410,10 +410,10 @@ function StorefrontPage() {
         {/* Product Grid Section */}
         <section className="mx-auto max-w-7xl px-6 py-12">
           {/* Section heading */}
-          <div className="mb-8 flex items-end justify-between border-b border-stone-200 pb-4">
+          <div className="mb-8 flex items-end justify-between border-b border-border pb-4">
             <div>
               <h2 
-                className="text-2xl lg:text-3xl font-light text-[#1A1A1A] tracking-tight"
+                className="text-2xl lg:text-3xl font-light text-foreground tracking-tight"
                 style={{ fontFamily: "'Cormorant Garamond', serif" }}
               >
                 {searchQuery
@@ -421,7 +421,7 @@ function StorefrontPage() {
                   : selectedCategory || "Todos los productos"}
               </h2>
               {!productsLoading && (
-                <p className="mt-1 text-xs text-stone-500 font-light">
+                <p className="mt-1 text-xs text-muted-foreground font-light">
                   {filtered.length} producto{filtered.length !== 1 ? "s" : ""}
                 </p>
               )}
@@ -429,7 +429,7 @@ function StorefrontPage() {
             {(selectedCategory || searchQuery) && (
               <button
                 onClick={() => { setSelectedCategory(null); setSearchQuery(""); }}
-                className="text-xs font-medium underline underline-offset-4 decoration-stone-300 hover:decoration-[#1A1A1A] transition-all"
+                className="text-xs font-medium underline underline-offset-4 decoration-border hover:decoration-foreground transition-all"
               >
                 Limpiar filtros
               </button>
@@ -448,16 +448,16 @@ function StorefrontPage() {
           {/* Empty State */}
           {!productsLoading && filtered.length === 0 && (
             <div className="py-20 text-center">
-              <div className="mx-auto grid size-16 place-items-center rounded-2xl bg-stone-100 text-stone-400 mb-4 border border-stone-200/50">
+              <div className="mx-auto grid size-16 place-items-center rounded-2xl bg-muted text-muted-foreground mb-4 border border-border/50">
                 <Package className="size-7" />
               </div>
               <h3 
-                className="text-lg font-light text-stone-800"
+                className="text-lg font-light text-foreground"
                 style={{ fontFamily: "'Cormorant Garamond', serif" }}
               >
                 {searchQuery ? "Sin resultados" : "No hay productos disponibles"}
               </h3>
-              <p className="mt-2 text-xs text-stone-500 max-w-xs mx-auto font-light">
+              <p className="mt-2 text-xs text-muted-foreground max-w-xs mx-auto font-light">
                 {searchQuery
                   ? `No encontramos productos relacionados con "${searchQuery}". Intenta buscar con otro término.`
                   : "Por el momento esta tienda no tiene productos publicados."}
@@ -466,7 +466,7 @@ function StorefrontPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="mt-6 rounded-md border-stone-200 hover:border-black text-xs font-light"
+                  className="mt-6 rounded-md border-border hover:border-foreground text-xs font-light"
                   onClick={() => { setSelectedCategory(null); setSearchQuery(""); }}
                 >
                   Ver todos los productos
@@ -492,7 +492,7 @@ function StorefrontPage() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-[#1A1A1A] text-white pt-16 pb-8">
+      <footer className="bg-foreground text-background pt-16 pb-8">
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8 mb-16">
           <div className="col-span-1 md:col-span-1">
             <span 
@@ -501,17 +501,17 @@ function StorefrontPage() {
             >
               {business.name.toUpperCase()}
             </span>
-            <p className="text-xs text-white/50 font-light leading-relaxed mb-6">
+            <p className="text-xs text-background/50 font-light leading-relaxed mb-6">
               Redefiniendo el comercio digital con un proceso limpio, rápido y directo por WhatsApp.
             </p>
             <div className="flex gap-4">
-              <a href="#" aria-label="Instagram" className="text-white/50 hover:text-white transition-colors">
+              <a href="#" aria-label="Instagram" className="text-background/50 hover:text-background transition-colors">
                 <Instagram className="size-4" />
               </a>
-              <a href="#" aria-label="Facebook" className="text-white/50 hover:text-white transition-colors">
+              <a href="#" aria-label="Facebook" className="text-background/50 hover:text-background transition-colors">
                 <Facebook className="size-4" />
               </a>
-              <a href="#" aria-label="Twitter" className="text-white/50 hover:text-white transition-colors">
+              <a href="#" aria-label="Twitter" className="text-background/50 hover:text-background transition-colors">
                 <Twitter className="size-4" />
               </a>
             </div>
@@ -519,15 +519,15 @@ function StorefrontPage() {
           
           <div>
             <h4 className="text-xs font-semibold uppercase tracking-widest mb-6">Tienda</h4>
-            <ul className="space-y-3 text-xs font-light text-white/50">
+            <ul className="space-y-3 text-xs font-light text-background/50">
               <li>
-                <button onClick={() => setSelectedCategory(null)} className="hover:text-white transition-colors">
+                <button onClick={() => setSelectedCategory(null)} className="hover:text-background transition-colors">
                   Catálogo Completo
                 </button>
               </li>
               {categories.slice(0, 5).map((cat) => (
                 <li key={cat.id}>
-                  <button onClick={() => setSelectedCategory(cat.name)} className="hover:text-white transition-colors">
+                  <button onClick={() => setSelectedCategory(cat.name)} className="hover:text-background transition-colors">
                     {cat.name}
                   </button>
                 </li>
@@ -537,31 +537,31 @@ function StorefrontPage() {
 
           <div>
             <h4 className="text-xs font-semibold uppercase tracking-widest mb-6">Soporte</h4>
-            <ul className="space-y-3 text-xs font-light text-white/50">
-              <li><a href="#" className="hover:text-white transition-colors">Contacto</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">FAQ</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Envíos</a></li>
+            <ul className="space-y-3 text-xs font-light text-background/50">
+              <li><a href="#" className="hover:text-background transition-colors">Contacto</a></li>
+              <li><a href="#" className="hover:text-background transition-colors">FAQ</a></li>
+              <li><a href="#" className="hover:text-background transition-colors">Envíos</a></li>
             </ul>
           </div>
 
           <div>
             <h4 className="text-xs font-semibold uppercase tracking-widest mb-6">Legal</h4>
-            <ul className="space-y-3 text-xs font-light text-white/50">
-              <li><a href="#" className="hover:text-white transition-colors">Privacidad</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Términos</a></li>
+            <ul className="space-y-3 text-xs font-light text-background/50">
+              <li><a href="#" className="hover:text-background transition-colors">Privacidad</a></li>
+              <li><a href="#" className="hover:text-background transition-colors">Términos</a></li>
             </ul>
           </div>
         </div>
         
-        <div className="max-w-7xl mx-auto px-6 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-[10px] text-white/40 font-light">© 2024 {business.name}. Todos los derechos reservados.</p>
-          <div className="flex gap-1.5 items-center text-[10px] text-white/40 font-light">
+        <div className="max-w-7xl mx-auto px-6 pt-8 border-t border-background/10 flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-[10px] text-background/40 font-light">© 2024 {business.name}. Todos los derechos reservados.</p>
+          <div className="flex gap-1.5 items-center text-[10px] text-background/40 font-light">
             Powered by{" "}
             <a
               href="https://commerceai.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 font-medium text-white/60 underline underline-offset-4 hover:text-white transition-colors"
+              className="inline-flex items-center gap-1 font-medium text-background/60 underline underline-offset-4 hover:text-background transition-colors"
             >
               Commerce AI <ExternalLink className="size-2.5" />
             </a>
@@ -601,14 +601,14 @@ function ProductCard({
     <Link
       to="/go/$slug/product/$productSlug"
       params={{ slug: storeSlug, productSlug: product.slug }}
-      className="group block w-full text-left cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1A1A1A] focus-visible:ring-offset-2 rounded-md"
+      className="group block w-full text-left cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-md"
       aria-label={`Ver ${product.name}, ${$}${displayPrice.toFixed(2)}`}
     >
-      <div className="relative aspect-[3/4] w-full overflow-hidden rounded-md bg-[#F0EFED] mb-4 transition-all duration-300 group-hover:shadow-sm border border-stone-200/40">
+      <div className="relative aspect-[3/4] w-full overflow-hidden rounded-md bg-muted mb-4 transition-all duration-300 group-hover:shadow-sm border border-border/40">
         {product.image_url && !imgError ? (
           <>
             {!imgLoaded && (
-              <div className="absolute inset-0 bg-[#F0EFED] animate-pulse" />
+              <div className="absolute inset-0 bg-muted animate-pulse" />
             )}
             <img
               src={product.image_url}
@@ -625,7 +625,7 @@ function ProductCard({
           </>
         ) : (
           <div className="flex size-full items-center justify-center">
-            <Package className="size-10 text-stone-300" />
+            <Package className="size-10 text-muted-foreground/30" />
           </div>
         )}
 
@@ -637,30 +637,30 @@ function ProductCard({
             </span>
           )}
           {hasSale && (
-            <span className="rounded-full bg-red-900 px-2.5 py-0.5 text-[9px] font-semibold text-white tracking-wider">
+            <span className="rounded-full bg-destructive px-2.5 py-0.5 text-[9px] font-semibold text-white tracking-wider">
               OFERTA
             </span>
           )}
         </div>
 
         {/* Plus Quick add action button */}
-        <span className="absolute bottom-3 right-3 w-8 h-8 bg-[#FAF8F5]/90 backdrop-blur rounded-full flex items-center justify-center opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 shadow-sm border border-stone-200">
-          <Plus className="size-4 text-[#1A1A1A]" />
+        <span className="absolute bottom-3 right-3 w-8 h-8 bg-background/90 backdrop-blur rounded-full flex items-center justify-center opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 shadow-sm border border-border">
+          <Plus className="size-4 text-foreground" />
         </span>
       </div>
 
       <div className="px-0.5">
         <h3 
-          className="text-base font-normal text-[#1A1A1A] leading-snug line-clamp-1"
+          className="text-base font-normal text-foreground leading-snug line-clamp-1"
           style={{ fontFamily: "'Cormorant Garamond', serif" }}
         >
           {product.name}
         </h3>
-        <p className="text-xs text-stone-500 mt-1 font-light">
+        <p className="text-xs text-muted-foreground mt-1 font-light">
           {hasSale ? (
             <>
-              <span className="text-red-900 font-normal mr-1.5">{$}{displayPrice.toFixed(2)}</span>
-              <span className="line-through text-stone-400">{$}{product.price.toFixed(2)}</span>
+              <span className="text-destructive font-normal mr-1.5">{$}{displayPrice.toFixed(2)}</span>
+              <span className="line-through text-muted-foreground/60">{$}{product.price.toFixed(2)}</span>
             </>
           ) : (
             `$${product.price.toFixed(2)}`
