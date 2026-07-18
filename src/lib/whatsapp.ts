@@ -8,13 +8,27 @@ type OrderItem = {
   name: string;
   quantity: number;
   price: number;
+  notes?: string;
 };
 
-type CustomerInfo = {
+export type CustomerInfo = {
   name: string;
   phone: string;
-  address: string;
+  deliveryType: "delivery" | "pickup";
+  address?: string;
+  neighborhood?: string;
+  reference?: string;
   notes?: string;
+  paymentMethod: "cash" | "transfer" | "cod";
+  cashAmount?: string;
+};
+
+const SEP = "─".repeat(28);
+
+const paymentLabel: Record<string, string> = {
+  cash: "Efectivo",
+  transfer: "Transferencia",
+  cod: "Pago contra entrega",
 };
 
 export function buildWhatsAppMessage(
@@ -24,40 +38,54 @@ export function buildWhatsAppMessage(
   customer: CustomerInfo,
 ): string {
   const lines: string[] = [];
-  const sep = "─".repeat(30);
 
-  lines.push(`*${businessName.toUpperCase()}*`);
-  lines.push(`*Nuevo Pedido*`);
-  lines.push(sep);
+  lines.push(`Hola 👋`);
+  lines.push(`Quisiera realizar el siguiente pedido en *${businessName}*:`);
   lines.push("");
-
-  lines.push(`Producto              Cant.  Total`);
-  lines.push(`──────────────────────────────`);
+  lines.push(SEP);
 
   items.forEach((item) => {
-    const name = item.name.length > 17
-      ? item.name.slice(0, 15) + ".."
-      : item.name;
-    const line = `${name.padEnd(22)} ${String(item.quantity).padStart(3)}   $${formatPrice(item.price * item.quantity)}`;
-    lines.push(line);
+    lines.push(`*${item.quantity}x ${item.name}*`);
+    lines.push(`   $${formatPrice(item.price * item.quantity)}`);
+    if (item.notes) {
+      lines.push(`   📝 ${item.notes}`);
+    }
+    lines.push(SEP);
   });
 
-  lines.push(`──────────────────────────────`);
-  lines.push(`*TOTAL*                $${formatPrice(subtotal)}`);
   lines.push("");
-  lines.push(sep);
+  lines.push(`*Subtotal:* $${formatPrice(subtotal)}`);
+  lines.push("");
+  lines.push(SEP);
+  lines.push("");
+  lines.push(`*Datos del cliente*`);
+  lines.push(`👤 Nombre: ${customer.name}`);
+  lines.push(`📱 Teléfono: ${customer.phone}`);
+  lines.push("");
 
-  lines.push(`*DATOS DEL CLIENTE*`);
-  lines.push(`Nombre:    ${customer.name}`);
-  lines.push(`Telefono:  ${customer.phone}`);
-  lines.push(`Direccion: ${customer.address}`);
-  if (customer.notes) {
-    lines.push(`Notas:     ${customer.notes}`);
+  if (customer.deliveryType === "delivery") {
+    lines.push(`🚚 Entrega: *Delivery*`);
+    if (customer.address) lines.push(`📍 Dirección: ${customer.address}`);
+    if (customer.neighborhood) lines.push(`🏘️ Barrio: ${customer.neighborhood}`);
+    if (customer.reference) lines.push(`🗺️ Referencia: ${customer.reference}`);
+  } else {
+    lines.push(`🏪 Entrega: *Retiro en tienda*`);
   }
 
   lines.push("");
-  lines.push(sep);
-  lines.push(`Gracias por tu preferencia.`);
+  lines.push(`💳 Pago: ${paymentLabel[customer.paymentMethod] ?? customer.paymentMethod}`);
+  if (customer.paymentMethod === "cash" && customer.cashAmount) {
+    lines.push(`   Pagaré con: $${customer.cashAmount}`);
+  }
+
+  if (customer.notes) {
+    lines.push("");
+    lines.push(`📋 Notas: ${customer.notes}`);
+  }
+
+  lines.push("");
+  lines.push(SEP);
+  lines.push("Muchas gracias. 🙏");
 
   return lines.join("\n");
 }

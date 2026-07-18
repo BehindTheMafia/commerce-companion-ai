@@ -9,9 +9,10 @@ export type CartProduct = {
   slug: string;
 };
 
-type CartItem = {
+export type CartItem = {
   product: CartProduct;
   quantity: number;
+  notes?: string;
 };
 
 type CartState = {
@@ -19,25 +20,32 @@ type CartState = {
 };
 
 type CartAction =
-  | { type: "ADD_ITEM"; product: CartProduct }
+  | { type: "ADD_ITEM"; product: CartProduct; quantity?: number; notes?: string }
   | { type: "REMOVE_ITEM"; productId: string }
   | { type: "UPDATE_QUANTITY"; productId: string; quantity: number }
+  | { type: "UPDATE_NOTES"; productId: string; notes: string }
   | { type: "CLEAR" };
 
 function cartReducer(state: CartState, action: CartAction): CartState {
   switch (action.type) {
     case "ADD_ITEM": {
+      const qty = action.quantity ?? 1;
       const existing = state.items.find((i) => i.product.id === action.product.id);
       if (existing) {
         return {
           items: state.items.map((i) =>
             i.product.id === action.product.id
-              ? { ...i, quantity: i.quantity + 1 }
+              ? { ...i, quantity: i.quantity + qty, notes: action.notes ?? i.notes }
               : i,
           ),
         };
       }
-      return { items: [...state.items, { product: action.product, quantity: 1 }] };
+      return {
+        items: [
+          ...state.items,
+          { product: action.product, quantity: qty, notes: action.notes },
+        ],
+      };
     }
     case "REMOVE_ITEM":
       return { items: state.items.filter((i) => i.product.id !== action.productId) };
@@ -51,6 +59,12 @@ function cartReducer(state: CartState, action: CartAction): CartState {
         ),
       };
     }
+    case "UPDATE_NOTES":
+      return {
+        items: state.items.map((i) =>
+          i.product.id === action.productId ? { ...i, notes: action.notes } : i,
+        ),
+      };
     case "CLEAR":
       return { items: [] };
   }
@@ -58,9 +72,10 @@ function cartReducer(state: CartState, action: CartAction): CartState {
 
 type CartContextType = {
   items: CartItem[];
-  addItem: (product: CartProduct) => void;
+  addItem: (product: CartProduct, quantity?: number, notes?: string) => void;
   removeItem: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
+  updateNotes: (productId: string, notes: string) => void;
   clearCart: () => void;
   itemCount: number;
   subtotal: number;
@@ -93,10 +108,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
     saveCart(state);
   }, [state]);
 
-  const addItem = (product: CartProduct) => dispatch({ type: "ADD_ITEM", product });
-  const removeItem = (productId: string) => dispatch({ type: "REMOVE_ITEM", productId });
+  const addItem = (product: CartProduct, quantity?: number, notes?: string) =>
+    dispatch({ type: "ADD_ITEM", product, quantity, notes });
+  const removeItem = (productId: string) =>
+    dispatch({ type: "REMOVE_ITEM", productId });
   const updateQuantity = (productId: string, quantity: number) =>
     dispatch({ type: "UPDATE_QUANTITY", productId, quantity });
+  const updateNotes = (productId: string, notes: string) =>
+    dispatch({ type: "UPDATE_NOTES", productId, notes });
   const clearCart = () => dispatch({ type: "CLEAR" });
 
   const itemCount = state.items.reduce((sum, i) => sum + i.quantity, 0);
@@ -106,7 +125,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, 0);
 
   return (
-    <CartContext.Provider value={{ items: state.items, addItem, removeItem, updateQuantity, clearCart, itemCount, subtotal }}>
+    <CartContext.Provider
+      value={{
+        items: state.items,
+        addItem,
+        removeItem,
+        updateQuantity,
+        updateNotes,
+        clearCart,
+        itemCount,
+        subtotal,
+      }}
+    >
       {children}
     </CartContext.Provider>
   );
