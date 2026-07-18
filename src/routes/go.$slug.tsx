@@ -7,11 +7,10 @@ import {
   Facebook, Twitter, Instagram,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
-import { CartProvider, useCart, type CartProduct } from "@/lib/cart-context";
+import { CartProvider, useCart } from "@/lib/cart-context";
 import { CartDrawerV2 } from "@/components/storefront/cart-drawer-v2";
-import { ProductQuickView } from "@/components/storefront/product-quick-view";
 import { buildWhatsAppMessage, getWhatsAppLink } from "@/lib/whatsapp";
 import type { CustomerData } from "@/components/storefront/checkout-form";
 import { toast } from "sonner";
@@ -113,11 +112,10 @@ function StorefrontPage() {
   const [cartOpen, setCartOpen] = useState(false);
   const [checkoutBusy, setCheckoutBusy] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
-  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const [isScrolled, setIsScrolled] = useState(false);
   const categoryBarRef = useRef<HTMLDivElement>(null);
 
-  const { itemCount, items, clearCart, subtotal, addItem } = useCart();
+  const { itemCount, items, clearCart, subtotal } = useCart();
 
   // Scroll detection for header shadow
   useEffect(() => {
@@ -227,21 +225,6 @@ function StorefrontPage() {
   });
 
   // ─── Handlers ────────────────────────────────────────────────────
-  function handleAddFromQuickView(productId: string, quantity: number, notes: string) {
-    const product = products.find((p) => p.id === productId);
-    if (!product) return;
-    const cartProduct: CartProduct = {
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      sale_price: product.sale_price,
-      image_url: product.image_url,
-      slug: product.slug,
-    };
-    addItem(cartProduct, quantity, notes || undefined);
-    showAddedToast(product.name, itemCount + quantity, () => setCartOpen(true));
-  }
-
   async function handleCheckout(data: CustomerData) {
     if (!business) return;
     const waPhone = business.whatsapp_phone;
@@ -549,7 +532,7 @@ function StorefrontPage() {
                   key={product.id}
                   product={product}
                   currencySymbol={$}
-                  onOpen={() => setQuickViewProduct(product)}
+                  storeSlug={slug}
                 />
               ))}
             </div>
@@ -645,14 +628,6 @@ function StorefrontPage() {
         </div>
       </footer>
 
-      {/* ── Product Quick View Modal ───────────────────────── */}
-      <ProductQuickView
-        product={quickViewProduct}
-        currencySymbol={$}
-        onClose={() => setQuickViewProduct(null)}
-        onAdd={handleAddFromQuickView}
-      />
-
       {/* ── Cart Drawer (multi-step) ───────────────────────── */}
       <CartDrawerV2
         open={cartOpen}
@@ -670,11 +645,11 @@ function StorefrontPage() {
 function ProductCard({
   product,
   currencySymbol: $,
-  onOpen,
+  storeSlug,
 }: {
   product: Product;
   currencySymbol: string;
-  onOpen: () => void;
+  storeSlug: string;
 }) {
   const [imgError, setImgError] = useState(false);
   const hasSale = product.sale_price != null && product.sale_price < product.price;
@@ -682,10 +657,10 @@ function ProductCard({
   const badge = getBadge(product.id);
 
   return (
-    <button
-      type="button"
-      onClick={onOpen}
-      className="group w-full text-left cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-2xl"
+    <Link
+      to="/go/$slug/$productSlug"
+      params={{ slug: storeSlug, productSlug: product.slug }}
+      className="group block w-full text-left cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-2xl"
       aria-label={`Ver ${product.name}, ${$}${displayPrice.toFixed(2)}`}
     >
       {/* Image */}
@@ -747,6 +722,6 @@ function ProductCard({
           )}
         </div>
       </div>
-    </button>
+    </Link>
   );
 }
