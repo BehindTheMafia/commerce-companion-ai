@@ -2,9 +2,9 @@ import { createFileRoute, useParams, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  Loader2, ShoppingBag, Sparkles, AlertCircle, Package,
-  ArrowRight, Search, Heart, X, ChevronRight,
-  Instagram, Facebook, Twitter, ExternalLink, Plus,
+  Loader2, ShoppingBag, AlertCircle, Package,
+  ArrowRight, Search, Heart, X,
+  Instagram, Facebook, Twitter, ExternalLink,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect, useRef } from "react";
@@ -48,28 +48,12 @@ function isNewProduct(createdAt: string) {
   return new Date(createdAt).getTime() > weekAgo;
 }
 
-// Deterministic badge per product
-const BADGES = [
-  { emoji: "🔥", label: "Más vendido", bg: "bg-primary/10 text-primary" },
-  { emoji: "⭐", label: "Popular", bg: "bg-primary/10 text-primary" },
-  { emoji: "🆕", label: "Nuevo", bg: "bg-primary/10 text-primary" },
-  { emoji: "❤️", label: "Recomendado", bg: "bg-primary/10 text-primary" },
-];
-function getBadge(id: string) {
-  const n = id.charCodeAt(0) + id.charCodeAt(id.length - 1);
-  if (n % 6 === 0) return BADGES[0];
-  if (n % 6 === 1) return BADGES[1];
-  if (n % 6 === 2) return BADGES[2];
-  if (n % 6 === 3) return BADGES[3];
-  return null;
-}
-
 function SkeletonCard() {
   return (
     <div className="animate-pulse">
-      <div className="aspect-[3/4] rounded-xl bg-muted mb-3" />
-      <div className="h-4 w-3/4 rounded bg-muted mb-2" />
-      <div className="h-3 w-1/3 rounded bg-muted" />
+      <div className="aspect-[3/4] rounded-2xl bg-muted mb-3" />
+      <div className="h-4 w-3/4 rounded-lg bg-muted mb-2" />
+      <div className="h-3 w-1/3 rounded-lg bg-muted" />
     </div>
   );
 }
@@ -153,10 +137,10 @@ function StorefrontPage() {
 
   if (bizLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
+      <div className="flex min-h-dvh items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4 text-center">
           <div className="grid size-14 place-items-center rounded-2xl bg-primary text-primary-foreground shadow-lg animate-pulse">
-            <Sparkles className="size-6 animate-spin duration-1000" />
+            <ShoppingBag className="size-6" />
           </div>
           <Loader2 className="size-4 animate-spin text-primary" />
         </div>
@@ -166,13 +150,13 @@ function StorefrontPage() {
 
   if (bizError || !business) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background px-4">
+      <div className="flex min-h-dvh items-center justify-center bg-background px-4">
         <div className="max-w-sm text-center">
           <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-destructive/10 text-destructive">
             <AlertCircle className="size-6" />
           </div>
           <h1 className="mt-4 text-lg font-semibold text-foreground">Tienda no encontrada</h1>
-          <p className="mt-1.5 text-sm text-muted-foreground font-light">
+          <p className="mt-1.5 text-sm text-muted-foreground">
             La tienda que buscas no existe o ha sido removida.
           </p>
           <Link
@@ -201,7 +185,7 @@ function StorefrontPage() {
     if (!business) return;
     const waPhone = business.whatsapp_phone;
     if (!waPhone) {
-      setCheckoutError("El negocio no tiene configurado un número de WhatsApp.");
+      setCheckoutError("El negocio no tiene configurado un numero de WhatsApp.");
       return;
     }
     setCheckoutBusy(true);
@@ -251,18 +235,19 @@ function StorefrontPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-background text-foreground antialiased font-sans">
+    <div className="flex min-h-dvh flex-col bg-background text-foreground antialiased font-sans">
+
       {/* Announcement bar */}
-      <div className="bg-foreground text-background text-[11px] py-2 text-center tracking-widest uppercase font-light">
-        ✨ ENVÍO GRATIS EN PEDIDOS +{$}50 | CÓDIGO: <span className="font-semibold text-primary">COMPRAAI</span>
+      <div className="bg-foreground text-background text-[11px] py-2 text-center tracking-widest uppercase font-medium">
+        Envio gratis en pedidos +{$}50
       </div>
 
       {/* Sticky header */}
       <header
         className={cn(
           "sticky top-0 z-40 w-full transition-all duration-300 border-b bg-background/95 backdrop-blur-md",
-          isScrolled 
-            ? "shadow-sm border-border/60" 
+          isScrolled
+            ? "shadow-sm border-border/60"
             : "border-transparent"
         )}
       >
@@ -270,46 +255,41 @@ function StorefrontPage() {
           <Link
             to="/go/$slug"
             params={{ slug }}
-            className="text-2xl font-medium tracking-widest text-foreground hover:text-primary transition-colors font-display"
+            className="text-xl font-semibold tracking-tight text-foreground hover:text-primary transition-colors font-display"
           >
-            {business.name.toUpperCase()}
+            {business.name}
           </Link>
 
           {/* Actions */}
-          <div className="flex items-center gap-5 shrink-0">
-            {/* Search toggle */}
-            <div className="relative flex items-center">
-              <button
-                className="text-foreground hover:text-primary transition-colors p-1"
-                onClick={() => { setSearchOpen(!searchOpen); if (!searchOpen) setSearchQuery(""); }}
-                aria-label="Buscar"
-              >
-                <Search className="size-5" strokeWidth={1.5} />
-              </button>
-            </div>
+          <div className="flex items-center gap-4 shrink-0">
+            <button
+              className="text-muted-foreground hover:text-foreground transition-colors p-1.5 -mr-1"
+              onClick={() => { setSearchOpen(!searchOpen); if (!searchOpen) setSearchQuery(""); }}
+              aria-label="Buscar"
+            >
+              <Search className="size-[18px]" strokeWidth={1.5} />
+            </button>
 
             <button
               onClick={() => setCartOpen(true)}
-              className="relative text-foreground hover:text-primary transition-colors"
+              className="relative text-muted-foreground hover:text-foreground transition-colors p-1.5"
               aria-label={`Carrito (${itemCount} productos)`}
             >
-              <div className="relative p-1">
-                <ShoppingBag className="size-5" strokeWidth={1.5} />
-                {itemCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 grid size-4 place-items-center rounded-full bg-primary text-[9px] font-semibold text-primary-foreground ring-2 ring-background">
-                    {itemCount}
-                  </span>
-                )}
-              </div>
+              <ShoppingBag className="size-[18px]" strokeWidth={1.5} />
+              {itemCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 grid min-w-[16px] h-4 place-items-center rounded-full bg-primary text-[9px] font-bold text-primary-foreground px-1">
+                  {itemCount > 99 ? "99+" : itemCount}
+                </span>
+              )}
             </button>
           </div>
         </div>
 
         {/* Search Input Panel */}
         {searchOpen && (
-          <div className="border-t border-border/60 bg-background px-6 py-3.5 animate-in slide-in-from-top-1 duration-150">
-            <div className="mx-auto max-w-2xl flex items-center gap-2 rounded-md bg-background border border-border px-3.5 h-11 focus-within:border-primary">
-              <Search className="size-4 text-muted-foreground shrink-0" strokeWidth={1.5} />
+          <div className="border-t border-border/60 bg-background px-6 py-3 animate-in slide-in-from-top-1 duration-150">
+            <div className="mx-auto max-w-2xl flex items-center gap-2 rounded-xl bg-muted/50 border border-border/60 px-3.5 h-10 focus-within:border-primary/50 focus-within:bg-background transition-colors">
+              <Search className="size-3.5 text-muted-foreground/60 shrink-0" strokeWidth={1.5} />
               <input
                 ref={searchInputRef}
                 type="search"
@@ -317,11 +297,11 @@ function StorefrontPage() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Buscar productos..."
                 aria-label="Buscar productos"
-                className="flex-1 bg-transparent text-xs text-foreground placeholder-muted-foreground focus:outline-none"
+                className="flex-1 bg-transparent text-xs text-foreground placeholder-muted-foreground/50 focus:outline-none"
               />
               {searchQuery && (
-                <button onClick={() => setSearchQuery("")} className="text-muted-foreground hover:text-foreground transition-colors">
-                  <X className="size-4" />
+                <button onClick={() => setSearchQuery("")} className="text-muted-foreground/50 hover:text-foreground transition-colors">
+                  <X className="size-3" />
                 </button>
               )}
             </div>
@@ -334,17 +314,17 @@ function StorefrontPage() {
             <div className="mx-auto max-w-7xl px-6">
               <div
                 ref={categoryBarRef}
-                className="flex gap-3 overflow-x-auto py-3.5 scrollbar-none [-webkit-overflow-scrolling:touch]"
+                className="flex gap-2 overflow-x-auto py-3 scrollbar-none [-webkit-overflow-scrolling:touch]"
                 role="navigation"
-                aria-label="Categorías"
+                aria-label="Categorias"
               >
                 <button
                   onClick={() => setSelectedCategory(null)}
                   className={cn(
-                    "shrink-0 rounded-full px-4 py-1.5 text-xs font-light tracking-wide transition-all duration-200 border",
+                    "shrink-0 rounded-full px-3.5 py-1.5 text-[11px] font-medium tracking-wide transition-all duration-200",
                     !selectedCategory
-                      ? "border-primary bg-primary text-primary-foreground shadow-sm font-normal"
-                      : "border-border text-muted-foreground bg-background hover:border-primary/60"
+                      ? "bg-foreground text-background shadow-sm"
+                      : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground"
                   )}
                 >
                   Todos
@@ -356,10 +336,10 @@ function StorefrontPage() {
                       setSelectedCategory(selectedCategory === cat.name ? null : cat.name)
                     }
                     className={cn(
-                      "shrink-0 rounded-full px-4 py-1.5 text-xs font-light tracking-wide transition-all duration-200 whitespace-nowrap border",
+                      "shrink-0 rounded-full px-3.5 py-1.5 text-[11px] font-medium tracking-wide transition-all duration-200 whitespace-nowrap",
                       selectedCategory === cat.name
-                        ? "border-primary bg-primary text-primary-foreground shadow-sm font-normal"
-                        : "border-border text-muted-foreground bg-background hover:border-primary/60"
+                        ? "bg-foreground text-background shadow-sm"
+                        : "bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground"
                     )}
                   >
                     {cat.name}
@@ -372,43 +352,77 @@ function StorefrontPage() {
       </header>
 
       <main className="flex-1">
-        {/* Hero Section */}
-        <section className="border-b border-border/60 bg-gradient-to-b from-primary/[0.02] to-transparent">
-          <div className="mx-auto max-w-7xl px-6 py-12 lg:py-16 text-center">
-            <div className="flex flex-col items-center gap-4">
-              {business.logo_url && (
-                <img
-                  src={business.logo_url}
-                  alt={business.name}
-                  className="size-16 rounded-full object-cover ring-2 ring-border shadow-sm mb-2"
-                />
-              )}
-              <h1 
-                className="text-4xl lg:text-5xl font-light text-foreground tracking-tight leading-none font-display"
-              >
-                {business.name}
-              </h1>
-              <p className="text-sm font-light text-muted-foreground max-w-sm leading-relaxed">
-                Descubre nuestra cuidada selección de productos. Haz tu pedido y envíalo directo por WhatsApp.
-              </p>
+        {/* Hero — asymmetric, left-aligned */}
+        <section className="border-b border-border/60">
+          <div className="mx-auto max-w-7xl px-6">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 py-14 lg:py-20">
+              <div className="lg:col-span-7 flex flex-col justify-center gap-5">
+                <div className="space-y-3">
+                  {business.logo_url && (
+                    <img
+                      src={business.logo_url}
+                      alt={business.name}
+                      className="size-12 rounded-2xl object-cover ring-1 ring-border/50 shadow-sm"
+                    />
+                  )}
+                  <h1 className="text-4xl sm:text-5xl lg:text-[56px] font-semibold tracking-tight text-foreground leading-[1.08] font-display">
+                    {business.name}
+                  </h1>
+                  <p className="text-sm sm:text-base text-muted-foreground leading-relaxed max-w-md">
+                    Descubre nuestra coleccion. Ordena directo por WhatsApp.
+                  </p>
+                </div>
+                {categories.length > 0 && (
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    {categories.slice(0, 4).map((cat) => (
+                      <button
+                        key={cat.id}
+                        onClick={() => setSelectedCategory(cat.name)}
+                        className={cn(
+                          "rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all duration-200",
+                          selectedCategory === cat.name
+                            ? "bg-primary text-primary-foreground border-primary shadow-sm shadow-primary/20"
+                            : "border-border/60 text-muted-foreground hover:border-foreground/30 hover:text-foreground"
+                        )}
+                      >
+                        {cat.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div className="hidden lg:flex lg:col-span-5 items-center justify-center">
+                <div className="relative w-full max-w-sm aspect-square">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.06] to-transparent rounded-3xl" />
+                  {products.length > 0 && products[0].image_url ? (
+                    <img
+                      src={products[0].image_url}
+                      alt=""
+                      className="relative size-full object-cover rounded-3xl shadow-lg ring-1 ring-border/20"
+                    />
+                  ) : (
+                    <div className="relative flex size-full items-center justify-center rounded-3xl bg-muted/50">
+                      <Package className="size-16 text-muted-foreground/15" />
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
         {/* Product Grid Section */}
-        <section className="mx-auto max-w-7xl px-6 py-12">
+        <section className="mx-auto max-w-7xl px-6 py-12 lg:py-16">
           {/* Section heading */}
-          <div className="mb-8 flex items-end justify-between border-b border-border pb-4">
+          <div className="mb-8 flex items-end justify-between">
             <div>
-              <h2 
-                className="text-2xl lg:text-3xl font-light text-foreground tracking-tight font-display"
-              >
+              <h2 className="text-xl sm:text-2xl font-semibold text-foreground tracking-tight font-display">
                 {searchQuery
                   ? `Resultados para "${searchQuery}"`
-                  : selectedCategory || "Todos los productos"}
+                  : selectedCategory || "Productos"}
               </h2>
               {!productsLoading && (
-                <p className="mt-1 text-xs text-muted-foreground font-light">
+                <p className="mt-1 text-xs text-muted-foreground">
                   {filtered.length} producto{filtered.length !== 1 ? "s" : ""}
                 </p>
               )}
@@ -416,7 +430,7 @@ function StorefrontPage() {
             {(selectedCategory || searchQuery) && (
               <button
                 onClick={() => { setSelectedCategory(null); setSearchQuery(""); }}
-                className="text-xs font-medium underline underline-offset-4 decoration-border hover:decoration-foreground transition-all"
+                className="text-xs font-semibold text-primary underline underline-offset-4 hover:opacity-80 transition-opacity"
               >
                 Limpiar filtros
               </button>
@@ -425,7 +439,7 @@ function StorefrontPage() {
 
           {/* Skeleton Loader */}
           {productsLoading && (
-            <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4 lg:gap-8">
+            <div className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
               {Array.from({ length: 8 }).map((_, i) => (
                 <SkeletonCard key={i} />
               ))}
@@ -434,25 +448,23 @@ function StorefrontPage() {
 
           {/* Empty State */}
           {!productsLoading && filtered.length === 0 && (
-            <div className="py-20 text-center">
-              <div className="mx-auto grid size-16 place-items-center rounded-2xl bg-muted text-muted-foreground mb-4 border border-border/50">
+            <div className="py-24 text-center">
+              <div className="mx-auto grid size-16 place-items-center rounded-2xl bg-muted text-muted-foreground/40 mb-4">
                 <Package className="size-7" />
               </div>
-              <h3 
-                className="text-lg font-light text-foreground font-display"
-              >
-                {searchQuery ? "Sin resultados" : "No hay productos disponibles"}
+              <h3 className="text-base font-semibold text-foreground">
+                {searchQuery ? "Sin resultados" : selectedCategory ? `No hay productos en "${selectedCategory}"` : "No hay productos"}
               </h3>
-              <p className="mt-2 text-xs text-muted-foreground max-w-xs mx-auto font-light">
+              <p className="mt-1.5 text-sm text-muted-foreground max-w-xs mx-auto">
                 {searchQuery
-                  ? `No encontramos productos relacionados con "${searchQuery}". Intenta buscar con otro término.`
-                  : "Por el momento esta tienda no tiene productos publicados."}
+                  ? `No encontramos "${searchQuery}". Intenta con otro termino.`
+                  : "Esta tienda aun no tiene productos publicados."}
               </p>
               {(searchQuery || selectedCategory) && (
                 <Button
                   variant="outline"
                   size="sm"
-                  className="mt-6 rounded-md border-border hover:border-foreground text-xs font-light"
+                  className="mt-6 rounded-xl"
                   onClick={() => { setSelectedCategory(null); setSearchQuery(""); }}
                 >
                   Ver todos los productos
@@ -463,7 +475,7 @@ function StorefrontPage() {
 
           {/* Product Cards Grid */}
           {!productsLoading && filtered.length > 0 && (
-            <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4 lg:gap-8">
+            <div className="grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
               {filtered.map((product) => (
                 <ProductCard
                   key={product.id}
@@ -479,35 +491,36 @@ function StorefrontPage() {
 
       {/* Footer */}
       <footer className="bg-foreground text-background pt-16 pb-8">
-        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-8 mb-16">
-          <div className="col-span-1 md:col-span-1">
-            <span 
-              className="text-2xl tracking-widest block mb-6 font-medium font-display"
-            >
-              {business.name.toUpperCase()}
-            </span>
-            <p className="text-xs text-background/50 font-light leading-relaxed mb-6">
-              Redefiniendo el comercio digital con un proceso limpio, rápido y directo por WhatsApp.
+        <div className="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-10 md:gap-8 mb-14">
+          <div className="col-span-2 md:col-span-1">
+            <div className="flex items-center gap-2.5 text-lg font-bold tracking-tight mb-4">
+              {business.logo_url && (
+                <img src={business.logo_url} alt="" className="size-7 rounded-xl object-cover ring-1 ring-white/10" />
+              )}
+              {business.name}
+            </div>
+            <p className="text-xs text-background/50 font-light leading-relaxed mb-5 max-w-xs">
+              Productos de calidad. Pedidos directos por WhatsApp. Rapido y sin complicaciones.
             </p>
-            <div className="flex gap-4">
-              <a href="#" aria-label="Instagram" className="text-background/50 hover:text-background transition-colors">
-                <Instagram className="size-4" />
+            <div className="flex gap-2.5">
+              <a href="#" aria-label="Instagram" className="grid size-8 place-items-center rounded-xl border border-background/10 text-background/50 hover:text-background hover:border-background/30 transition-all">
+                <Instagram className="size-3.5" />
               </a>
-              <a href="#" aria-label="Facebook" className="text-background/50 hover:text-background transition-colors">
-                <Facebook className="size-4" />
+              <a href="#" aria-label="Facebook" className="grid size-8 place-items-center rounded-xl border border-background/10 text-background/50 hover:text-background hover:border-background/30 transition-all">
+                <Facebook className="size-3.5" />
               </a>
-              <a href="#" aria-label="Twitter" className="text-background/50 hover:text-background transition-colors">
-                <Twitter className="size-4" />
+              <a href="#" aria-label="Twitter" className="grid size-8 place-items-center rounded-xl border border-background/10 text-background/50 hover:text-background hover:border-background/30 transition-all">
+                <Twitter className="size-3.5" />
               </a>
             </div>
           </div>
-          
+
           <div>
-            <h4 className="text-xs font-semibold uppercase tracking-widest mb-6">Tienda</h4>
-            <ul className="space-y-3 text-xs font-light text-background/50">
+            <h4 className="text-[10px] font-semibold uppercase tracking-widest mb-4 text-background/60">Categorias</h4>
+            <ul className="space-y-2.5 text-xs text-background/50">
               <li>
                 <button onClick={() => setSelectedCategory(null)} className="hover:text-background transition-colors">
-                  Catálogo Completo
+                  Todos los productos
                 </button>
               </li>
               {categories.slice(0, 5).map((cat) => (
@@ -521,36 +534,38 @@ function StorefrontPage() {
           </div>
 
           <div>
-            <h4 className="text-xs font-semibold uppercase tracking-widest mb-6">Soporte</h4>
-            <ul className="space-y-3 text-xs font-light text-background/50">
+            <h4 className="text-[10px] font-semibold uppercase tracking-widest mb-4 text-background/60">Soporte</h4>
+            <ul className="space-y-2.5 text-xs text-background/50">
               <li><a href="#" className="hover:text-background transition-colors">Contacto</a></li>
               <li><a href="#" className="hover:text-background transition-colors">FAQ</a></li>
-              <li><a href="#" className="hover:text-background transition-colors">Envíos</a></li>
+              <li><a href="#" className="hover:text-background transition-colors">Envios</a></li>
+              <li><a href="#" className="hover:text-background transition-colors">Devoluciones</a></li>
             </ul>
           </div>
 
           <div>
-            <h4 className="text-xs font-semibold uppercase tracking-widest mb-6">Legal</h4>
-            <ul className="space-y-3 text-xs font-light text-background/50">
+            <h4 className="text-[10px] font-semibold uppercase tracking-widest mb-4 text-background/60">Legal</h4>
+            <ul className="space-y-2.5 text-xs text-background/50">
               <li><a href="#" className="hover:text-background transition-colors">Privacidad</a></li>
-              <li><a href="#" className="hover:text-background transition-colors">Términos</a></li>
+              <li><a href="#" className="hover:text-background transition-colors">Terminos</a></li>
+              <li><a href="#" className="hover:text-background transition-colors">Cookies</a></li>
             </ul>
           </div>
         </div>
-        
-        <div className="max-w-7xl mx-auto px-6 pt-8 border-t border-background/10 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-[10px] text-background/40 font-light">© 2024 {business.name}. Todos los derechos reservados.</p>
-          <div className="flex gap-1.5 items-center text-[10px] text-background/40 font-light">
+
+        <div className="max-w-7xl mx-auto px-6 pt-6 border-t border-background/10 flex flex-col sm:flex-row justify-between items-center gap-3">
+          <p className="text-[10px] text-background/30">&copy; 2024 {business.name}. Todos los derechos reservados.</p>
+          <p className="flex items-center gap-1.5 text-[10px] text-background/30">
             Powered by{" "}
             <a
               href="https://commerceai.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 font-medium text-background/60 underline underline-offset-4 hover:text-background transition-colors"
+              className="inline-flex items-center gap-1 font-medium text-background/50 underline underline-offset-4 hover:text-background transition-colors"
             >
               Commerce AI <ExternalLink className="size-2.5" />
             </a>
-          </div>
+          </p>
         </div>
       </footer>
 
@@ -580,16 +595,16 @@ function ProductCard({
   const [imgLoaded, setImgLoaded] = useState(false);
   const hasSale = product.sale_price != null && product.sale_price < product.price;
   const displayPrice = hasSale ? product.sale_price! : product.price;
-  const badge = getBadge(product.id);
+  const showNewBadge = isNewProduct(product.created_at);
 
   return (
     <Link
       to="/go/$slug/product/$productSlug"
       params={{ slug: storeSlug, productSlug: product.slug }}
-      className="group block w-full text-left cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-md"
+      className="group block w-full text-left cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-2xl"
       aria-label={`Ver ${product.name}, ${$}${displayPrice.toFixed(2)}`}
     >
-      <div className="relative aspect-[3/4] w-full overflow-hidden rounded-md bg-muted mb-4 transition-all duration-300 group-hover:shadow-sm border border-border/40">
+      <div className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl bg-muted mb-3 transition-all duration-500 ease-out group-hover:shadow-lg group-hover:shadow-black/[0.04] group-hover:-translate-y-0.5">
         {product.image_url && !imgError ? (
           <>
             {!imgLoaded && (
@@ -599,9 +614,9 @@ function ProductCard({
               src={product.image_url}
               alt={product.name}
               className={cn(
-                "size-full object-cover object-center transition-all duration-700",
-                imgLoaded ? "opacity-100 scale-100" : "opacity-0 scale-95",
-                "group-hover:scale-105"
+                "size-full object-cover transition-all duration-700 ease-out",
+                imgLoaded ? "opacity-100" : "opacity-0",
+                "group-hover:scale-[1.03]"
               )}
               loading="lazy"
               onLoad={() => setImgLoaded(true)}
@@ -610,46 +625,46 @@ function ProductCard({
           </>
         ) : (
           <div className="flex size-full items-center justify-center">
-            <Package className="size-10 text-muted-foreground/30" />
+            <Package className="size-10 text-muted-foreground/15" />
           </div>
         )}
 
-        {/* Flashing badges */}
-        <div className="absolute left-3 top-3 flex flex-col gap-1.5">
-          {badge && (
-            <span className={cn("rounded-full px-2.5 py-0.5 text-[9px] font-semibold tracking-wider", badge.bg)}>
-              {badge.emoji} {badge.label.toUpperCase()}
+        {/* Badges */}
+        <div className="absolute left-2.5 top-2.5 flex flex-col gap-1.5">
+          {showNewBadge && (
+            <span className="rounded-full bg-blue-100 text-blue-700 px-2 py-0.5 text-[10px] font-semibold shadow-sm">
+              Nuevo
             </span>
           )}
           {hasSale && (
-            <span className="rounded-full bg-destructive px-2.5 py-0.5 text-[9px] font-semibold text-white tracking-wider">
-              OFERTA
+            <span className="rounded-full bg-destructive px-2 py-0.5 text-[10px] font-semibold text-white shadow-sm">
+              Oferta
             </span>
           )}
         </div>
 
-        {/* Plus Quick add action button */}
-        <span className="absolute bottom-3 right-3 w-8 h-8 bg-background/90 backdrop-blur rounded-full flex items-center justify-center opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 shadow-sm border border-border">
-          <Plus className="size-4 text-foreground" />
-        </span>
+        {/* Hover overlay */}
+        <div className="absolute inset-0 flex items-end justify-center bg-gradient-to-t from-black/15 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100 p-3">
+          <span className="rounded-xl bg-white/95 backdrop-blur-sm px-4 py-2 text-xs font-semibold text-foreground shadow-sm translate-y-2 transition-transform duration-300 group-hover:translate-y-0">
+            Ver producto
+          </span>
+        </div>
       </div>
 
-      <div className="px-0.5">
-        <h3 
-          className="text-base font-normal text-foreground leading-snug line-clamp-1 font-display"
-        >
+      <div className="px-0.5 space-y-0.5">
+        <h3 className="text-sm font-semibold text-foreground leading-snug line-clamp-2 group-hover:text-primary transition-colors duration-200">
           {product.name}
         </h3>
-        <p className="text-xs text-muted-foreground mt-1 font-light">
-          {hasSale ? (
-            <>
-              <span className="text-destructive font-normal mr-1.5">{$}{displayPrice.toFixed(2)}</span>
-              <span className="line-through text-muted-foreground/60">{$}{product.price.toFixed(2)}</span>
-            </>
-          ) : (
-            `$${product.price.toFixed(2)}`
+        <div className="flex items-center gap-1.5">
+          <span className={cn("text-sm font-bold", hasSale ? "text-destructive" : "text-foreground")}>
+            {$}{displayPrice.toFixed(2)}
+          </span>
+          {hasSale && (
+            <span className="text-xs text-muted-foreground line-through">
+              {$}{product.price.toFixed(2)}
+            </span>
           )}
-        </p>
+        </div>
       </div>
     </Link>
   );
