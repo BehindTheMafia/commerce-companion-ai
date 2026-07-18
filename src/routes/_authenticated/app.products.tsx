@@ -73,7 +73,7 @@ function ProductsPage() {
     queryKey: ["products", activeBusiness?.id],
     enabled: !!activeBusiness,
     queryFn: async () => {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from("products")
         .select("id,name,slug,sku,price,sale_price,stock,status,image_url,description,category_id,pricing_modes,specifications,shipping_info,warranty_info,wholesale_info,category:categories(name)")
         .eq("business_id", activeBusiness!.id)

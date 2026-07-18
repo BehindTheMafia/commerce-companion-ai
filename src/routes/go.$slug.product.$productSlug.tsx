@@ -65,7 +65,7 @@ function ProductDetailPage() {
     queryKey: ["sf-product", slug, productSlug],
     enabled: !!business,
     queryFn: async (): Promise<Product | null> => {
-      const { data } = await (supabase as any)
+      const { data } = await supabase
         .from("products")
         .select(
           "id, name, slug, price, sale_price, image_url, description, sku, stock, created_at, pricing_modes, specifications, shipping_info, warranty_info, wholesale_info, category:categories(name, slug), brand:brands(name)",
@@ -74,7 +74,7 @@ function ProductDetailPage() {
         .eq("slug", productSlug)
         .eq("status", "active")
         .maybeSingle();
-      return (data ?? null) as Product | null;
+      return (data ?? null) as unknown as Product | null;
     },
   });
 
@@ -84,12 +84,12 @@ function ProductDetailPage() {
     queryKey: ["sf-product-variants", product?.id],
     enabled: !!product,
     queryFn: async () => {
-      const { data } = await (supabase as any)
+      const { data } = await supabase
         .from("product_variants")
         .select("*, values:product_variant_values(*)")
         .eq("product_id", product!.id)
         .order("sort_order");
-      return (data ?? []) as ProductVariant[];
+      return (data ?? []) as unknown as ProductVariant[];
     },
   });
 

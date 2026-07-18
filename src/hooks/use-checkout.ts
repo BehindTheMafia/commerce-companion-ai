@@ -49,7 +49,7 @@ export function useCheckout(business: Business | null | undefined) {
           p_customer_name: data.name,
           p_customer_phone: data.phone,
           p_customer_address: data.address || "",
-          p_notes: data.notes || null,
+          p_notes: data.notes || null as any,
           p_items: items.map((i) => ({
             product_id: i.product.id,
             product_name:

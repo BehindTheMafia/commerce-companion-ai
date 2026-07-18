@@ -12,6 +12,31 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       brands: {
@@ -60,6 +85,7 @@ export type Database = {
           id: string
           logo_url: string | null
           name: string
+          settings: Json | null
           slug: string
           timezone: string
           updated_at: string
@@ -72,6 +98,7 @@ export type Database = {
           id?: string
           logo_url?: string | null
           name: string
+          settings?: Json | null
           slug: string
           timezone?: string
           updated_at?: string
@@ -84,6 +111,7 @@ export type Database = {
           id?: string
           logo_url?: string | null
           name?: string
+          settings?: Json | null
           slug?: string
           timezone?: string
           updated_at?: string
@@ -235,6 +263,269 @@ export type Database = {
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inbox_conversation_ai: {
+        Row: {
+          conversation_id: string
+          conversion_probability: number | null
+          created_at: string
+          id: string
+          intent: string | null
+          metadata: Json | null
+          recommended_discount: number | null
+          sentiment: string | null
+          suggested_products: Json | null
+          suggested_reply: string | null
+          summary: string | null
+          updated_at: string
+          urgency: string | null
+        }
+        Insert: {
+          conversation_id: string
+          conversion_probability?: number | null
+          created_at?: string
+          id?: string
+          intent?: string | null
+          metadata?: Json | null
+          recommended_discount?: number | null
+          sentiment?: string | null
+          suggested_products?: Json | null
+          suggested_reply?: string | null
+          summary?: string | null
+          updated_at?: string
+          urgency?: string | null
+        }
+        Update: {
+          conversation_id?: string
+          conversion_probability?: number | null
+          created_at?: string
+          id?: string
+          intent?: string | null
+          metadata?: Json | null
+          recommended_discount?: number | null
+          sentiment?: string | null
+          suggested_products?: Json | null
+          suggested_reply?: string | null
+          summary?: string | null
+          updated_at?: string
+          urgency?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inbox_conversation_ai_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: true
+            referencedRelation: "inbox_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inbox_conversation_notes: {
+        Row: {
+          author_id: string
+          content: string
+          conversation_id: string
+          created_at: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          content: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inbox_conversation_notes_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "memberships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inbox_conversation_notes_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "inbox_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inbox_conversation_tags: {
+        Row: {
+          conversation_id: string
+          created_at: string
+          id: string
+          tag: string
+        }
+        Insert: {
+          conversation_id: string
+          created_at?: string
+          id?: string
+          tag: string
+        }
+        Update: {
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          tag?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inbox_conversation_tags_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "inbox_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inbox_conversations: {
+        Row: {
+          assigned_to: string | null
+          business_id: string
+          channel: string
+          created_at: string
+          customer_id: string | null
+          customer_name: string | null
+          customer_phone: string | null
+          id: string
+          last_message_at: string | null
+          last_message_sender: string | null
+          last_message_text: string | null
+          metadata: Json | null
+          status: string
+          unread_count: number
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          business_id: string
+          channel?: string
+          created_at?: string
+          customer_id?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          id?: string
+          last_message_at?: string | null
+          last_message_sender?: string | null
+          last_message_text?: string | null
+          metadata?: Json | null
+          status?: string
+          unread_count?: number
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          business_id?: string
+          channel?: string
+          created_at?: string
+          customer_id?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          id?: string
+          last_message_at?: string | null
+          last_message_sender?: string | null
+          last_message_text?: string | null
+          metadata?: Json | null
+          status?: string
+          unread_count?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inbox_conversations_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "memberships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inbox_conversations_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inbox_conversations_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inbox_messages: {
+        Row: {
+          content: string | null
+          conversation_id: string
+          created_at: string
+          external_id: string | null
+          id: string
+          media_type: string | null
+          media_url: string | null
+          message_type: string
+          metadata: Json | null
+          sender_id: string | null
+          sender_type: string
+          status: string
+        }
+        Insert: {
+          content?: string | null
+          conversation_id: string
+          created_at?: string
+          external_id?: string | null
+          id?: string
+          media_type?: string | null
+          media_url?: string | null
+          message_type?: string
+          metadata?: Json | null
+          sender_id?: string | null
+          sender_type: string
+          status?: string
+        }
+        Update: {
+          content?: string | null
+          conversation_id?: string
+          created_at?: string
+          external_id?: string | null
+          id?: string
+          media_type?: string | null
+          media_url?: string | null
+          message_type?: string
+          metadata?: Json | null
+          sender_id?: string | null
+          sender_type?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inbox_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "inbox_conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inbox_messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "memberships"
             referencedColumns: ["id"]
           },
         ]
@@ -474,6 +765,82 @@ export type Database = {
           },
         ]
       }
+      product_variant_values: {
+        Row: {
+          available: boolean
+          id: string
+          image_url: string | null
+          label: string
+          sort_order: number
+          value: string
+          variant_id: string
+        }
+        Insert: {
+          available?: boolean
+          id?: string
+          image_url?: string | null
+          label: string
+          sort_order?: number
+          value: string
+          variant_id: string
+        }
+        Update: {
+          available?: boolean
+          id?: string
+          image_url?: string | null
+          label?: string
+          sort_order?: number
+          value?: string
+          variant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_variant_values_variant_id_fkey"
+            columns: ["variant_id"]
+            isOneToOne: false
+            referencedRelation: "product_variants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      product_variants: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          product_id: string
+          sort_order: number
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          product_id: string
+          sort_order?: number
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          product_id?: string
+          sort_order?: number
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_variants_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           brand_id: string | null
@@ -489,13 +856,18 @@ export type Database = {
           min_stock: number
           name: string
           price: number
+          pricing_modes: Json | null
           sale_price: number | null
+          shipping_info: string | null
           sku: string | null
           slug: string
+          specifications: Json | null
           status: string
           stock: number
           tags: string[] | null
           updated_at: string
+          warranty_info: string | null
+          wholesale_info: string | null
         }
         Insert: {
           brand_id?: string | null
@@ -511,13 +883,18 @@ export type Database = {
           min_stock?: number
           name: string
           price?: number
+          pricing_modes?: Json | null
           sale_price?: number | null
+          shipping_info?: string | null
           sku?: string | null
           slug: string
+          specifications?: Json | null
           status?: string
           stock?: number
           tags?: string[] | null
           updated_at?: string
+          warranty_info?: string | null
+          wholesale_info?: string | null
         }
         Update: {
           brand_id?: string | null
@@ -533,13 +910,18 @@ export type Database = {
           min_stock?: number
           name?: string
           price?: number
+          pricing_modes?: Json | null
           sale_price?: number | null
+          shipping_info?: string | null
           sku?: string | null
           slug?: string
+          specifications?: Json | null
           status?: string
           stock?: number
           tags?: string[] | null
           updated_at?: string
+          warranty_info?: string | null
+          wholesale_info?: string | null
         }
         Relationships: [
           {
@@ -600,15 +982,57 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      get_my_businesses: {
-        Args: Record<string, never>
+      add_conversation_note: {
+        Args: { p_content: string; p_conversation_id: string }
+        Returns: string
+      }
+      assign_conversation: {
+        Args: { p_conversation_id: string; p_membership_id: string }
+        Returns: undefined
+      }
+      create_order: {
+        Args: {
+          p_business_id: string
+          p_customer_address: string
+          p_customer_name: string
+          p_customer_phone: string
+          p_items?: Json
+          p_notes?: string
+        }
+        Returns: Json
+      }
+      get_conversation_messages: {
+        Args: { p_conversation_id: string; p_limit?: number; p_offset?: number }
         Returns: {
+          content: string | null
+          conversation_id: string
+          created_at: string
+          external_id: string | null
           id: string
+          media_type: string | null
+          media_url: string | null
+          message_type: string
+          metadata: Json | null
+          sender_id: string | null
+          sender_type: string
+          status: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "inbox_messages"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      get_my_businesses: {
+        Args: never
+        Returns: {
+          currency: string
+          id: string
+          logo_url: string
           name: string
           slug: string
-          logo_url: string | null
-          currency: string
-          whatsapp_phone: string | null
+          whatsapp_phone: string
         }[]
       }
       has_business_role: {
@@ -619,16 +1043,33 @@ export type Database = {
         Returns: boolean
       }
       is_business_member: { Args: { _business_id: string }; Returns: boolean }
-      create_order: {
+      resolve_conversation: {
+        Args: { p_conversation_id: string }
+        Returns: undefined
+      }
+      send_message: {
+        Args: {
+          p_content?: string
+          p_conversation_id: string
+          p_media_type?: string
+          p_media_url?: string
+          p_message_type?: string
+          p_sender_type: string
+        }
+        Returns: string
+      }
+      webhook_handle_incoming_message: {
         Args: {
           p_business_id: string
-          p_customer_name: string
-          p_customer_phone: string
-          p_customer_address: string
-          p_notes: string | null
-          p_items: unknown
+          p_content?: string
+          p_customer_name?: string
+          p_external_id?: string
+          p_media_type?: string
+          p_media_url?: string
+          p_message_type?: string
+          p_phone: string
         }
-        Returns: Record<string, unknown>
+        Returns: Json
       }
     }
     Enums: {
@@ -767,6 +1208,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       membership_role: ["owner", "admin", "staff", "viewer"],
