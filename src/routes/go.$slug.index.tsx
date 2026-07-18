@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   Loader2, ShoppingBag, Sparkles, AlertCircle, Package,
   ArrowRight, ExternalLink, Search, Heart, X,
-  Facebook, Twitter, Instagram, ChevronLeft, ChevronRight,
+  Facebook, Twitter, Instagram, ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect, useRef } from "react";
@@ -45,9 +45,9 @@ function isNewProduct(createdAt: string) {
 function SkeletonCard() {
   return (
     <div className="animate-pulse">
-      <div className="aspect-[3/4] rounded-2xl bg-muted mb-3" />
-      <div className="h-4 w-3/4 rounded-lg bg-muted mb-2" />
-      <div className="h-3 w-1/3 rounded-lg bg-muted" />
+      <div className="aspect-[3/4] rounded-2xl bg-muted/70 mb-3" />
+      <div className="h-4 w-3/4 rounded-lg bg-muted/60 mb-2" />
+      <div className="h-3 w-1/3 rounded-lg bg-muted/60" />
     </div>
   );
 }
@@ -132,12 +132,14 @@ function StorefrontPage() {
   if (bizLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-3 text-center">
-          <div className="grid size-14 place-items-center rounded-2xl bg-primary text-primary-foreground shadow-lg shadow-primary/20">
+        <div className="flex flex-col items-center gap-4 text-center">
+          <div className="grid size-14 place-items-center rounded-2xl bg-primary text-primary-foreground shadow-lg">
             <Sparkles className="size-6" />
           </div>
-          <p className="text-sm font-medium text-foreground">Cargando tienda...</p>
-          <Loader2 className="size-4 animate-spin text-muted-foreground" />
+          <div className="space-y-1.5">
+            <p className="text-sm font-medium text-foreground">Cargando tienda</p>
+            <Loader2 className="mx-auto size-4 animate-spin text-muted-foreground" />
+          </div>
         </div>
       </div>
     );
@@ -146,17 +148,17 @@ function StorefrontPage() {
   if (bizError || !business) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background px-4">
-        <div className="max-w-md text-center">
+        <div className="max-w-sm text-center">
           <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-destructive/10 text-destructive">
             <AlertCircle className="size-6" />
           </div>
-          <h1 className="mt-4 text-xl font-semibold">Tienda no encontrada</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
+          <h1 className="mt-4 text-lg font-semibold text-foreground">Tienda no encontrada</h1>
+          <p className="mt-1.5 text-sm text-muted-foreground">
             La tienda que buscas no existe o ha sido removida.
           </p>
           <Link
             to="/"
-            className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-primary underline underline-offset-4"
+            className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-primary underline underline-offset-4"
           >
             Volver al inicio <ArrowRight className="size-3" />
           </Link>
@@ -180,13 +182,11 @@ function StorefrontPage() {
     if (!business) return;
     const waPhone = business.whatsapp_phone;
     if (!waPhone) {
-      setCheckoutError("El negocio no tiene configurado un número de WhatsApp.");
+      setCheckoutError("El negocio no tiene configurado un numero de WhatsApp.");
       return;
     }
-
     setCheckoutBusy(true);
     setCheckoutError(null);
-
     const message = buildWhatsAppMessage(
       business.name,
       items.map((i) => ({
@@ -208,25 +208,20 @@ function StorefrontPage() {
         cashAmount: data.cashAmount || undefined,
       },
     );
-
     location.href = getWhatsAppLink(waPhone, message);
-
     try {
-      const itemsPayload = items.map((i) => ({
-        product_id: i.product.id,
-        product_name: i.product.name,
-        quantity: i.quantity,
-      }));
-
       await supabase.rpc("create_order", {
         p_business_id: business.id,
         p_customer_name: data.name,
         p_customer_phone: data.phone,
         p_customer_address: data.address || "",
         p_notes: data.notes || null,
-        p_items: itemsPayload,
+        p_items: items.map((i) => ({
+          product_id: i.product.id,
+          product_name: i.product.name,
+          quantity: i.quantity,
+        })),
       });
-
       clearCart();
       setCartOpen(false);
     } catch (err) {
@@ -236,20 +231,18 @@ function StorefrontPage() {
     }
   }
 
-  const showFilters = categories.length > 0 || searchQuery;
-
   return (
     <div className="flex min-h-screen flex-col bg-background">
 
-      {/* ── Announcement bar ───────────────────────────────── */}
+      {/* Announcement bar */}
       <div className="relative overflow-hidden bg-foreground text-background">
         <div className="relative z-10 text-[11px] py-2 text-center tracking-wide font-light px-4">
           <Sparkles className="mr-1.5 inline size-3 align-text-top opacity-60" />
-          ENVÍO GRATIS EN PEDIDOS +{$}50
+          ENVIO GRATIS EN PEDIDOS +{$}50
         </div>
       </div>
 
-      {/* ── Sticky header ──────────────────────────────────── */}
+      {/* Sticky header */}
       <header
         className={cn(
           "sticky top-0 z-40 w-full bg-background/90 backdrop-blur-xl transition-all duration-200",
@@ -283,7 +276,7 @@ function StorefrontPage() {
               type="search"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Buscar productos..."
+              placeholder="Buscar productos"
               aria-label="Buscar productos"
               className="flex-1 bg-transparent text-xs text-foreground placeholder-muted-foreground/50 focus:outline-none min-w-0"
             />
@@ -291,7 +284,7 @@ function StorefrontPage() {
               <button
                 onClick={() => setSearchQuery("")}
                 className="shrink-0 text-muted-foreground/50 hover:text-foreground transition-colors"
-                aria-label="Limpiar búsqueda"
+                aria-label="Limpiar busqueda"
               >
                 <X className="size-3" />
               </button>
@@ -330,7 +323,7 @@ function StorefrontPage() {
           </div>
         </div>
 
-        {/* Mobile search bar */}
+        {/* Mobile search */}
         {searchOpen && (
           <div className="border-t border-border/40 bg-background px-4 py-2.5 sm:hidden animate-in slide-in-from-top-1 duration-150">
             <div className="flex items-center gap-2 rounded-xl bg-muted/60 border border-border/40 px-3 h-9 focus-within:border-primary/50">
@@ -340,7 +333,7 @@ function StorefrontPage() {
                 type="search"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Buscar productos..."
+                placeholder="Buscar productos"
                 aria-label="Buscar productos"
                 className="flex-1 bg-transparent text-xs text-foreground placeholder-muted-foreground/50 focus:outline-none"
               />
@@ -353,7 +346,7 @@ function StorefrontPage() {
           </div>
         )}
 
-        {/* Category pills */}
+        {/* Categories */}
         {categories.length > 0 && (
           <div className="border-t border-border/40">
             <div className="mx-auto max-w-7xl px-4 sm:px-6">
@@ -361,7 +354,7 @@ function StorefrontPage() {
                 ref={categoryBarRef}
                 className="flex gap-2 overflow-x-auto py-2 scrollbar-none [-webkit-overflow-scrolling:touch]"
                 role="navigation"
-                aria-label="Categorías"
+                aria-label="Categorias"
               >
                 <button
                   onClick={() => setSelectedCategory(null)}
@@ -398,47 +391,66 @@ function StorefrontPage() {
 
       <main className="flex-1">
 
-        {/* ── Hero ──────────────────────────────────────────── */}
-        <section className="relative border-b border-border/40 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.03] via-transparent to-transparent pointer-events-none" />
-          <div className="relative mx-auto max-w-7xl px-4 py-12 sm:py-16 sm:px-6">
-            <div className="flex flex-col items-center text-center gap-4 max-w-lg mx-auto">
-              {business.logo_url && (
-                <div className="relative">
-                  <div className="absolute inset-0 rounded-2xl bg-primary/10 blur-xl" />
-                  <img
-                    src={business.logo_url}
-                    alt={business.name}
-                    className="relative size-16 rounded-2xl object-cover ring-1 ring-border/50 shadow-sm"
-                  />
+        {/* Hero */}
+        <section className="border-b border-border/40">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 py-12 sm:py-16">
+              <div className="lg:col-span-7 flex flex-col justify-center gap-4">
+                <div className="space-y-3">
+                  {business.logo_url && (
+                    <img
+                      src={business.logo_url}
+                      alt={business.name}
+                      className="size-12 rounded-2xl object-cover ring-1 ring-border/50 shadow-sm"
+                    />
+                  )}
+                  <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-foreground leading-[1.1]">
+                    {business.name}
+                  </h1>
+                  <p className="text-sm sm:text-base text-muted-foreground font-light leading-relaxed max-w-md">
+                    Descubre nuestra coleccion. Ordena directo por WhatsApp.
+                  </p>
                 </div>
-              )}
-              <div className="space-y-2">
-                <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground leading-tight">
-                  {business.name}
-                </h1>
-                <p className="text-sm text-muted-foreground font-light max-w-sm mx-auto leading-relaxed">
-                  Descubre nuestra colección. Ordena directo por WhatsApp.
-                </p>
+                {categories.length > 0 && (
+                  <div className="flex flex-wrap gap-2 pt-2">
+                    {categories.slice(0, 4).map((cat) => (
+                      <button
+                        key={cat.id}
+                        onClick={() => setSelectedCategory(cat.name)}
+                        className={cn(
+                          "rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all",
+                          selectedCategory === cat.name
+                            ? "bg-primary text-primary-foreground border-primary"
+                            : "border-border/60 text-muted-foreground hover:border-foreground/30 hover:text-foreground"
+                        )}
+                      >
+                        {cat.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
-              {!showFilters && categories.length > 0 && (
-                <div className="flex gap-2 pt-1">
-                  {categories.slice(0, 3).map((cat) => (
-                    <button
-                      key={cat.id}
-                      onClick={() => setSelectedCategory(cat.name)}
-                      className="rounded-full border border-border/60 px-3.5 py-1.5 text-[11px] font-medium text-muted-foreground hover:border-foreground/30 hover:text-foreground transition-all"
-                    >
-                      {cat.name}
-                    </button>
-                  ))}
+              <div className="hidden lg:flex lg:col-span-5 items-center justify-center">
+                <div className="relative w-full max-w-sm aspect-square">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.07] to-transparent rounded-3xl" />
+                  {products.length > 0 && products[0].image_url ? (
+                    <img
+                      src={products[0].image_url}
+                      alt=""
+                      className="relative size-full object-cover rounded-3xl shadow-lg ring-1 ring-border/20"
+                    />
+                  ) : (
+                    <div className="relative flex size-full items-center justify-center rounded-3xl bg-muted/50">
+                      <Package className="size-16 text-muted-foreground/15" />
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
           </div>
         </section>
 
-        {/* ── Product grid ───────────────────────────────────── */}
+        {/* Product grid */}
         <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12">
 
           {/* Section heading */}
@@ -468,7 +480,7 @@ function StorefrontPage() {
 
           {/* Skeleton */}
           {productsLoading && (
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 sm:gap-5 lg:gap-6">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4 lg:gap-5">
               {Array.from({ length: 8 }).map((_, i) => (
                 <SkeletonCard key={i} />
               ))}
@@ -486,8 +498,8 @@ function StorefrontPage() {
               </h3>
               <p className="mt-1.5 text-sm text-muted-foreground max-w-xs mx-auto">
                 {searchQuery
-                  ? `No encontramos "${searchQuery}". Intenta con otro término.`
-                  : "Esta tienda aún no tiene productos publicados. Vuelve pronto."}
+                  ? `No encontramos "${searchQuery}". Intenta con otro termino.`
+                  : "Esta tienda aun no tiene productos publicados. Vuelve pronto."}
               </p>
               {(searchQuery || selectedCategory) && (
                 <Button
@@ -518,7 +530,7 @@ function StorefrontPage() {
         </section>
       </main>
 
-      {/* ── Footer ─────────────────────────────────────────── */}
+      {/* Footer */}
       <footer className="border-t border-border/40 bg-foreground text-background pt-12 pb-8">
         <div className="mx-auto max-w-7xl px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-10 mb-10">
@@ -530,7 +542,7 @@ function StorefrontPage() {
                 {business.name}
               </div>
               <p className="text-xs text-background/50 font-light leading-relaxed mb-5 max-w-xs">
-                Productos de calidad. Pedidos directos por WhatsApp. Rápido y sin complicaciones.
+                Productos de calidad. Pedidos directos por WhatsApp. Rapido y sin complicaciones.
               </p>
               <div className="flex gap-2.5">
                 <a href="#" aria-label="Instagram" className="grid size-8 place-items-center rounded-xl border border-background/10 text-background/50 hover:text-background hover:border-background/30 transition-all">
@@ -539,7 +551,7 @@ function StorefrontPage() {
                 <a href="#" aria-label="Facebook" className="grid size-8 place-items-center rounded-xl border border-background/10 text-background/50 hover:text-background hover:border-background/30 transition-all">
                   <Facebook className="size-3.5" />
                 </a>
-                <a href="#" aria-label="Twitter/X" className="grid size-8 place-items-center rounded-xl border border-background/10 text-background/50 hover:text-background hover:border-background/30 transition-all">
+                <a href="#" aria-label="Twitter" className="grid size-8 place-items-center rounded-xl border border-background/10 text-background/50 hover:text-background hover:border-background/30 transition-all">
                   <Twitter className="size-3.5" />
                 </a>
               </div>
@@ -547,7 +559,7 @@ function StorefrontPage() {
 
             <div>
               <h4 className="text-[10px] font-semibold uppercase tracking-widest mb-4 text-background/60">
-                Categorías
+                Categorias
               </h4>
               <ul className="space-y-2.5 text-xs text-background/50">
                 <li>
@@ -566,24 +578,20 @@ function StorefrontPage() {
             </div>
 
             <div>
-              <h4 className="text-[10px] font-semibold uppercase tracking-widest mb-4 text-background/60">
-                Soporte
-              </h4>
+              <h4 className="text-[10px] font-semibold uppercase tracking-widest mb-4 text-background/60">Soporte</h4>
               <ul className="space-y-2.5 text-xs text-background/50">
                 <li><a href="#" className="hover:text-background transition-colors">Contacto</a></li>
                 <li><a href="#" className="hover:text-background transition-colors">FAQ</a></li>
-                <li><a href="#" className="hover:text-background transition-colors">Envíos</a></li>
+                <li><a href="#" className="hover:text-background transition-colors">Envios</a></li>
                 <li><a href="#" className="hover:text-background transition-colors">Devoluciones</a></li>
               </ul>
             </div>
 
             <div>
-              <h4 className="text-[10px] font-semibold uppercase tracking-widest mb-4 text-background/60">
-                Legal
-              </h4>
+              <h4 className="text-[10px] font-semibold uppercase tracking-widest mb-4 text-background/60">Legal</h4>
               <ul className="space-y-2.5 text-xs text-background/50">
                 <li><a href="#" className="hover:text-background transition-colors">Privacidad</a></li>
-                <li><a href="#" className="hover:text-background transition-colors">Términos</a></li>
+                <li><a href="#" className="hover:text-background transition-colors">Terminos</a></li>
                 <li><a href="#" className="hover:text-background transition-colors">Cookies</a></li>
               </ul>
             </div>
@@ -591,7 +599,7 @@ function StorefrontPage() {
 
           <div className="pt-6 border-t border-background/10 flex flex-col sm:flex-row justify-between items-center gap-3">
             <p className="text-[10px] text-background/30">
-              © 2024 {business.name}. Todos los derechos reservados.
+              &copy; 2024 {business.name}. Todos los derechos reservados.
             </p>
             <p className="flex items-center gap-1.5 text-[10px] text-background/30">
               Powered by{" "}
@@ -642,7 +650,7 @@ function ProductCard({
       className="group block w-full text-left cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-2xl"
       aria-label={`Ver ${product.name}, ${$}${displayPrice.toFixed(2)}`}
     >
-      <div className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl bg-muted mb-3 transition-all duration-300 group-hover:shadow-lg group-hover:shadow-black/5">
+      <div className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl bg-muted mb-3 transition-all duration-500 ease-out group-hover:shadow-lg group-hover:shadow-black/5 group-hover:-translate-y-0.5">
         {product.image_url && !imgError ? (
           <>
             {!imgLoaded && (
@@ -671,7 +679,7 @@ function ProductCard({
         <div className="absolute left-2.5 top-2.5 flex flex-col gap-1.5">
           {showNewBadge && (
             <span className="rounded-full bg-blue-100 text-blue-700 px-2 py-0.5 text-[10px] font-semibold shadow-sm">
-              🆕 Nuevo
+              Nuevo
             </span>
           )}
           {hasSale && (
