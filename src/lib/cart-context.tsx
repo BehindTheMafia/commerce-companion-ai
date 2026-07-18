@@ -7,6 +7,10 @@ export type CartProduct = {
   sale_price: number | null;
   image_url: string | null;
   slug: string;
+  pricingModeId?: string;
+  pricingModeName?: string;
+  unitPrice?: number;
+  minimumQuantity?: number;
 };
 
 export type CartItem = {
@@ -30,21 +34,23 @@ function cartReducer(state: CartState, action: CartAction): CartState {
   switch (action.type) {
     case "ADD_ITEM": {
       const qty = action.quantity ?? 1;
-      const existing = state.items.find((i) => i.product.id === action.product.id);
+      const existing = state.items.find(
+        (i) =>
+          i.product.id === action.product.id &&
+          i.product.pricingModeId === action.product.pricingModeId,
+      );
       if (existing) {
         return {
           items: state.items.map((i) =>
-            i.product.id === action.product.id
+            i.product.id === action.product.id &&
+            i.product.pricingModeId === action.product.pricingModeId
               ? { ...i, quantity: i.quantity + qty, notes: action.notes ?? i.notes }
               : i,
           ),
         };
       }
       return {
-        items: [
-          ...state.items,
-          { product: action.product, quantity: qty, notes: action.notes },
-        ],
+        items: [...state.items, { product: action.product, quantity: qty, notes: action.notes }],
       };
     }
     case "REMOVE_ITEM":
@@ -90,7 +96,9 @@ function loadCart(): CartState {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) return JSON.parse(raw);
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
   return { items: [] };
 }
 
@@ -98,7 +106,9 @@ function saveCart(state: CartState) {
   if (typeof window === "undefined") return;
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 }
 
 export function CartProvider({ children }: { children: ReactNode }) {
@@ -110,8 +120,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const addItem = (product: CartProduct, quantity?: number, notes?: string) =>
     dispatch({ type: "ADD_ITEM", product, quantity, notes });
-  const removeItem = (productId: string) =>
-    dispatch({ type: "REMOVE_ITEM", productId });
+  const removeItem = (productId: string) => dispatch({ type: "REMOVE_ITEM", productId });
   const updateQuantity = (productId: string, quantity: number) =>
     dispatch({ type: "UPDATE_QUANTITY", productId, quantity });
   const updateNotes = (productId: string, notes: string) =>
@@ -120,7 +129,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const itemCount = state.items.reduce((sum, i) => sum + i.quantity, 0);
   const subtotal = state.items.reduce((sum, i) => {
-    const price = i.product.sale_price ?? i.product.price;
+    const price = i.product.unitPrice ?? i.product.sale_price ?? i.product.price;
     return sum + price * i.quantity;
   }, 0);
 

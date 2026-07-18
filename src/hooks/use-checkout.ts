@@ -23,9 +23,10 @@ export function useCheckout(business: Business | null | undefined) {
       const message = buildWhatsAppMessage(
         business.name,
         items.map((i) => ({
-          name: i.product.name,
+          name:
+            i.product.name + (i.product.pricingModeName ? ` (${i.product.pricingModeName})` : ""),
           quantity: i.quantity,
-          price: i.product.sale_price ?? i.product.price,
+          price: i.product.unitPrice ?? i.product.sale_price ?? i.product.price,
           notes: i.notes,
         })),
         subtotal,
@@ -51,7 +52,8 @@ export function useCheckout(business: Business | null | undefined) {
           p_notes: data.notes || null,
           p_items: items.map((i) => ({
             product_id: i.product.id,
-            product_name: i.product.name,
+            product_name:
+              i.product.name + (i.product.pricingModeName ? ` (${i.product.pricingModeName})` : ""),
             quantity: i.quantity,
           })),
         });

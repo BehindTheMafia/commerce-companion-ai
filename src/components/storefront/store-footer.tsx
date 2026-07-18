@@ -1,19 +1,24 @@
 import { Link } from "@tanstack/react-router";
-import { ShoppingBag, ExternalLink, Instagram, Facebook, Twitter } from "lucide-react";
+import { ExternalLink, Instagram, Facebook, Twitter } from "lucide-react";
 import type { Business } from "@/types/storefront";
+import { useStoreSettings } from "@/hooks/use-store-settings";
 
 type StoreFooterProps = {
   business: Business;
   slug: string;
 };
 
-const SOCIAL_ICONS = [
-  { icon: Instagram, key: "instagram" },
-  { icon: Facebook, key: "facebook" },
-  { icon: Twitter, key: "twitter" },
-] as const;
+const SOCIAL_ICONS: Record<string, { icon: React.ComponentType<{ className?: string }> }> = {
+  instagram: { icon: Instagram },
+  facebook: { icon: Facebook },
+  twitter: { icon: Twitter },
+};
 
 export function StoreFooter({ business, slug }: StoreFooterProps) {
+  const settings = useStoreSettings(business);
+  const socialLinks = settings.social_links;
+  const hasSocialLinks = Object.values(socialLinks).some((url) => url);
+
   return (
     <footer className="border-t border-border/40 bg-muted/20 pt-16 pb-10 mt-auto">
       <div className="max-w-[1440px] mx-auto px-5 md:px-8 lg:px-12 grid grid-cols-2 md:grid-cols-4 gap-10 mb-14">
@@ -28,17 +33,26 @@ export function StoreFooter({ business, slug }: StoreFooterProps) {
             )}
             {business.name}
           </div>
-          <div className="flex gap-2.5">
-            {SOCIAL_ICONS.map(({ icon: Icon, key }) => (
-              <a
-                key={key}
-                href="#"
-                className="grid size-9 place-items-center rounded-xl border border-border/50 text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-all"
-              >
-                <Icon className="size-3.5" />
-              </a>
-            ))}
-          </div>
+          {hasSocialLinks && (
+            <div className="flex gap-2.5">
+              {Object.entries(socialLinks).map(([key, url]) => {
+                if (!url) return null;
+                const { icon: Icon } = SOCIAL_ICONS[key] ?? {};
+                if (!Icon) return null;
+                return (
+                  <a
+                    key={key}
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="grid size-9 place-items-center rounded-xl border border-border/50 text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-all"
+                  >
+                    <Icon className="size-3.5" />
+                  </a>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         <div>

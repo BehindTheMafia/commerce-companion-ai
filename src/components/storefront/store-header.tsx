@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "@tanstack/react-router";
-import { ShoppingBag, Search } from "lucide-react";
+import { ShoppingBag } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/lib/cart-context";
 import type { Business } from "@/types/storefront";
@@ -8,10 +8,11 @@ import type { Business } from "@/types/storefront";
 type StoreHeaderProps = {
   business: Business;
   slug: string;
+  onCartOpen?: () => void;
   actions?: React.ReactNode;
 };
 
-export function StoreHeader({ business, slug, actions }: StoreHeaderProps) {
+export function StoreHeader({ business, slug, onCartOpen, actions }: StoreHeaderProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const { itemCount } = useCart();
 
@@ -49,6 +50,7 @@ export function StoreHeader({ business, slug, actions }: StoreHeaderProps) {
         <div className="flex items-center gap-2">
           {actions}
           <button
+            onClick={onCartOpen}
             className="relative text-muted-foreground hover:text-foreground transition-colors p-2 rounded-full hover:bg-muted/50"
             aria-label={`Carrito (${itemCount} productos)`}
           >

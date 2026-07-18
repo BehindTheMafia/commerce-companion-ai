@@ -1,6 +1,5 @@
 import { Link } from "@tanstack/react-router";
 import { Package } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { hasSalePrice, getDisplayPrice } from "@/lib/product";
 import type { Product } from "@/types/storefront";
 
@@ -8,16 +7,22 @@ type RelatedProductsProps = {
   products: Product[];
   currencySymbol: string;
   storeSlug: string;
+  title?: string;
 };
 
-export function RelatedProducts({ products, currencySymbol: $, storeSlug }: RelatedProductsProps) {
+export function RelatedProducts({
+  products,
+  currencySymbol: $,
+  storeSlug,
+  title = "Completa tu Pedido",
+}: RelatedProductsProps) {
   if (products.length === 0) return null;
 
   return (
     <section className="mt-20 lg:mt-28 border-t border-border/40 pt-16">
       <div className="mb-10 flex items-end justify-between">
         <h2 className="text-xl lg:text-2xl font-semibold text-foreground tracking-tight">
-          Completa tu Pedido
+          {title}
         </h2>
         <Link
           to="/go/$slug"

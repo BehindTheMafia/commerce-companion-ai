@@ -1,9 +1,10 @@
 import { createFileRoute, useParams } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useCart, type CartProduct } from "@/lib/cart-context";
 import { useBusinessQuery } from "@/hooks/use-business-query";
+import { useStoreSettings } from "@/hooks/use-store-settings";
 import { useCheckout } from "@/hooks/use-checkout";
 import { useCurrency } from "@/hooks/use-currency";
 import { useProductImages } from "@/hooks/use-product-images";
@@ -16,11 +17,17 @@ import { ProductBadges } from "@/components/storefront/product-badges";
 import { ProductQuantity } from "@/components/storefront/product-quantity";
 import { ProductCTA } from "@/components/storefront/product-cta";
 import { ProductAccordion } from "@/components/storefront/product-accordion";
+import { ProductBenefits } from "@/components/storefront/product-benefits";
+import { ProductShipping } from "@/components/storefront/product-shipping";
+import { ProductVariants } from "@/components/storefront/product-variants";
+import { useVariants } from "@/hooks/use-variants";
+import { PricingSelector } from "@/components/storefront/pricing-selector";
+import { usePricingMode } from "@/hooks/use-pricing-mode";
 import { RelatedProducts } from "@/components/storefront/related-products";
 import { SkeletonProductPage } from "@/components/storefront/skeleton-product-page";
 import { CartDrawerV2 } from "@/components/storefront/cart-drawer-v2";
 import { toast } from "sonner";
-import { AlertCircle, ArrowRight, Heart } from "lucide-react";
+import { AlertCircle, ArrowRight } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import type { Product } from "@/types/storefront";
 
@@ -45,10 +52,12 @@ function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const [notes, setNotes] = useState("");
   const [cartOpen, setCartOpen] = useState(false);
+  const [variantSelection, setVariantSelection] = useState<Record<string, string>>({});
 
   const { addItem, itemCount } = useCart();
 
   const { data: business, isLoading: bizLoading } = useBusinessQuery(slug);
+  const settings = useStoreSettings(business);
   const { symbol: $ } = useCurrency(business?.currency ?? "USD");
   const { handleCheckout, busy: checkoutBusy, error: checkoutError } = useCheckout(business);
 
@@ -73,7 +82,7 @@ function ProductDetailPage() {
 
   const { data: related = [] } = useQuery({
     queryKey: ["sf-related", business?.id, product?.id],
-    enabled: !!business && !!product,
+    enabled: !!business && !!product && settings.recommendations.enabled,
     queryFn: async (): Promise<Product[]> => {
       if (product?.category?.slug) {
         const { data: cats } = await supabase
@@ -109,8 +118,38 @@ function ProductDetailPage() {
     },
   });
 
+  const {
+    selected: pricingMode,
+    setSelectedId: setPricingMode,
+    effectivePrice,
+    minimumQuantity,
+    showSelector,
+  } = usePricingMode(product?.pricing_modes ?? null);
+
+  const { hasVariants, defaultSelection } = useVariants(product?.variants ?? null);
+
+  const variantState = useMemo(() => {
+    if (!hasVariants) return variantSelection;
+    return { ...defaultSelection, ...variantSelection };
+  }, [hasVariants, defaultSelection, variantSelection]);
+
+  const unitPrice =
+    effectivePrice ??
+    (hasSalePrice(product?.price ?? 0, product?.sale_price ?? null)
+      ? product!.sale_price!
+      : (product?.price ?? 0));
+
+  const onSale = product ? hasSalePrice(product.price, product.sale_price) : false;
+  const displayPrice = onSale ? product!.sale_price! : (product?.price ?? 0);
+
+  const canAddToCart = quantity >= minimumQuantity;
+  const minQtyMessage =
+    !canAddToCart && pricingMode
+      ? `Minimo de compra para ${pricingMode.name} es ${minimumQuantity} unidades.`
+      : null;
+
   const handleAddToCart = useCallback(() => {
-    if (!product) return;
+    if (!product || !canAddToCart) return;
     const cartProduct: CartProduct = {
       id: product.id,
       name: product.name,
@@ -118,6 +157,14 @@ function ProductDetailPage() {
       sale_price: product.sale_price,
       image_url: product.image_url,
       slug: product.slug,
+      ...(pricingMode
+        ? {
+            pricingModeId: pricingMode.id,
+            pricingModeName: pricingMode.name,
+            unitPrice: pricingMode.price,
+            minimumQuantity: pricingMode.minimumQuantity,
+          }
+        : {}),
     };
     addItem(cartProduct, quantity, notes || undefined);
     toast.custom(
@@ -140,7 +187,7 @@ function ProductDetailPage() {
       ),
       { duration: 3000, position: "bottom-center" },
     );
-  }, [product, quantity, notes, addItem, itemCount]);
+  }, [product, pricingMode, quantity, notes, canAddToCart, addItem, itemCount]);
 
   if (bizLoading || productLoading) {
     return <SkeletonProductPage />;
@@ -169,9 +216,6 @@ function ProductDetailPage() {
     );
   }
 
-  const onSale = hasSalePrice(product.price, product.sale_price);
-  const displayPrice = getDisplayPrice(product.price, product.sale_price);
-
   const descriptionSections: { title: string; content: string }[] = [];
   if (product.description) {
     descriptionSections.push({ title: "Descripcion", content: product.description });
@@ -179,10 +223,10 @@ function ProductDetailPage() {
 
   return (
     <div className="flex min-h-dvh flex-col bg-background text-foreground antialiased font-sans">
-      <StoreHeader business={business} slug={slug} />
+      <StoreHeader business={business} slug={slug} onCartOpen={() => setCartOpen(true)} />
 
       <main className="flex-1">
-        <div className="mx-auto max-w-[1440px] px-5 md:px-8 lg:px-12 py-8 lg:py-12">
+        <div className="mx-auto w-full max-w-[1440px] px-5 md:px-8 lg:px-12 py-8 lg:py-12">
           <ProductBreadcrumbs
             items={[
               { label: "Inicio", to: "/go/$slug", params: { slug } },
@@ -191,7 +235,8 @@ function ProductDetailPage() {
             ]}
           />
 
-          <div className="grid gap-12 lg:gap-16 grid-cols-1 lg:grid-cols-[55fr_45fr]">
+          <div className="grid gap-8 lg:gap-16 grid-cols-1 lg:grid-cols-[58fr_42fr]">
+            {/* Left: Gallery — sticky on desktop */}
             <ProductGallery
               images={images}
               mainImageUrl={product.image_url}
@@ -205,23 +250,32 @@ function ProductDetailPage() {
               }
             />
 
-            <div className="flex flex-col max-w-[520px]">
+            {/* Right: Product Information */}
+            <div className="flex flex-col">
+              {product.category?.name && (
+                <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-3">
+                  {product.category.name}
+                </span>
+              )}
+
               <h1 className="text-[32px] md:text-[40px] lg:text-[48px] font-semibold text-foreground leading-[1.1] tracking-tight line-clamp-2">
                 {product.name}
               </h1>
 
+              {/* Price */}
               <div className="mt-3">
                 <div className="flex items-baseline gap-3">
                   <span
                     className={
                       "text-[36px] md:text-[40px] lg:text-[42px] font-semibold tracking-[-0.02em] " +
-                      (onSale ? "text-destructive" : "text-foreground")
+                      (onSale && !pricingMode ? "text-destructive" : "text-foreground")
                     }
                   >
-                    {$}
-                    {displayPrice.toFixed(2)}
+                    {pricingMode
+                      ? `${$}${pricingMode.price.toFixed(2)}`
+                      : `${$}${displayPrice.toFixed(2)}`}
                   </span>
-                  {onSale && (
+                  {onSale && !pricingMode && (
                     <span className="text-lg text-muted-foreground line-through">
                       {$}
                       {product.price.toFixed(2)}
@@ -230,12 +284,34 @@ function ProductDetailPage() {
                 </div>
               </div>
 
+              {/* Pricing Selector — only if multiple pricing modes */}
+              {showSelector && (
+                <PricingSelector
+                  modes={product.pricing_modes ?? []}
+                  selectedId={pricingMode?.id ?? null}
+                  onChange={setPricingMode}
+                />
+              )}
+
+              {/* Variants — only if product variants exist */}
+              {hasVariants && (
+                <ProductVariants
+                  variants={product.variants ?? []}
+                  selected={variantState}
+                  onChange={(type, valueId) =>
+                    setVariantSelection((prev) => ({ ...prev, [type]: valueId }))
+                  }
+                />
+              )}
+
+              {/* Short Description — only if exists */}
               {product.description && (
                 <p className="mt-4 text-sm text-muted-foreground leading-relaxed">
                   {product.description}
                 </p>
               )}
 
+              {/* Notes */}
               <div className="mt-6">
                 <label
                   htmlFor="pd-notes"
@@ -253,26 +329,52 @@ function ProductDetailPage() {
                 />
               </div>
 
-              <div className="mt-6 flex items-center gap-4">
-                <ProductQuantity quantity={quantity} onChange={setQuantity} />
-                <ProductCTA
-                  label="Agregar al pedido"
-                  totalPrice={`${$}${(displayPrice * quantity).toFixed(2)}`}
-                  onClick={handleAddToCart}
-                />
-                <button
-                  aria-label="Agregar a favoritos"
-                  className="size-[56px] flex items-center justify-center border border-border/50 rounded-full hover:border-foreground/30 transition-colors bg-transparent text-muted-foreground hover:text-foreground shrink-0"
-                >
-                  <Heart className="size-5" strokeWidth={1.25} />
-                </button>
+              {/* Quantity + CTA + Validation */}
+              <div className="mt-6 flex flex-col gap-3">
+                <div className="flex items-center gap-4">
+                  <ProductQuantity
+                    quantity={quantity}
+                    onChange={setQuantity}
+                    min={minimumQuantity}
+                  />
+                  <ProductCTA
+                    label="Agregar al pedido"
+                    totalPrice={`${$}${(unitPrice * quantity).toFixed(2)}`}
+                    onClick={handleAddToCart}
+                    disabled={!canAddToCart}
+                  />
+                </div>
+                {minQtyMessage && (
+                  <p className="text-xs text-destructive font-medium">{minQtyMessage}</p>
+                )}
               </div>
 
+              {/* Store Benefits — only if configured */}
+              <ProductBenefits benefits={settings.benefits} />
+
+              {/* Shipping Banner — only if enabled */}
+              {settings.shipping.enabled && settings.shipping.banner_text && (
+                <ProductShipping
+                  text={settings.shipping.banner_text}
+                  freeThreshold={settings.shipping.free_threshold}
+                  currencySymbol={$}
+                />
+              )}
+
+              {/* Accordion — only sections with content */}
               <ProductAccordion sections={descriptionSections} />
             </div>
           </div>
 
-          <RelatedProducts products={related} currencySymbol={$} storeSlug={slug} />
+          {/* Related Products — only if enabled and has products */}
+          {settings.recommendations.enabled && related.length > 0 && (
+            <RelatedProducts
+              products={related}
+              currencySymbol={$}
+              storeSlug={slug}
+              title={settings.recommendations.title ?? undefined}
+            />
+          )}
         </div>
       </main>
 
