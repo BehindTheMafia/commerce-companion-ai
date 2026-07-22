@@ -234,7 +234,7 @@ function OnboardingPage() {
       } as never);
 
       toast.success("¡Tu espacio de trabajo está listo!");
-      window.location.href = "/app";
+      navigate({ to: "/app" });
     } catch (err) {
       console.error("Onboarding error:", err);
       toast.error(err instanceof Error ? err.message : "Error al crear el espacio de trabajo");

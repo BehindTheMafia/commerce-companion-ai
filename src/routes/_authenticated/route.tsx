@@ -1,7 +1,5 @@
-// Integration-managed protected layout. SSR off because Supabase session
-// lives in localStorage. Redirects to /auth when there is no user.
-// Redirects to /onboarding if onboarding is not completed.
 import { createFileRoute, Outlet, useRouter } from "@tanstack/react-router";
+import { motion } from "motion/react";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 
@@ -34,5 +32,13 @@ function AuthGuard() {
   }, [router]);
 
   if (!ready) return null;
-  return <Outlet />;
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.35, ease: [0.22, 0.61, 0.36, 1] }}
+    >
+      <Outlet />
+    </motion.div>
+  );
 }

@@ -1,4 +1,5 @@
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
+import { motion } from "motion/react";
 import { BusinessProvider, useBusiness } from "@/lib/business-context";
 import {
   Sidebar,
@@ -92,9 +93,14 @@ function AppLayout() {
         <AppSidebar />
         <SidebarInset>
           <TopBar />
-          <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, ease: [0.22, 0.61, 0.36, 1] }}
+            className="flex flex-1 flex-col gap-4 p-4 pt-0"
+          >
             <Outlet />
-          </div>
+          </motion.div>
         </SidebarInset>
       </SidebarProvider>
     </BusinessProvider>

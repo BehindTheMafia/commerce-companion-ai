@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { motion } from "motion/react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/animate-ui/components/buttons/button";
@@ -27,17 +28,37 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
+  const navigatingRef = useRef(false);
+
+  async function checkSession() {
+    const { data } = await supabase.auth.getSession();
+    if (!data.session) return;
+
+    if (window.opener) {
+      window.close();
+      return;
+    }
+
+    if (navigatingRef.current) return;
+    navigatingRef.current = true;
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("onboarding_completed")
+      .eq("id", data.session.user.id)
+      .maybeSingle();
+
+    navigate({ to: profile?.onboarding_completed ? "/app" : "/onboarding" });
+  }
 
   useEffect(() => {
-    supabase.auth.getSession().then(async ({ data }) => {
-      if (!data.session) return;
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("onboarding_completed")
-        .eq("id", data.session.user.id)
-        .maybeSingle();
-      window.location.href = profile?.onboarding_completed ? "/app" : "/onboarding";
+    checkSession();
+
+    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN") checkSession();
     });
+
+    return () => sub.subscription.unsubscribe();
   }, []);
 
   async function handleEmail(e: React.FormEvent) {
@@ -61,7 +82,7 @@ function AuthPage() {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
       }
-      window.location.href = "/onboarding";
+      navigate({ to: "/onboarding" });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Error de autenticación");
     } finally {
@@ -72,10 +93,11 @@ function AuthPage() {
   async function handleGoogle() {
     setLoading(true);
     try {
-      const result = await lovable.auth.signInWithOAuth("google");
+      const result = await lovable.auth.signInWithOAuthPopup("google");
       if (result.error) throw result.error;
-      if (result.redirected) return;
-      window.location.href = "/onboarding";
+      if (result.redirected) {
+        setLoading(false);
+      }
     } catch (err) {
       console.error("Google OAuth error:", err);
       toast.error(err instanceof Error ? err.message : "Error con Google");
@@ -104,7 +126,13 @@ function AuthPage() {
       </div>
 
       <div className="flex items-center justify-center p-6">
-        <Card className="w-full max-w-md border-border/60 shadow-sm overflow-hidden">
+        <motion.div
+          initial={{ opacity: 0, y: 20, scale: 0.97 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.5, ease: [0.22, 0.61, 0.36, 1] }}
+          className="w-full max-w-md"
+        >
+        <Card className="w-full border-border/60 shadow-sm overflow-hidden">
           <div className="p-6 pb-0 md:hidden">
             <Link to="/" className="flex items-center gap-2">
               <div className="grid size-8 place-items-center rounded-xl bg-primary text-primary-foreground">
@@ -248,6 +276,7 @@ function AuthPage() {
             </TabsPanels>
           </Tabs>
         </Card>
+        </motion.div>
       </div>
     </div>
   );
