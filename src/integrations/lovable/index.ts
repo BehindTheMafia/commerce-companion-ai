@@ -19,9 +19,24 @@ export const lovable = {
     },
 
     signInWithOAuthPopup: async (provider: Provider) => {
-      const popup = window.open("", "google-auth", "width=600,height=700");
+      const w = 540;
+      const h = 700;
+      const left = window.screenX + (window.innerWidth - w) / 2;
+      const top = window.screenY + (window.innerHeight - h) / 2;
+
+      const popup = window.open(
+        "",
+        "google-auth",
+        `width=${w},height=${h},left=${left},top=${top},popup=1`,
+      );
+
       if (!popup) {
-        return { error: new Error("Pop-up bloqueado. Permite ventanas emergentes e intenta de nuevo.") };
+        const { data } = await supabase.auth.signInWithOAuth({
+          provider,
+          options: { redirectTo: OAUTH_REDIRECT },
+        });
+        if (data?.url) window.location.href = data.url;
+        return { redirected: true };
       }
 
       const { data, error } = await supabase.auth.signInWithOAuth({
