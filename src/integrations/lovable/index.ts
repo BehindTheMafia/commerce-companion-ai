@@ -19,15 +19,30 @@ export const lovable = {
     },
 
     signInWithOAuthPopup: async (provider: Provider) => {
-      const w = 540;
-      const h = 700;
-      const left = window.screenX + (window.innerWidth - w) / 2;
-      const top = window.screenY + (window.innerHeight - h) / 2;
+      const w = 520;
+      const h = 650;
+
+      const dualScreenLeft = window.screenLeft !== undefined ? window.screenLeft : window.screenX;
+      const dualScreenTop = window.screenTop !== undefined ? window.screenTop : window.screenY;
+
+      const width = window.innerWidth
+        ? window.innerWidth
+        : document.documentElement.clientWidth
+          ? document.documentElement.clientWidth
+          : screen.width;
+      const height = window.innerHeight
+        ? window.innerHeight
+        : document.documentElement.clientHeight
+          ? document.documentElement.clientHeight
+          : screen.height;
+
+      const left = Math.max(0, Math.floor((width - w) / 2 + dualScreenLeft));
+      const top = Math.max(0, Math.floor((height - h) / 2 + dualScreenTop));
 
       const popup = window.open(
-        "",
-        "google-auth",
-        `width=${w},height=${h},left=${left},top=${top},popup=1`,
+        "about:blank",
+        "google-auth-popup",
+        `width=${w},height=${h},top=${top},left=${left},scrollbars=yes,resizable=yes`
       );
 
       if (!popup) {
@@ -39,9 +54,16 @@ export const lovable = {
         return { redirected: true };
       }
 
+      if (popup) {
+        popup.focus();
+      }
+
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
-        options: { redirectTo: OAUTH_REDIRECT },
+        options: {
+          redirectTo: OAUTH_REDIRECT,
+          skipBrowserRedirect: true,
+        },
       });
 
       if (error) {
