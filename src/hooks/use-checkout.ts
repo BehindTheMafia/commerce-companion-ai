@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/lib/cart-context";
 import { buildWhatsAppMessage, getWhatsAppLink } from "@/lib/whatsapp";
+import { sendPushForOrder } from "@/lib/push/client-api";
 import type { Business } from "@/types/storefront";
 import type { CustomerData } from "@/components/storefront/checkout-form";
 
@@ -20,6 +21,7 @@ export function useCheckout(business: Business | null | undefined) {
       }
       setBusy(true);
       setError(null);
+
       const message = buildWhatsAppMessage(
         business.name,
         items.map((i) => ({
@@ -42,14 +44,15 @@ export function useCheckout(business: Business | null | undefined) {
           cashAmount: data.cashAmount || undefined,
         },
       );
-      location.href = getWhatsAppLink(waPhone, message);
+
       try {
-        await supabase.rpc("create_order", {
+        // Persist the order first so it is never lost to the WhatsApp navigation.
+        const { data: created, error: createError } = await supabase.rpc("create_order", {
           p_business_id: business.id,
           p_customer_name: data.name,
           p_customer_phone: data.phone,
           p_customer_address: data.address || "",
-          p_notes: data.notes || null as any,
+          p_notes: data.notes || undefined,
           p_items: items.map((i) => ({
             product_id: i.product.id,
             product_name:
@@ -57,12 +60,22 @@ export function useCheckout(business: Business | null | undefined) {
             quantity: i.quantity,
           })),
         });
-        clearCart();
+
+        if (createError) {
+          console.error("Error creating order:", createError);
+        } else if (created && typeof created === "object" && "id" in created) {
+          // Fire-and-forget: tell the backend to push new-order notifications to
+          // every admin device. keepalive survives the navigation below.
+          void sendPushForOrder((created as { id: string }).id);
+          clearCart();
+        }
       } catch (err) {
         console.error("Error creating order:", err);
       } finally {
         setBusy(false);
       }
+
+      location.href = getWhatsAppLink(waPhone, message);
     },
     [business, items, subtotal, clearCart],
   );

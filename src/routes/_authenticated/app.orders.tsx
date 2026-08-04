@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useBusiness } from "@/lib/business-context";
@@ -6,17 +6,38 @@ import { PageHeader } from "@/components/admin/page-header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
-  ShoppingCart, Check, X, Truck, PackageCheck, ChevronRight,
-  Package, Phone, MapPin, User, FileText, Search,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  ShoppingCart,
+  Check,
+  X,
+  Truck,
+  PackageCheck,
+  ChevronRight,
+  Package,
+  Phone,
+  MapPin,
+  User,
+  FileText,
+  Search,
+  type LucideIcon,
 } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 export const Route = createFileRoute("/_authenticated/app/orders")({
+  validateSearch: (search: Record<string, unknown>): { order?: string } => ({
+    order: typeof search.order === "string" ? search.order : undefined,
+  }),
   component: OrdersPage,
 });
 
@@ -41,7 +62,7 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 function sym(c: string) {
-  return ({ USD: "$", EUR: "€", GBP: "£", MXN: "$", COP: "$", BRL: "R$" }[c] || "$");
+  return { USD: "$", EUR: "€", GBP: "£", MXN: "$", COP: "$", BRL: "R$" }[c] || "$";
 }
 
 type Order = {
@@ -66,17 +87,21 @@ type OrderItem = {
   total: number;
 };
 
-const STATUS_ACTIONS: Record<string, { label: string; nextStatus: string; icon: typeof Check; variant?: "default" | "destructive" | "outline" }[]> = {
+const STATUS_ACTIONS: Record<
+  string,
+  {
+    label: string;
+    nextStatus: string;
+    icon: typeof Check;
+    variant?: "default" | "destructive" | "outline";
+  }[]
+> = {
   pending: [
     { label: "Aceptar", nextStatus: "preparing", icon: Check },
     { label: "Rechazar", nextStatus: "cancelled", icon: X, variant: "destructive" },
   ],
-  preparing: [
-    { label: "Marcar enviado", nextStatus: "shipped", icon: Truck },
-  ],
-  shipped: [
-    { label: "Marcar entregado", nextStatus: "delivered", icon: PackageCheck },
-  ],
+  preparing: [{ label: "Marcar enviado", nextStatus: "shipped", icon: Truck }],
+  shipped: [{ label: "Marcar entregado", nextStatus: "delivered", icon: PackageCheck }],
 };
 
 function getCustomerName(o: Order): string {
@@ -86,6 +111,8 @@ function getCustomerName(o: Order): string {
 function OrdersPage() {
   const { activeBusiness } = useBusiness();
   const qc = useQueryClient();
+  const navigate = useNavigate();
+  const urlSearch = Route.useSearch();
   const isMobile = useIsMobile();
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [actionBusy, setActionBusy] = useState<string | null>(null);
@@ -97,13 +124,25 @@ function OrdersPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("orders")
-        .select("id,order_number,status,total,currency,created_at,customer_name,customer_phone,customer_address,notes,customer:customers(full_name)")
+        .select(
+          "id,order_number,status,total,currency,created_at,customer_name,customer_phone,customer_address,notes,customer:customers(full_name)",
+        )
         .eq("business_id", activeBusiness!.id)
         .order("created_at", { ascending: false });
       if (error) throw error;
       return (data ?? []) as Order[];
     },
   });
+
+  // Deep link from a push notification / toast: /app/orders?order=<id>
+  useEffect(() => {
+    if (!urlSearch.order) return;
+    const found = orders.find((o) => o.id === urlSearch.order);
+    if (found) {
+      setSelectedOrder(found);
+      navigate({ to: "/app/orders", search: { order: undefined } });
+    }
+  }, [urlSearch.order, orders, navigate]);
 
   const { data: orderItems = [] } = useQuery({
     queryKey: ["order-items", selectedOrder?.id],
@@ -135,7 +174,10 @@ function OrdersPage() {
     try {
       const { error } = await supabase
         .from("orders")
-        .update({ status: newStatus as "pending" | "paid" | "preparing" | "shipped" | "delivered" | "cancelled" | "refunded" })
+        .update({
+          status: newStatus as
+            "pending" | "paid" | "preparing" | "shipped" | "delivered" | "cancelled" | "refunded",
+        })
         .eq("id", orderId);
       if (error) throw error;
       toast.success(`Pedido ${STATUS_LABELS[newStatus]?.toLowerCase() ?? newStatus}`);
@@ -199,9 +241,13 @@ function OrdersPage() {
         <Card className="mt-4 overflow-hidden">
           {orders.length === 0 ? (
             <div className="flex flex-col items-center gap-3 p-16 text-center">
-              <div className="grid size-12 place-items-center rounded-2xl bg-primary/10 text-primary"><ShoppingCart className="size-6" /></div>
+              <div className="grid size-12 place-items-center rounded-2xl bg-primary/10 text-primary">
+                <ShoppingCart className="size-6" />
+              </div>
               <p className="text-sm text-muted-foreground">Sin pedidos todavía.</p>
-              <p className="text-xs text-muted-foreground/60">Los pedidos de WhatsApp aparecerán aquí automáticamente.</p>
+              <p className="text-xs text-muted-foreground/60">
+                Los pedidos de WhatsApp aparecerán aquí automáticamente.
+              </p>
             </div>
           ) : (
             <Table>
@@ -219,7 +265,10 @@ function OrdersPage() {
               <TableBody>
                 {filtered.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="py-12 text-center text-sm text-muted-foreground">
+                    <TableCell
+                      colSpan={7}
+                      className="py-12 text-center text-sm text-muted-foreground"
+                    >
                       No se encontraron pedidos para "{search}"
                     </TableCell>
                   </TableRow>
@@ -244,15 +293,21 @@ function OrdersPage() {
                           {format(new Date(o.created_at), "dd MMM yyyy")}
                         </TableCell>
                         <TableCell className="py-4 text-center">
-                          <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_COLORS[o.status] ?? ""}`}>
+                          <span
+                            className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_COLORS[o.status] ?? ""}`}
+                          >
                             {STATUS_LABELS[o.status] ?? o.status}
                           </span>
                         </TableCell>
                         <TableCell className="py-4 text-right tabular-nums font-medium">
-                          {$}{Number(o.total).toFixed(2)}
+                          {$}
+                          {Number(o.total).toFixed(2)}
                         </TableCell>
                         <TableCell className="py-4 text-center">
-                          <div className="flex items-center justify-center gap-1" onClick={(e) => e.stopPropagation()}>
+                          <div
+                            className="flex items-center justify-center gap-1"
+                            onClick={(e) => e.stopPropagation()}
+                          >
                             {firstAction && (
                               <Button
                                 size="sm"
@@ -285,7 +340,10 @@ function OrdersPage() {
         </Card>
       </div>
 
-      <div className="overflow-hidden border-l" style={{ overflow: selectedOrder ? undefined : "hidden" }}>
+      <div
+        className="overflow-hidden border-l"
+        style={{ overflow: selectedOrder ? undefined : "hidden" }}
+      >
         {selectedOrder && (
           <div className="sticky top-0 flex h-screen flex-col">
             <div className="flex items-center justify-between border-b px-5 py-4">
@@ -302,11 +360,14 @@ function OrdersPage() {
             </div>
             <div className="flex-1 overflow-y-auto p-5 space-y-6">
               <div className="flex items-center gap-3">
-                <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_COLORS[selectedOrder.status] ?? ""}`}>
+                <span
+                  className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_COLORS[selectedOrder.status] ?? ""}`}
+                >
                   {STATUS_LABELS[selectedOrder.status] ?? selectedOrder.status}
                 </span>
                 <span className="ml-auto text-lg tabular-nums font-bold">
-                  {$}{Number(selectedOrder.total).toFixed(2)}
+                  {$}
+                  {Number(selectedOrder.total).toFixed(2)}
                 </span>
               </div>
               <div>
@@ -319,15 +380,20 @@ function OrdersPage() {
                     <p className="text-sm text-muted-foreground">Cargando...</p>
                   ) : (
                     orderItems.map((item) => (
-                      <div key={item.id} className="flex items-center justify-between rounded-lg border p-3.5">
+                      <div
+                        key={item.id}
+                        className="flex items-center justify-between rounded-lg border p-3.5"
+                      >
                         <div>
                           <p className="text-sm font-medium">{item.product_name}</p>
                           <p className="mt-0.5 text-xs text-muted-foreground">
-                            {item.quantity} x {$}{Number(item.unit_price).toFixed(2)}
+                            {item.quantity} x {$}
+                            {Number(item.unit_price).toFixed(2)}
                           </p>
                         </div>
                         <span className="text-sm tabular-nums font-semibold">
-                          {$}{Number(item.total).toFixed(2)}
+                          {$}
+                          {Number(item.total).toFixed(2)}
                         </span>
                       </div>
                     ))
@@ -407,10 +473,20 @@ function OrdersPage() {
 }
 
 function MobileOrders({
-  orders, filtered, search, setSearch,
-  selectedOrder, setSelectedOrder, orderItems,
-  actionBusy, updateStatus,
-  STATUS_ACTIONS, STATUS_COLORS, STATUS_LABELS, getCustomerName, $,
+  orders,
+  filtered,
+  search,
+  setSearch,
+  selectedOrder,
+  setSelectedOrder,
+  orderItems,
+  actionBusy,
+  updateStatus,
+  STATUS_ACTIONS,
+  STATUS_COLORS,
+  STATUS_LABELS,
+  getCustomerName,
+  $,
 }: {
   orders: Order[];
   filtered: Order[];
@@ -421,7 +497,15 @@ function MobileOrders({
   orderItems: OrderItem[];
   actionBusy: string | null;
   updateStatus: (id: string, s: string) => void;
-  STATUS_ACTIONS: Record<string, { label: string; nextStatus: string; icon: any; variant?: "default" | "destructive" | "outline" }[]>;
+  STATUS_ACTIONS: Record<
+    string,
+    {
+      label: string;
+      nextStatus: string;
+      icon: LucideIcon;
+      variant?: "default" | "destructive" | "outline";
+    }[]
+  >;
   STATUS_COLORS: Record<string, string>;
   STATUS_LABELS: Record<string, string>;
   getCustomerName: (o: Order) => string;
@@ -429,10 +513,7 @@ function MobileOrders({
 }) {
   return (
     <div className="px-4 py-6">
-      <PageHeader
-        title="Pedidos"
-        description="Revisa, acepta y da seguimiento."
-      />
+      <PageHeader title="Pedidos" description="Revisa, acepta y da seguimiento." />
       {orders.length > 0 && (
         <div className="relative mt-4">
           <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground/60" />
@@ -447,7 +528,9 @@ function MobileOrders({
       <Card className="mt-4 overflow-hidden">
         {orders.length === 0 ? (
           <div className="flex flex-col items-center gap-3 p-12 text-center">
-            <div className="grid size-12 place-items-center rounded-2xl bg-primary/10 text-primary"><ShoppingCart className="size-6" /></div>
+            <div className="grid size-12 place-items-center rounded-2xl bg-primary/10 text-primary">
+              <ShoppingCart className="size-6" />
+            </div>
             <p className="text-sm text-muted-foreground">Sin pedidos todavía.</p>
           </div>
         ) : (
@@ -469,7 +552,9 @@ function MobileOrders({
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
                         <span className="font-mono text-xs">{o.order_number}</span>
-                        <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium ${STATUS_COLORS[o.status] ?? ""}`}>
+                        <span
+                          className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium ${STATUS_COLORS[o.status] ?? ""}`}
+                        >
                           {STATUS_LABELS[o.status] ?? o.status}
                         </span>
                       </div>
@@ -480,14 +565,20 @@ function MobileOrders({
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm tabular-nums font-semibold">{$}{Number(o.total).toFixed(2)}</p>
+                      <p className="text-sm tabular-nums font-semibold">
+                        {$}
+                        {Number(o.total).toFixed(2)}
+                      </p>
                       {firstAction && (
                         <Button
                           size="sm"
                           variant={firstAction.variant ?? "outline"}
                           className="mt-1 h-7 gap-1 px-2 text-[10px]"
                           disabled={actionBusy === o.id}
-                          onClick={(e) => { e.stopPropagation(); updateStatus(o.id, firstAction.nextStatus); }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            updateStatus(o.id, firstAction.nextStatus);
+                          }}
                         >
                           <firstAction.icon className="size-3" />
                           {firstAction.label}
@@ -530,11 +621,14 @@ function MobileOrders({
               </div>
               <div className="flex-1 overflow-y-auto p-5 space-y-6">
                 <div className="flex items-center gap-3">
-                  <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_COLORS[selectedOrder.status] ?? ""}`}>
+                  <span
+                    className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_COLORS[selectedOrder.status] ?? ""}`}
+                  >
                     {STATUS_LABELS[selectedOrder.status] ?? selectedOrder.status}
                   </span>
                   <span className="ml-auto text-lg tabular-nums font-bold">
-                    {$}{Number(selectedOrder.total).toFixed(2)}
+                    {$}
+                    {Number(selectedOrder.total).toFixed(2)}
                   </span>
                 </div>
                 <div>
@@ -543,14 +637,21 @@ function MobileOrders({
                   </div>
                   <div className="space-y-2">
                     {orderItems.map((item) => (
-                      <div key={item.id} className="flex items-center justify-between rounded-lg border p-3.5">
+                      <div
+                        key={item.id}
+                        className="flex items-center justify-between rounded-lg border p-3.5"
+                      >
                         <div>
                           <p className="text-sm font-medium">{item.product_name}</p>
                           <p className="mt-0.5 text-xs text-muted-foreground">
-                            {item.quantity} x {$}{Number(item.unit_price).toFixed(2)}
+                            {item.quantity} x {$}
+                            {Number(item.unit_price).toFixed(2)}
                           </p>
                         </div>
-                        <span className="text-sm tabular-nums font-semibold">{$}{Number(item.total).toFixed(2)}</span>
+                        <span className="text-sm tabular-nums font-semibold">
+                          {$}
+                          {Number(item.total).toFixed(2)}
+                        </span>
                       </div>
                     ))}
                   </div>
@@ -567,7 +668,9 @@ function MobileOrders({
                     {selectedOrder.customer_phone && (
                       <div className="flex items-center gap-2.5">
                         <Phone className="size-4 shrink-0 text-muted-foreground" />
-                        <a href={`tel:${selectedOrder.customer_phone}`} className="hover:underline">{selectedOrder.customer_phone}</a>
+                        <a href={`tel:${selectedOrder.customer_phone}`} className="hover:underline">
+                          {selectedOrder.customer_phone}
+                        </a>
                       </div>
                     )}
                     {selectedOrder.customer_address && (
@@ -583,12 +686,18 @@ function MobileOrders({
                     <div className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                       <FileText className="size-3" /> Notas
                     </div>
-                    <p className="leading-relaxed rounded-lg border p-3.5 text-sm text-muted-foreground">{selectedOrder.notes}</p>
+                    <p className="leading-relaxed rounded-lg border p-3.5 text-sm text-muted-foreground">
+                      {selectedOrder.notes}
+                    </p>
                   </div>
                 )}
                 <div>
-                  <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Fecha del pedido</div>
-                  <p className="text-sm">{format(new Date(selectedOrder.created_at), "dd MMM yyyy, HH:mm")}</p>
+                  <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Fecha del pedido
+                  </div>
+                  <p className="text-sm">
+                    {format(new Date(selectedOrder.created_at), "dd MMM yyyy, HH:mm")}
+                  </p>
                 </div>
               </div>
               <div className="border-t p-4">
@@ -599,7 +708,10 @@ function MobileOrders({
                       className="flex-1 gap-2"
                       variant={action.variant ?? "default"}
                       disabled={actionBusy === selectedOrder.id}
-                      onClick={() => { updateStatus(selectedOrder.id, action.nextStatus); if (action.nextStatus === "cancelled") setSelectedOrder(null); }}
+                      onClick={() => {
+                        updateStatus(selectedOrder.id, action.nextStatus);
+                        if (action.nextStatus === "cancelled") setSelectedOrder(null);
+                      }}
                     >
                       <action.icon className="size-4" />
                       {action.label}

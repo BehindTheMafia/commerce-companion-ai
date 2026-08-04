@@ -95,18 +95,22 @@ ALTER TABLE inbox_conversation_tags ENABLE ROW LEVEL SECURITY;
 ALTER TABLE inbox_conversation_notes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE inbox_conversation_ai ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "users can select conversations in their businesses" ON inbox_conversations;
 CREATE POLICY "users can select conversations in their businesses"
   ON inbox_conversations FOR SELECT
   USING (business_id IN (SELECT business_id FROM memberships WHERE user_id = auth.uid()));
 
+DROP POLICY IF EXISTS "users can update conversations in their businesses" ON inbox_conversations;
 CREATE POLICY "users can update conversations in their businesses"
   ON inbox_conversations FOR UPDATE
   USING (business_id IN (SELECT business_id FROM memberships WHERE user_id = auth.uid()));
 
+DROP POLICY IF EXISTS "users can insert conversations in their businesses" ON inbox_conversations;
 CREATE POLICY "users can insert conversations in their businesses"
   ON inbox_conversations FOR INSERT
   WITH CHECK (business_id IN (SELECT business_id FROM memberships WHERE user_id = auth.uid()));
 
+DROP POLICY IF EXISTS "users can select messages in their conversations" ON inbox_messages;
 CREATE POLICY "users can select messages in their conversations"
   ON inbox_messages FOR SELECT
   USING (conversation_id IN (
@@ -115,6 +119,7 @@ CREATE POLICY "users can select messages in their conversations"
     )
   ));
 
+DROP POLICY IF EXISTS "users can insert messages in their conversations" ON inbox_messages;
 CREATE POLICY "users can insert messages in their conversations"
   ON inbox_messages FOR INSERT
   WITH CHECK (conversation_id IN (
@@ -123,6 +128,7 @@ CREATE POLICY "users can insert messages in their conversations"
     )
   ));
 
+DROP POLICY IF EXISTS "users can select tags in their conversations" ON inbox_conversation_tags;
 CREATE POLICY "users can select tags in their conversations"
   ON inbox_conversation_tags FOR SELECT
   USING (conversation_id IN (
@@ -131,6 +137,7 @@ CREATE POLICY "users can select tags in their conversations"
     )
   ));
 
+DROP POLICY IF EXISTS "users can manage tags in their conversations" ON inbox_conversation_tags;
 CREATE POLICY "users can manage tags in their conversations"
   ON inbox_conversation_tags FOR INSERT
   WITH CHECK (conversation_id IN (
@@ -139,6 +146,7 @@ CREATE POLICY "users can manage tags in their conversations"
     )
   ));
 
+DROP POLICY IF EXISTS "users can delete tags in their conversations" ON inbox_conversation_tags;
 CREATE POLICY "users can delete tags in their conversations"
   ON inbox_conversation_tags FOR DELETE
   USING (conversation_id IN (
@@ -147,6 +155,7 @@ CREATE POLICY "users can delete tags in their conversations"
     )
   ));
 
+DROP POLICY IF EXISTS "users can select notes in their conversations" ON inbox_conversation_notes;
 CREATE POLICY "users can select notes in their conversations"
   ON inbox_conversation_notes FOR SELECT
   USING (conversation_id IN (
@@ -155,6 +164,7 @@ CREATE POLICY "users can select notes in their conversations"
     )
   ));
 
+DROP POLICY IF EXISTS "users can manage notes in their conversations" ON inbox_conversation_notes;
 CREATE POLICY "users can manage notes in their conversations"
   ON inbox_conversation_notes FOR INSERT
   WITH CHECK (conversation_id IN (
@@ -163,10 +173,12 @@ CREATE POLICY "users can manage notes in their conversations"
     )
   ));
 
+DROP POLICY IF EXISTS "users can update their own notes" ON inbox_conversation_notes;
 CREATE POLICY "users can update their own notes"
   ON inbox_conversation_notes FOR UPDATE
   USING (author_id IN (SELECT id FROM memberships WHERE user_id = auth.uid()));
 
+DROP POLICY IF EXISTS "users can select ai data in their conversations" ON inbox_conversation_ai;
 CREATE POLICY "users can select ai data in their conversations"
   ON inbox_conversation_ai FOR SELECT
   USING (conversation_id IN (
@@ -420,5 +432,22 @@ $$;
 -- Enable realtime for inbox tables
 -- ============================================================
 
-ALTER PUBLICATION supabase_realtime ADD TABLE inbox_messages;
-ALTER PUBLICATION supabase_realtime ADD TABLE inbox_conversations;
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables
+    WHERE pubname = 'supabase_realtime' AND schemaname = 'public' AND tablename = 'inbox_messages'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE inbox_messages;
+  END IF;
+END $$;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables
+    WHERE pubname = 'supabase_realtime' AND schemaname = 'public' AND tablename = 'inbox_conversations'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE inbox_conversations;
+  END IF;
+END $$;

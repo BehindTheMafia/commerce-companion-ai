@@ -18,6 +18,10 @@ import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/ap
 import { Route as GoSlugIndexRouteImport } from './routes/go.$slug.index'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
 import { Route as ApiTwilioWebhookRouteImport } from './routes/api.twilio.webhook'
+import { Route as ApiPushVapidRouteImport } from './routes/api.push.vapid'
+import { Route as ApiPushUnregisterRouteImport } from './routes/api.push.unregister'
+import { Route as ApiPushSendRouteImport } from './routes/api.push.send'
+import { Route as ApiPushRegisterRouteImport } from './routes/api.push.register'
 import { Route as AuthenticatedAppSettingsRouteImport } from './routes/_authenticated/app.settings'
 import { Route as AuthenticatedAppProductsRouteImport } from './routes/_authenticated/app.products'
 import { Route as AuthenticatedAppOrdersRouteImport } from './routes/_authenticated/app.orders'
@@ -72,6 +76,26 @@ const AuthenticatedAppIndexRoute = AuthenticatedAppIndexRouteImport.update({
 const ApiTwilioWebhookRoute = ApiTwilioWebhookRouteImport.update({
   id: '/api/twilio/webhook',
   path: '/api/twilio/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPushVapidRoute = ApiPushVapidRouteImport.update({
+  id: '/api/push/vapid',
+  path: '/api/push/vapid',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPushUnregisterRoute = ApiPushUnregisterRouteImport.update({
+  id: '/api/push/unregister',
+  path: '/api/push/unregister',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPushSendRoute = ApiPushSendRouteImport.update({
+  id: '/api/push/send',
+  path: '/api/push/send',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPushRegisterRoute = ApiPushRegisterRouteImport.update({
+  id: '/api/push/register',
+  path: '/api/push/register',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAppSettingsRoute =
@@ -152,6 +176,10 @@ export interface FileRoutesByFullPath {
   '/app/orders': typeof AuthenticatedAppOrdersRoute
   '/app/products': typeof AuthenticatedAppProductsRoute
   '/app/settings': typeof AuthenticatedAppSettingsRoute
+  '/api/push/register': typeof ApiPushRegisterRoute
+  '/api/push/send': typeof ApiPushSendRoute
+  '/api/push/unregister': typeof ApiPushUnregisterRoute
+  '/api/push/vapid': typeof ApiPushVapidRoute
   '/api/twilio/webhook': typeof ApiTwilioWebhookRoute
   '/app/': typeof AuthenticatedAppIndexRoute
   '/go/$slug/': typeof GoSlugIndexRoute
@@ -171,6 +199,10 @@ export interface FileRoutesByTo {
   '/app/orders': typeof AuthenticatedAppOrdersRoute
   '/app/products': typeof AuthenticatedAppProductsRoute
   '/app/settings': typeof AuthenticatedAppSettingsRoute
+  '/api/push/register': typeof ApiPushRegisterRoute
+  '/api/push/send': typeof ApiPushSendRoute
+  '/api/push/unregister': typeof ApiPushUnregisterRoute
+  '/api/push/vapid': typeof ApiPushVapidRoute
   '/api/twilio/webhook': typeof ApiTwilioWebhookRoute
   '/app': typeof AuthenticatedAppIndexRoute
   '/go/$slug': typeof GoSlugIndexRoute
@@ -194,6 +226,10 @@ export interface FileRoutesById {
   '/_authenticated/app/orders': typeof AuthenticatedAppOrdersRoute
   '/_authenticated/app/products': typeof AuthenticatedAppProductsRoute
   '/_authenticated/app/settings': typeof AuthenticatedAppSettingsRoute
+  '/api/push/register': typeof ApiPushRegisterRoute
+  '/api/push/send': typeof ApiPushSendRoute
+  '/api/push/unregister': typeof ApiPushUnregisterRoute
+  '/api/push/vapid': typeof ApiPushVapidRoute
   '/api/twilio/webhook': typeof ApiTwilioWebhookRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
   '/go/$slug/': typeof GoSlugIndexRoute
@@ -217,6 +253,10 @@ export interface FileRouteTypes {
     | '/app/orders'
     | '/app/products'
     | '/app/settings'
+    | '/api/push/register'
+    | '/api/push/send'
+    | '/api/push/unregister'
+    | '/api/push/vapid'
     | '/api/twilio/webhook'
     | '/app/'
     | '/go/$slug/'
@@ -236,6 +276,10 @@ export interface FileRouteTypes {
     | '/app/orders'
     | '/app/products'
     | '/app/settings'
+    | '/api/push/register'
+    | '/api/push/send'
+    | '/api/push/unregister'
+    | '/api/push/vapid'
     | '/api/twilio/webhook'
     | '/app'
     | '/go/$slug'
@@ -258,6 +302,10 @@ export interface FileRouteTypes {
     | '/_authenticated/app/orders'
     | '/_authenticated/app/products'
     | '/_authenticated/app/settings'
+    | '/api/push/register'
+    | '/api/push/send'
+    | '/api/push/unregister'
+    | '/api/push/vapid'
     | '/api/twilio/webhook'
     | '/_authenticated/app/'
     | '/go/$slug/'
@@ -273,6 +321,10 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   OnboardingRoute: typeof OnboardingRoute
   GoSlugRoute: typeof GoSlugRouteWithChildren
+  ApiPushRegisterRoute: typeof ApiPushRegisterRoute
+  ApiPushSendRoute: typeof ApiPushSendRoute
+  ApiPushUnregisterRoute: typeof ApiPushUnregisterRoute
+  ApiPushVapidRoute: typeof ApiPushVapidRoute
   ApiTwilioWebhookRoute: typeof ApiTwilioWebhookRoute
 }
 
@@ -339,6 +391,34 @@ declare module '@tanstack/react-router' {
       path: '/api/twilio/webhook'
       fullPath: '/api/twilio/webhook'
       preLoaderRoute: typeof ApiTwilioWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/push/vapid': {
+      id: '/api/push/vapid'
+      path: '/api/push/vapid'
+      fullPath: '/api/push/vapid'
+      preLoaderRoute: typeof ApiPushVapidRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/push/unregister': {
+      id: '/api/push/unregister'
+      path: '/api/push/unregister'
+      fullPath: '/api/push/unregister'
+      preLoaderRoute: typeof ApiPushUnregisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/push/send': {
+      id: '/api/push/send'
+      path: '/api/push/send'
+      fullPath: '/api/push/send'
+      preLoaderRoute: typeof ApiPushSendRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/push/register': {
+      id: '/api/push/register'
+      path: '/api/push/register'
+      fullPath: '/api/push/register'
+      preLoaderRoute: typeof ApiPushRegisterRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/app/settings': {
@@ -482,6 +562,10 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   OnboardingRoute: OnboardingRoute,
   GoSlugRoute: GoSlugRouteWithChildren,
+  ApiPushRegisterRoute: ApiPushRegisterRoute,
+  ApiPushSendRoute: ApiPushSendRoute,
+  ApiPushUnregisterRoute: ApiPushUnregisterRoute,
+  ApiPushVapidRoute: ApiPushVapidRoute,
   ApiTwilioWebhookRoute: ApiTwilioWebhookRoute,
 }
 export const routeTree = rootRouteImport
