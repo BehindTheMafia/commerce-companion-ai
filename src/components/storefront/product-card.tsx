@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Package, Plus } from "lucide-react";
+import { Package, Plus, Check, Eye } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { isNewProduct, hasSalePrice, getDisplayPrice } from "@/lib/product";
 import { useCart } from "@/lib/cart-context";
@@ -21,11 +21,13 @@ export function ProductCard({
 }: ProductCardProps) {
   const [imgError, setImgError] = useState(false);
   const [imgLoaded, setImgLoaded] = useState(false);
+  const [added, setAdded] = useState(false);
   const { addItem } = useCart();
 
   const onSale = hasSalePrice(product.price, product.sale_price);
   const displayPrice = getDisplayPrice(product.price, product.sale_price);
   const showNewBadge = isNewProduct(product.created_at);
+  const outOfStock = product.stock !== null && product.stock <= 0;
   const discountPct =
     onSale && product.price > 0
       ? Math.round(((product.price - product.sale_price!) / product.price) * 100)
@@ -34,6 +36,7 @@ export function ProductCard({
   const handleQuickAdd = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (outOfStock) return;
     addItem(
       {
         id: product.id,
@@ -45,6 +48,8 @@ export function ProductCard({
       },
       1,
     );
+    setAdded(true);
+    window.setTimeout(() => setAdded(false), 900);
     onQuickAdd?.();
   };
 
@@ -52,10 +57,13 @@ export function ProductCard({
     <Link
       to="/go/$slug/product/$productSlug"
       params={{ slug: storeSlug, productSlug: product.slug }}
-      className="group flex flex-col text-left outline-none focus:outline-none"
+      className={cn(
+        "group flex flex-col overflow-hidden rounded-3xl border border-border/60 bg-white text-left shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)]",
+        outOfStock && "opacity-75",
+      )}
       aria-label={`Ver ${product.name}, ${$}${displayPrice.toFixed(2)}`}
     >
-      <div className="relative mb-3 aspect-[3/4] w-full overflow-hidden rounded-2xl bg-muted/50 transition-all duration-500 group-hover:-translate-y-1 group-hover:shadow-xl group-hover:shadow-black/5 group-focus-visible:ring-2 group-focus-visible:ring-primary group-focus-visible:ring-offset-2">
+      <div className="relative aspect-square w-full overflow-hidden bg-muted">
         {product.image_url && !imgError ? (
           <>
             {!imgLoaded && <div className="absolute inset-0 animate-pulse bg-muted/60" />}
@@ -63,9 +71,10 @@ export function ProductCard({
               src={product.image_url}
               alt={product.name}
               className={cn(
-                "size-full object-cover transition-all duration-700 ease-out",
+                "size-full object-cover transition-all duration-500 ease-out",
                 imgLoaded ? "scale-100 opacity-100" : "scale-95 opacity-0",
                 "group-hover:scale-105",
+                outOfStock && "grayscale",
               )}
               loading="lazy"
               onLoad={() => setImgLoaded(true)}
@@ -78,64 +87,79 @@ export function ProductCard({
           </div>
         )}
 
-        <div className="absolute left-3 top-3 flex flex-col gap-1.5">
+        <div className="absolute left-3 top-3 z-10 flex flex-col gap-1.5">
+          {onSale && (
+            <span className="rounded-xl bg-red-500 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow-sm sm:text-xs">
+              {discountPct > 0 ? `−${discountPct}% OFF` : "OFERTA"}
+            </span>
+          )}
           {showNewBadge && (
-            <span className="rounded-md bg-background/90 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-foreground shadow-sm backdrop-blur-md">
+            <span className="rounded-xl bg-foreground px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-background shadow-sm sm:text-xs">
               Nuevo
             </span>
           )}
-          {onSale && (
-            <span className="rounded-md bg-destructive/90 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-destructive-foreground shadow-sm backdrop-blur-md">
-              Oferta{discountPct > 0 ? ` −${discountPct}%` : ""}
+          {outOfStock && (
+            <span className="rounded-xl bg-foreground/80 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-background shadow-sm sm:text-xs">
+              Agotado
             </span>
           )}
         </div>
 
-        {onQuickAdd ? (
-          <div className="absolute inset-x-0 bottom-0 translate-y-2 p-2.5 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
-            <button
-              onClick={handleQuickAdd}
-              className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-foreground/95 py-2.5 text-sm font-semibold text-background shadow-lg backdrop-blur-sm transition-colors hover:bg-foreground active:scale-[0.98]"
-            >
-              <Plus className="size-4" strokeWidth={2.5} />
-              Agregar
-            </button>
-          </div>
-        ) : (
-          <div className="absolute inset-0 flex items-end justify-center bg-gradient-to-t from-black/40 via-transparent to-transparent p-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-            <div className="w-full translate-y-4 rounded-xl bg-background/95 py-2.5 text-center text-sm font-semibold text-foreground shadow-lg backdrop-blur-md transition-transform duration-300 group-hover:translate-y-0">
-              Ver detalles
-            </div>
-          </div>
-        )}
+        <div className="absolute inset-0 flex items-center justify-center bg-black/25 opacity-0 backdrop-blur-[2px] transition-opacity duration-300 group-hover:opacity-100">
+          <span className="flex translate-y-3 items-center gap-2 rounded-2xl bg-white/90 px-4 py-2 text-sm font-medium text-foreground shadow-lg backdrop-blur-md transition-transform duration-300 group-hover:translate-y-0">
+            <Eye className="size-4" strokeWidth={2} />
+            Vista rápida
+          </span>
+        </div>
       </div>
 
-      <div className="flex flex-1 flex-col px-0.5">
+      <div className="flex flex-1 flex-col p-4 sm:p-5">
         {product.category?.name && (
-          <span className="mb-1 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+          <span className="mb-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">
             {product.category.name}
           </span>
         )}
-        <h3 className="mb-1.5 line-clamp-2 text-[15px] font-semibold leading-snug text-foreground transition-colors duration-200 group-hover:text-primary">
+        <h3 className="mb-2 line-clamp-2 text-sm font-semibold leading-snug text-foreground transition-colors duration-200 group-hover:text-foreground sm:text-base">
           {product.name}
         </h3>
 
-        <div className="mt-auto flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-          <span
+        <div className="mt-auto flex items-end justify-between gap-2 pt-1">
+          <div className="min-w-0">
+            <span
+              className={cn(
+                "block text-lg font-bold tabular-nums sm:text-xl",
+                onSale ? "text-red-500" : "text-foreground",
+              )}
+            >
+              {$}
+              {displayPrice.toFixed(2)}
+            </span>
+            {onSale && (
+              <span className="block text-xs text-muted-foreground line-through tabular-nums decoration-muted-foreground/50">
+                {$}
+                {product.price.toFixed(2)}
+              </span>
+            )}
+          </div>
+          <button
+            onClick={handleQuickAdd}
+            disabled={outOfStock}
+            aria-label={outOfStock ? `${product.name} agotado` : `Agregar ${product.name}`}
             className={cn(
-              "text-[15px] font-bold tabular-nums",
-              onSale ? "text-destructive" : "text-foreground",
+              "grid size-10 shrink-0 place-items-center rounded-2xl transition-all duration-200 active:scale-90",
+              outOfStock
+                ? "cursor-not-allowed bg-muted text-muted-foreground/60"
+                : added
+                  ? "bg-foreground text-background shadow-md"
+                  : "bg-muted text-foreground shadow-sm hover:bg-foreground hover:text-background",
             )}
           >
-            {$}
-            {displayPrice.toFixed(2)}
-          </span>
-          {onSale && (
-            <span className="text-[13px] font-normal text-muted-foreground line-through tabular-nums decoration-muted-foreground/50">
-              {$}
-              {product.price.toFixed(2)}
-            </span>
-          )}
+            {added ? (
+              <Check className="size-5" strokeWidth={2.5} />
+            ) : (
+              <Plus className="size-5" strokeWidth={2.5} />
+            )}
+          </button>
         </div>
       </div>
     </Link>

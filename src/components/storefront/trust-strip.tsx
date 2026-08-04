@@ -1,4 +1,5 @@
 import { Truck, Headphones, Lock, Gift } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { useStoreSettings } from "@/hooks/use-store-settings";
 import { getWhatsAppLink } from "@/lib/whatsapp";
 import type { Business } from "@/types/storefront";
@@ -15,6 +16,18 @@ const BENEFIT_ICONS: Record<
   gift: Gift,
 };
 
+const TONES: Record<string, { bg: string; text: string }> = {
+  shipping: { bg: "bg-blue-50", text: "text-blue-600" },
+  whatsapp: { bg: "bg-[#25D366]/10", text: "text-[#128C7E]" },
+  shield: { bg: "bg-green-50", text: "text-green-600" },
+  truck: { bg: "bg-blue-50", text: "text-blue-600" },
+  headset: { bg: "bg-[#25D366]/10", text: "text-[#128C7E]" },
+  lock: { bg: "bg-foreground/[0.06]", text: "text-foreground" },
+  gift: { bg: "bg-foreground/[0.06]", text: "text-foreground" },
+};
+
+const DEFAULT_TONE = { bg: "bg-foreground/[0.06]", text: "text-foreground" };
+
 type TrustStripProps = {
   business: Business | null | undefined;
   currencySymbol?: string;
@@ -29,49 +42,69 @@ export function TrustStrip({ business, currencySymbol = "$" }: TrustStripProps) 
 
   const items: {
     key: string;
+    tone: { bg: string; text: string };
     icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
     label: string;
+    subtitle?: string;
     href?: string;
   }[] = [];
 
   if (shippingEnabled) {
     items.push({
       key: "shipping",
+      tone: TONES.shipping,
       icon: Truck,
-      label: freeThreshold
-        ? `Envío gratis desde ${currencySymbol}${freeThreshold.toFixed(2)}`
-        : "Envíos disponibles",
+      label: "Envío",
+      subtitle: freeThreshold
+        ? `Gratis desde ${currencySymbol}${freeThreshold.toFixed(2)}`
+        : "A todo el país",
     });
   }
 
   if (waPhone) {
     items.push({
       key: "whatsapp",
+      tone: TONES.whatsapp,
       icon: Headphones,
-      label: "Soporte por WhatsApp",
+      label: "Atención personalizada",
+      subtitle: "Soporte directo",
       href: getWhatsAppLink(waPhone, "Hola, quisiera más información sobre sus productos."),
     });
   }
 
   for (const benefit of configuredBenefits) {
     const Icon = BENEFIT_ICONS[benefit.icon] ?? Gift;
-    items.push({ key: benefit.label, icon: Icon, label: benefit.label });
+    items.push({
+      key: benefit.label,
+      tone: TONES[benefit.icon] ?? DEFAULT_TONE,
+      icon: Icon,
+      label: benefit.label,
+    });
   }
 
   if (items.length === 0) return null;
 
   return (
-    <div className="border-b border-border/40 bg-muted/30">
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-8 gap-y-2 px-6 py-4 lg:px-8">
+    <div className="border-y border-border/40 bg-white py-12">
+      <div className="mx-auto grid max-w-[1440px] grid-cols-2 gap-x-4 gap-y-10 px-5 md:grid-cols-4 md:px-8 lg:px-12">
         {items.map((item) => {
           const Icon = item.icon;
           const content = (
-            <span className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground">
-              <span className="grid size-8 place-items-center rounded-full bg-background text-primary ring-1 ring-border/60">
-                <Icon className="size-3.5" strokeWidth={2} />
+            <div className="flex w-full flex-col items-center px-2 text-center">
+              <span
+                className={cn(
+                  "grid size-12 place-items-center rounded-full",
+                  item.tone.bg,
+                  item.tone.text,
+                )}
+              >
+                <Icon className="size-6" strokeWidth={2} />
               </span>
-              {item.label}
-            </span>
+              <h4 className="mt-4 font-semibold text-foreground">{item.label}</h4>
+              {item.subtitle && (
+                <p className="mt-0.5 text-sm text-muted-foreground">{item.subtitle}</p>
+              )}
+            </div>
           );
           return item.href ? (
             <a
@@ -79,14 +112,14 @@ export function TrustStrip({ business, currencySymbol = "$" }: TrustStripProps) 
               href={item.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="transition-colors hover:text-foreground"
+              className="flex justify-center transition-transform hover:-translate-y-0.5"
             >
               {content}
             </a>
           ) : (
-            <span key={item.key} className="transition-colors">
+            <div key={item.key} className="flex justify-center">
               {content}
-            </span>
+            </div>
           );
         })}
       </div>
