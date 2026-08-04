@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useBusiness } from "@/lib/business-context";
 import {
@@ -175,18 +176,26 @@ export function useNotifications(): UseNotificationsResult {
       const perm = await requestNotificationPermission();
       setPermission(perm);
       if (perm === "granted") {
-        await ensureDeviceRegistered(businessId);
+        const registered = await ensureDeviceRegistered(businessId);
         await upsertNotificationPreferences(userId, businessId, {
           new_orders_enabled: true,
           sound_enabled: true,
           prompt_status: "accepted",
         });
+        if (!registered) {
+          toast.error("No se pudo registrar este dispositivo", {
+            description: "Cierra y vuelve a abrir la app para reintentar.",
+          });
+        }
       } else {
         await upsertNotificationPreferences(userId, businessId, {
           prompt_status: perm === "denied" ? "blocked" : "denied",
         });
       }
       await refetch();
+    } catch (err) {
+      console.error("[push] enable failed", err);
+      toast.error("Hubo un problema activando las notificaciones");
     } finally {
       setRegistering(false);
     }

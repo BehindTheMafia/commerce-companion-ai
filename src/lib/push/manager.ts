@@ -62,15 +62,25 @@ export async function subscribeToPush(): Promise<PushSubscription | null> {
   const existing = await reg.pushManager.getSubscription();
   if (existing) return existing;
 
-  try {
-    return await reg.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(key),
-    });
-  } catch (err) {
-    console.error("[push] subscribe failed", err);
-    return null;
+  const options: PushSubscriptionOptionsInit = {
+    userVisibleOnly: true,
+    applicationServerKey: urlBase64ToUint8Array(key),
+  };
+
+  // iOS (16.4+) is known to transiently reject the first subscribe() call
+  // after permission is granted (NotAllowedError / InvalidStateError) while
+  // the service worker finishes activating. A short retry resolves it.
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      return await reg.pushManager.subscribe(options);
+    } catch (err) {
+      console.warn(`[push] subscribe attempt ${attempt}/3 failed`, err);
+      if (attempt < 3) {
+        await new Promise((resolve) => setTimeout(resolve, 800));
+      }
+    }
   }
+  return null;
 }
 
 /**
