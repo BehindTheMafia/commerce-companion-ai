@@ -221,6 +221,10 @@
     border-color: var(--color-border);
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   html,
   body {
     font-family: var(--font-sans);

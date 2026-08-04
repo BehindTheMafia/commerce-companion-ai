@@ -81,9 +81,9 @@ export function ProductGallery({
                     key={img.id}
                     onClick={() => goTo(i)}
                     className={cn(
-                      "relative w-20 h-24 lg:w-full lg:h-32 rounded-[14px] overflow-hidden border-2 transition-all duration-300 ease-out shrink-0 focus:outline-none focus:ring-2 focus:ring-[#111827] focus:ring-offset-2",
+                      "relative w-20 h-24 lg:w-full lg:h-32 rounded-[14px] overflow-hidden border-2 transition-all duration-300 ease-out shrink-0 focus:outline-none focus:ring-2 focus:ring-foreground focus:ring-offset-2",
                       i === activeIndex
-                        ? "border-[#111827] shadow-md"
+                        ? "border-foreground shadow-md"
                         : "border-transparent opacity-60 hover:opacity-100 hover:border-gray-300",
                     )}
                     role="tab"
@@ -104,7 +104,7 @@ export function ProductGallery({
             {/* Main Image with Hover Zoom */}
             <div
               ref={imageRef}
-              className="flex-1 bg-[#FAFAFA] rounded-[18px] overflow-hidden relative cursor-crosshair aspect-square lg:aspect-[4/5] shadow-[0_8px_30px_rgb(0,0,0,0.04)] group"
+              className="flex-1 bg-muted/40 rounded-[18px] overflow-hidden relative cursor-crosshair aspect-square lg:aspect-[4/5] shadow-[0_8px_30px_rgb(0,0,0,0.04)] group"
               onMouseEnter={() => setIsZoomed(true)}
               onMouseLeave={() => setIsZoomed(false)}
               onMouseMove={handleMouseMove}
@@ -116,7 +116,7 @@ export function ProductGallery({
             >
               {currentImage && !imgError ? (
                 <>
-                  {!imgLoaded && <div className="absolute inset-0 bg-[#FAFAFA] animate-pulse" />}
+                  {!imgLoaded && <div className="absolute inset-0 bg-muted/40 animate-pulse" />}
                   {allImages.map((img, idx) => (
                     <img
                       key={img.id}
@@ -149,8 +149,8 @@ export function ProductGallery({
 
               {/* Discount Badge */}
               {discountPercent && discountPercent > 0 && (
-                <div className="absolute top-6 left-6 z-10 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-lg shadow-sm border border-white/20">
-                  <span className="text-[#DC2626] font-bold text-sm tracking-wide">
+                <div className="absolute top-6 left-6 z-10 bg-background/90 backdrop-blur-md px-3 py-1.5 rounded-lg shadow-sm border border-white/20">
+                  <span className="text-destructive font-bold text-sm tracking-wide">
                     -{discountPercent}%
                   </span>
                 </div>
@@ -203,7 +203,7 @@ export function ProductGallery({
         >
           <button
             onClick={() => setLightboxOpen(false)}
-            className="absolute top-4 right-4 z-10 size-10 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-colors"
+            className="absolute top-4 right-4 z-10 size-10 rounded-full bg-background/10 text-white flex items-center justify-center hover:bg-background/20 transition-colors"
             aria-label="Cerrar"
           >
             <X className="size-5" />
@@ -216,7 +216,7 @@ export function ProductGallery({
                   e.stopPropagation();
                   goTo(activeIndex - 1);
                 }}
-                className="absolute left-4 top-1/2 -translate-y-1/2 z-10 size-10 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-colors"
+                className="absolute left-4 top-1/2 -translate-y-1/2 z-10 size-10 rounded-full bg-background/10 text-white flex items-center justify-center hover:bg-background/20 transition-colors"
                 aria-label="Imagen anterior"
               >
                 <ChevronLeft className="size-5" />
@@ -226,7 +226,7 @@ export function ProductGallery({
                   e.stopPropagation();
                   goTo(activeIndex + 1);
                 }}
-                className="absolute right-4 top-1/2 -translate-y-1/2 z-10 size-10 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-colors"
+                className="absolute right-4 top-1/2 -translate-y-1/2 z-10 size-10 rounded-full bg-background/10 text-white flex items-center justify-center hover:bg-background/20 transition-colors"
                 aria-label="Imagen siguiente"
               >
                 <ChevronRight className="size-5" />

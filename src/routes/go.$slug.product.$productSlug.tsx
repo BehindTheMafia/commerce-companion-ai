@@ -307,10 +307,10 @@ function ProductDetailPage() {
             {product.specifications.map((spec, idx) => (
               <li
                 key={idx}
-                className="flex justify-between items-center border-b border-gray-100 pb-2 last:border-0"
+                className="flex justify-between items-center border-b border-border pb-2 last:border-0"
               >
-                <span className="text-[#6B7280]">{spec.label}</span>
-                <span className="font-semibold text-[#111827]">{spec.value}</span>
+                <span className="text-muted-foreground">{spec.label}</span>
+                <span className="font-semibold text-foreground">{spec.value}</span>
               </li>
             ))}
           </ul>
@@ -365,10 +365,10 @@ function ProductDetailPage() {
   const brandName = product.brand?.name ?? business.name;
 
   return (
-    <div className="min-h-screen bg-white text-[#111827] antialiased font-sans">
+    <div className="min-h-screen bg-background text-foreground antialiased font-sans">
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-white focus:text-[#111827] focus:rounded-xl focus:shadow-lg focus:ring-2 focus:ring-[#111827] focus:text-sm focus:font-semibold"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-background focus:text-foreground focus:rounded-xl focus:shadow-lg focus:ring-2 focus:ring-foreground focus:text-sm focus:font-semibold"
       >
         Saltar al contenido principal
       </a>
@@ -405,18 +405,18 @@ function ProductDetailPage() {
             <div>
               <div className="lg:sticky lg:top-12 flex flex-col gap-6 md:gap-8 pb-28 lg:pb-0">
                 {/* HEADER SECTION */}
-                <div className="flex flex-col gap-3 md:gap-4 border-b border-[#E5E7EB] pb-5 md:pb-6">
-                  <span className="text-[11px] md:text-[12px] font-bold text-[#6B7280]">
+                <div className="flex flex-col gap-3 md:gap-4 border-b border-border pb-5 md:pb-6">
+                  <span className="text-[11px] md:text-[12px] font-bold text-muted-foreground">
                     {brandName}
                   </span>
 
-                  <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-[40px] font-extrabold leading-[1.1] tracking-tight text-[#111827]">
+                  <h1 className="font-display text-2xl sm:text-3xl md:text-4xl lg:text-[40px] font-extrabold leading-[1.1] tracking-tight text-foreground">
                     {product.name}
                   </h1>
 
                   {settings.reviews.enabled && (
                     <div className="flex items-center gap-4 mt-1">
-                      <div className="flex text-[#9CA3AF] text-sm gap-[2px]">
+                      <div className="flex text-muted-foreground text-sm gap-[2px]">
                         {[1, 2, 3, 4, 5].map((i) => (
                           <Star key={i} className="size-[18px]" strokeWidth={1.5} />
                         ))}
@@ -434,7 +434,7 @@ function ProductDetailPage() {
                         : `${$}${displayPrice.toFixed(2)}`}
                     </span>
                     {onSale && !pricingMode && (
-                      <span className="text-base sm:text-lg md:text-xl text-[#6B7280] line-through font-medium mb-1 md:mb-1.5">
+                      <span className="text-base sm:text-lg md:text-xl text-muted-foreground line-through font-medium mb-1 md:mb-1.5">
                         {$}
                         {product.price.toFixed(2)}
                       </span>
@@ -455,7 +455,7 @@ function ProductDetailPage() {
                       </div>
                     )}
                     {product.sku && (
-                      <span className="text-[#6B7280] font-medium flex items-center gap-2">
+                      <span className="text-muted-foreground font-medium flex items-center gap-2">
                         SKU: {product.sku}
                       </span>
                     )}
@@ -486,7 +486,7 @@ function ProductDetailPage() {
                 <div>
                   <label
                     htmlFor="pd-notes"
-                    className="text-[13px] font-bold uppercase tracking-wider text-[#111827] block mb-3"
+                    className="text-[13px] font-bold uppercase tracking-wider text-foreground block mb-3"
                   >
                     Notas (opcional)
                   </label>
@@ -496,7 +496,7 @@ function ProductDetailPage() {
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     placeholder="Detalles adicionales para tu pedido..."
-                    className="w-full bg-[#FAFAFA] border border-[#E5E7EB] rounded-[14px] px-[18px] h-[52px] text-sm text-[#111827] placeholder:text-[#9CA3AF] transition-all duration-200 focus:outline-none focus:border-[#111827] focus:ring-2 focus:ring-[#111827]/10"
+                    className="w-full bg-muted/40 border border-border rounded-[14px] px-[18px] h-[52px] text-sm text-foreground placeholder:text-muted-foreground transition-all duration-200 focus:outline-none focus:border-foreground focus:ring-2 focus:ring-foreground/10"
                   />
                 </div>
 
@@ -516,7 +516,7 @@ function ProductDetailPage() {
                     />
                   </div>
                   {minQtyMessage && (
-                    <p className="text-xs text-[#DC2626] font-medium">{minQtyMessage}</p>
+                    <p className="text-xs text-destructive font-medium">{minQtyMessage}</p>
                   )}
 
                   {/* WhatsApp Button */}
@@ -532,9 +532,9 @@ function ProductDetailPage() {
                   {/* Tertiary Actions */}
                   <div className="flex justify-center gap-8 mt-2 py-2">
                     {settings.wishlist.enabled && (
-                      <button className="flex items-center gap-2 text-sm font-semibold text-[#6B7280] hover:text-[#111827] transition-colors group">
+                      <button className="flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors group">
                         <Heart
-                          className="size-[18px] group-hover:text-[#DC2626] transition-colors"
+                          className="size-[18px] group-hover:text-destructive transition-colors"
                           strokeWidth={1.5}
                         />
                         Agregar a Favoritos
@@ -542,10 +542,10 @@ function ProductDetailPage() {
                     )}
                     <button
                       onClick={handleShare}
-                      className="flex items-center gap-2 text-sm font-semibold text-[#6B7280] hover:text-[#111827] transition-colors group"
+                      className="flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors group"
                     >
                       <Share2
-                        className="size-[18px] group-hover:text-blue-500 transition-colors"
+                        className="size-[18px] group-hover:text-primary transition-colors"
                         strokeWidth={1.5}
                       />
                       Compartir Producto
@@ -554,16 +554,16 @@ function ProductDetailPage() {
                 </div>
 
                 {/* DELIVERY ESTIMATE */}
-                <div className="bg-[#FAFAFA] border border-[#E5E7EB] rounded-[16px] p-5 flex items-start gap-4">
-                  <div className="bg-white p-2.5 rounded-full shadow-sm">
-                    <Box className="size-5 text-[#111827]" strokeWidth={1.5} />
+                <div className="bg-muted/40 border border-border rounded-[16px] p-5 flex items-start gap-4">
+                  <div className="bg-background p-2.5 rounded-full shadow-sm">
+                    <Box className="size-5 text-foreground" strokeWidth={1.5} />
                   </div>
                   <div>
-                    <h4 className="font-bold text-[14px] text-[#111827]">Entrega Estimada</h4>
-                    <p className="text-[#6B7280] text-[14px] mt-1">
+                    <h4 className="font-bold text-[14px] text-foreground">Entrega Estimada</h4>
+                    <p className="text-muted-foreground text-[14px] mt-1">
                       Pide ahora y recíbelo entre el{" "}
-                      <strong className="text-[#111827]">{deliveryDates.start}</strong> y el{" "}
-                      <strong className="text-[#111827]">{deliveryDates.end}</strong>.
+                      <strong className="text-foreground">{deliveryDates.start}</strong> y el{" "}
+                      <strong className="text-foreground">{deliveryDates.end}</strong>.
                     </p>
                   </div>
                 </div>
@@ -584,7 +584,7 @@ function ProductDetailPage() {
                 {accordionSections.length > 0 && <ProductAccordion sections={accordionSections} />}
 
                 {/* SECURITY NOTE */}
-                <div className="flex items-center justify-center gap-2 text-[#6B7280] text-xs font-medium">
+                <div className="flex items-center justify-center gap-2 text-muted-foreground text-xs font-medium">
                   <Lock className="size-3.5" strokeWidth={1.5} /> Pago seguro garantizado
                 </div>
               </div>
@@ -615,13 +615,13 @@ function ProductDetailPage() {
       />
 
       {/* MOBILE STICKY PURCHASE BAR */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-[#E5E7EB] px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] z-50 shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-xl border-t border-border px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] z-50 shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
         <div className="flex items-center justify-between gap-3 max-w-md mx-auto">
           <div className="flex flex-col">
-            <span className="text-xs text-[#6B7280] font-semibold">
+            <span className="text-xs text-muted-foreground font-semibold">
               {variantLabel || (showSelector ? (pricingMode?.name ?? "") : "")}
             </span>
-            <span className="text-lg font-extrabold text-[#111827]">
+            <span className="text-lg font-extrabold text-foreground">
               {pricingMode
                 ? `${$}${(pricingMode.price * quantity).toFixed(2)}`
                 : `${$}${(unitPrice * quantity).toFixed(2)}`}
@@ -630,7 +630,7 @@ function ProductDetailPage() {
           <button
             onClick={handleAddToCart}
             disabled={!canAddToCart}
-            className="flex-1 bg-[#111827] text-white rounded-[12px] h-[48px] font-bold text-[14px] flex items-center justify-center gap-2 hover:bg-black active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 bg-foreground text-background rounded-[12px] h-[48px] font-bold text-[14px] flex items-center justify-center gap-2 hover:bg-foreground/90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <ShoppingBag className="size-[18px]" strokeWidth={1.5} />
             Agregar al Carrito

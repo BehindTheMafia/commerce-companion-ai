@@ -12,11 +12,11 @@ export function ProductCTA({ label, totalPrice, onClick, disabled }: ProductCTAP
     <button
       onClick={onClick}
       disabled={disabled}
-      className="flex-1 bg-[#111827] text-white rounded-[14px] h-[56px] font-bold text-[15px] flex items-center justify-center gap-3 hover:bg-black hover:shadow-lg hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+      className="flex-1 bg-foreground text-background rounded-[14px] h-[56px] font-bold text-[15px] flex items-center justify-center gap-3 hover:bg-foreground/90 hover:shadow-lg hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
     >
       <ShoppingBag className="size-[18px]" strokeWidth={1.5} />
       <span>{label}</span>
-      <span className="size-1 bg-white/40 rounded-full" />
+      <span className="size-1 bg-background/40 rounded-full" />
       <span>{totalPrice}</span>
     </button>
   );

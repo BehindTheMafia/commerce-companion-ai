@@ -23,10 +23,10 @@ export function ProductVariants({ variants, selected, onChange }: ProductVariant
         return (
           <div key={variant.id} className="flex flex-col gap-3">
             <div className="flex justify-between items-center">
-              <label className="text-[13px] font-bold uppercase tracking-wider text-[#111827]">
+              <label className="text-[13px] font-bold uppercase tracking-wider text-foreground">
                 {variant.name}
               </label>
-              <span className="text-[13px] font-semibold text-[#6B7280]">
+              <span className="text-[13px] font-semibold text-muted-foreground">
                 {currentVal?.label ?? ""}
               </span>
             </div>
@@ -41,8 +41,8 @@ export function ProductVariants({ variants, selected, onChange }: ProductVariant
                     className={cn(
                       "py-2.5 px-6 rounded-[12px] text-sm font-semibold transition-all duration-300 ease-out border",
                       isSelected
-                        ? "border-[#111827] bg-[#111827] text-white shadow-md"
-                        : "border-[#E5E7EB] bg-white text-[#6B7280] hover:border-[#111827] hover:text-[#111827]",
+                        ? "border-foreground bg-foreground text-background shadow-md"
+                        : "border-border bg-background text-muted-foreground hover:border-foreground hover:text-foreground",
                       !val.available && "opacity-30 cursor-not-allowed line-through",
                     )}
                     aria-pressed={isSelected}

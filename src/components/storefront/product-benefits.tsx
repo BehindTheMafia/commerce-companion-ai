@@ -28,13 +28,13 @@ export function ProductBenefits({ benefits }: ProductBenefitsProps) {
         return (
           <div
             key={i}
-            className="bg-[#FAFAFA] border border-[#E5E7EB] rounded-[16px] p-4 flex gap-4 items-start group hover:bg-white hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all duration-300"
+            className="bg-muted/40 border border-border rounded-[16px] p-4 flex gap-4 items-start group hover:bg-background hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] transition-all duration-300"
           >
-            <div className="bg-white border border-[#E5E7EB] w-10 h-10 rounded-[12px] flex items-center justify-center shrink-0 shadow-sm group-hover:scale-110 transition-transform duration-300">
-              {Icon && <Icon className="text-[#111827] size-[18px]" strokeWidth={1.5} />}
+            <div className="bg-background border border-border w-10 h-10 rounded-[12px] flex items-center justify-center shrink-0 shadow-sm group-hover:scale-110 transition-transform duration-300">
+              {Icon && <Icon className="text-foreground size-[18px]" strokeWidth={1.5} />}
             </div>
             <div>
-              <h4 className="font-bold text-[#111827] text-sm mb-1">{benefit.label}</h4>
+              <h4 className="font-bold text-foreground text-sm mb-1">{benefit.label}</h4>
             </div>
           </div>
         );

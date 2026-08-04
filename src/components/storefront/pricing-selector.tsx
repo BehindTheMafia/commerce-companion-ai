@@ -19,14 +19,14 @@ export function PricingSelector({ modes, selectedId, onChange }: PricingSelector
   return (
     <div className="flex flex-col gap-3">
       <div className="flex justify-between items-center">
-        <span className="text-[13px] font-bold uppercase tracking-wider text-[#111827]">
+        <span className="text-[13px] font-bold uppercase tracking-wider text-foreground">
           Purchase Type
         </span>
-        <span className="text-[13px] font-semibold text-[#6B7280]">
+        <span className="text-[13px] font-semibold text-muted-foreground">
           {enabled.find((m) => m.id === selectedId)?.name ?? ""}
         </span>
       </div>
-      <div className="bg-[#FAFAFA] border border-[#E5E7EB] p-1.5 rounded-[14px] flex w-full shadow-inner relative">
+      <div className="bg-muted/40 border border-border p-1.5 rounded-[14px] flex w-full shadow-inner relative">
         {enabled.map((mode) => (
           <button
             key={mode.id}
@@ -34,20 +34,18 @@ export function PricingSelector({ modes, selectedId, onChange }: PricingSelector
             className={cn(
               "flex-1 py-2.5 px-4 rounded-[10px] text-sm font-semibold transition-all duration-300 ease-out relative z-10",
               selectedId === mode.id
-                ? "text-[#111827] shadow-[0_2px_10px_rgb(0,0,0,0.08)] bg-white"
-                : "text-[#6B7280] hover:text-[#111827] hover:bg-gray-100/50",
+                ? "text-foreground shadow-[0_2px_10px_rgb(0,0,0,0.08)] bg-background"
+                : "text-muted-foreground hover:text-foreground hover:bg-gray-100/50",
             )}
             aria-pressed={selectedId === mode.id}
           >
             <span>{mode.name}</span>
-            {mode.badge && (
-              <span className="ml-1 text-[10px] opacity-60">({mode.badge})</span>
-            )}
+            {mode.badge && <span className="ml-1 text-[10px] opacity-60">({mode.badge})</span>}
           </button>
         ))}
       </div>
       {enabled.find((m) => m.id === selectedId)?.description && (
-        <p className="text-xs text-[#6B7280]">
+        <p className="text-xs text-muted-foreground">
           {enabled.find((m) => m.id === selectedId)?.description}
         </p>
       )}
