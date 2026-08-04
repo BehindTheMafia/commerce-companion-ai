@@ -42,7 +42,7 @@ export function StoreHeader({ business, slug, onCartOpen, actions }: StoreHeader
               <ShoppingBag className="size-4" />
             </div>
           )}
-          <span className="text-lg font-semibold tracking-tight text-foreground">
+          <span className="text-base sm:text-lg font-semibold tracking-tight text-foreground truncate max-w-[180px] sm:max-w-[280px]">
             {business.name}
           </span>
         </Link>

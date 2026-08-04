@@ -10,7 +10,7 @@ type ProductQuantityProps = {
 export function ProductQuantity({ quantity, onChange, min = 1, max = 99 }: ProductQuantityProps) {
   return (
     <div
-      className="flex items-center bg-[#FAFAFA] border border-[#E5E7EB] rounded-[14px] h-[56px] w-[130px] shrink-0 p-1"
+      className="flex items-center bg-[#FAFAFA] border border-[#E5E7EB] rounded-[14px] h-[56px] w-28 sm:w-[130px] shrink-0 p-1"
       role="spinbutton"
       aria-label="Cantidad"
       aria-valuemin={min}

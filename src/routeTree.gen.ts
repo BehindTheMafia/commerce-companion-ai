@@ -26,6 +26,9 @@ import { Route as AuthenticatedAppInboxRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedAppCustomersRouteImport } from './routes/_authenticated/app.customers'
 import { Route as AuthenticatedAppCategoriesRouteImport } from './routes/_authenticated/app.categories'
 import { Route as GoSlugProductProductSlugRouteImport } from './routes/go.$slug.product.$productSlug'
+import { Route as AuthenticatedAppProductsNewRouteImport } from './routes/_authenticated/app.products_.new'
+import { Route as AuthenticatedAppCategoriesNewRouteImport } from './routes/_authenticated/app.categories_.new'
+import { Route as AuthenticatedAppProductsIdEditRouteImport } from './routes/_authenticated/app.products_.$id.edit'
 
 const OnboardingRoute = OnboardingRouteImport.update({
   id: '/onboarding',
@@ -117,6 +120,24 @@ const GoSlugProductProductSlugRoute =
     path: '/product/$productSlug',
     getParentRoute: () => GoSlugRoute,
   } as any)
+const AuthenticatedAppProductsNewRoute =
+  AuthenticatedAppProductsNewRouteImport.update({
+    id: '/products_/new',
+    path: '/products/new',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppCategoriesNewRoute =
+  AuthenticatedAppCategoriesNewRouteImport.update({
+    id: '/categories_/new',
+    path: '/categories/new',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppProductsIdEditRoute =
+  AuthenticatedAppProductsIdEditRouteImport.update({
+    id: '/products_/$id/edit',
+    path: '/products/$id/edit',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -134,7 +155,10 @@ export interface FileRoutesByFullPath {
   '/api/twilio/webhook': typeof ApiTwilioWebhookRoute
   '/app/': typeof AuthenticatedAppIndexRoute
   '/go/$slug/': typeof GoSlugIndexRoute
+  '/app/categories/new': typeof AuthenticatedAppCategoriesNewRoute
+  '/app/products/new': typeof AuthenticatedAppProductsNewRoute
   '/go/$slug/product/$productSlug': typeof GoSlugProductProductSlugRoute
+  '/app/products/$id/edit': typeof AuthenticatedAppProductsIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -150,7 +174,10 @@ export interface FileRoutesByTo {
   '/api/twilio/webhook': typeof ApiTwilioWebhookRoute
   '/app': typeof AuthenticatedAppIndexRoute
   '/go/$slug': typeof GoSlugIndexRoute
+  '/app/categories/new': typeof AuthenticatedAppCategoriesNewRoute
+  '/app/products/new': typeof AuthenticatedAppProductsNewRoute
   '/go/$slug/product/$productSlug': typeof GoSlugProductProductSlugRoute
+  '/app/products/$id/edit': typeof AuthenticatedAppProductsIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -170,7 +197,10 @@ export interface FileRoutesById {
   '/api/twilio/webhook': typeof ApiTwilioWebhookRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
   '/go/$slug/': typeof GoSlugIndexRoute
+  '/_authenticated/app/categories_/new': typeof AuthenticatedAppCategoriesNewRoute
+  '/_authenticated/app/products_/new': typeof AuthenticatedAppProductsNewRoute
   '/go/$slug/product/$productSlug': typeof GoSlugProductProductSlugRoute
+  '/_authenticated/app/products_/$id/edit': typeof AuthenticatedAppProductsIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -190,7 +220,10 @@ export interface FileRouteTypes {
     | '/api/twilio/webhook'
     | '/app/'
     | '/go/$slug/'
+    | '/app/categories/new'
+    | '/app/products/new'
     | '/go/$slug/product/$productSlug'
+    | '/app/products/$id/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -206,7 +239,10 @@ export interface FileRouteTypes {
     | '/api/twilio/webhook'
     | '/app'
     | '/go/$slug'
+    | '/app/categories/new'
+    | '/app/products/new'
     | '/go/$slug/product/$productSlug'
+    | '/app/products/$id/edit'
   id:
     | '__root__'
     | '/'
@@ -225,7 +261,10 @@ export interface FileRouteTypes {
     | '/api/twilio/webhook'
     | '/_authenticated/app/'
     | '/go/$slug/'
+    | '/_authenticated/app/categories_/new'
+    | '/_authenticated/app/products_/new'
     | '/go/$slug/product/$productSlug'
+    | '/_authenticated/app/products_/$id/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -358,6 +397,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GoSlugProductProductSlugRouteImport
       parentRoute: typeof GoSlugRoute
     }
+    '/_authenticated/app/products_/new': {
+      id: '/_authenticated/app/products_/new'
+      path: '/products/new'
+      fullPath: '/app/products/new'
+      preLoaderRoute: typeof AuthenticatedAppProductsNewRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/categories_/new': {
+      id: '/_authenticated/app/categories_/new'
+      path: '/categories/new'
+      fullPath: '/app/categories/new'
+      preLoaderRoute: typeof AuthenticatedAppCategoriesNewRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/products_/$id/edit': {
+      id: '/_authenticated/app/products_/$id/edit'
+      path: '/products/$id/edit'
+      fullPath: '/app/products/$id/edit'
+      preLoaderRoute: typeof AuthenticatedAppProductsIdEditRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
   }
 }
 
@@ -370,6 +430,9 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppProductsRoute: typeof AuthenticatedAppProductsRoute
   AuthenticatedAppSettingsRoute: typeof AuthenticatedAppSettingsRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
+  AuthenticatedAppCategoriesNewRoute: typeof AuthenticatedAppCategoriesNewRoute
+  AuthenticatedAppProductsNewRoute: typeof AuthenticatedAppProductsNewRoute
+  AuthenticatedAppProductsIdEditRoute: typeof AuthenticatedAppProductsIdEditRoute
 }
 
 const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
@@ -381,6 +444,9 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppProductsRoute: AuthenticatedAppProductsRoute,
   AuthenticatedAppSettingsRoute: AuthenticatedAppSettingsRoute,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
+  AuthenticatedAppCategoriesNewRoute: AuthenticatedAppCategoriesNewRoute,
+  AuthenticatedAppProductsNewRoute: AuthenticatedAppProductsNewRoute,
+  AuthenticatedAppProductsIdEditRoute: AuthenticatedAppProductsIdEditRoute,
 }
 
 const AuthenticatedAppRouteWithChildren =

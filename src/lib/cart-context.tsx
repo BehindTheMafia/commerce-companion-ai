@@ -1,4 +1,5 @@
 import { createContext, useContext, useReducer, useEffect, type ReactNode } from "react";
+import { migrateCartStorageKey } from "./config";
 
 export type CartProduct = {
   id: string;
@@ -89,12 +90,12 @@ type CartContextType = {
 
 const CartContext = createContext<CartContextType | null>(null);
 
-const STORAGE_KEY = "hyperbee-cart";
+const STORAGE_KEY = migrateCartStorageKey();
 
 function loadCart(): CartState {
   if (typeof window === "undefined") return { items: [] };
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = window.localStorage.getItem(STORAGE_KEY);
     if (raw) return JSON.parse(raw);
   } catch {
     /* ignore */
@@ -105,7 +106,7 @@ function loadCart(): CartState {
 function saveCart(state: CartState) {
   if (typeof window === "undefined") return;
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   } catch {
     /* ignore */
   }

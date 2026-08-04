@@ -18,18 +18,14 @@ import {
   SidebarMenuSubItem,
   SidebarProvider,
   SidebarRail,
-  SidebarTrigger,
 } from "@/components/animate-ui/components/radix/sidebar";
 import {
-  BadgeCheck,
-  BarChart3,
   Bell,
   Bot,
   Boxes,
   Check,
   ChevronRight,
   ChevronsUpDown,
-  CreditCard,
   Folder,
   Forward,
   LayoutDashboard,
@@ -42,30 +38,20 @@ import {
   Settings2,
   ShoppingCart,
   Sparkles,
+  Sun,
+  Moon,
   Tag,
   Trash2,
   Users,
   Zap,
 } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useEffect, useState } from "react";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import { useEffect, useState, useCallback } from "react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -76,11 +62,20 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/animate-ui/components/radix/dialog";
-import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/animate-ui/components/radix/dialog";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
+
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export const Route = createFileRoute("/_authenticated/app")({
   component: AppLayout,
@@ -92,12 +87,12 @@ function AppLayout() {
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset>
-          <TopBar />
+          <AppHeader />
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, ease: [0.22, 0.61, 0.36, 1] }}
-            className="flex flex-1 flex-col gap-4 p-4 pt-0"
+            className="flex flex-1 flex-col"
           >
             <Outlet />
           </motion.div>
@@ -228,7 +223,10 @@ function AppSidebar() {
                     <SidebarMenuSub>
                       {section.items.map((item) => (
                         <SidebarMenuSubItem key={item.to}>
-                          <SidebarMenuSubButton asChild isActive={isActive(item.to, "end" in item ? item.end : false)}>
+                          <SidebarMenuSubButton
+                            asChild
+                            isActive={isActive(item.to, "end" in item ? item.end : false)}
+                          >
                             <Link to={item.to}>
                               <span>{item.label}</span>
                             </Link>
@@ -342,15 +340,12 @@ function UserMenu() {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarImage src="https://pbs.twimg.com/profile_images/1909615404789506048/MTqvRsjo_400x400.jpg" alt={email} />
                 <AvatarFallback className="rounded-lg">
                   {email?.charAt(0)?.toUpperCase() ?? "U"}
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">
-                  {email?.split("@")[0] ?? "Usuario"}
-                </span>
+                <span className="truncate font-semibold">{email?.split("@")[0] ?? "Usuario"}</span>
                 <span className="truncate text-xs">{email || "Cargando..."}</span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
@@ -365,7 +360,6 @@ function UserMenu() {
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src="https://pbs.twimg.com/profile_images/1909615404789506048/MTqvRsjo_400x400.jpg" alt={email} />
                   <AvatarFallback className="rounded-lg">
                     {email?.charAt(0)?.toUpperCase() ?? "U"}
                   </AvatarFallback>
@@ -379,20 +373,6 @@ function UserMenu() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheck />
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCard />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell />
-                Notifications
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={signOut}>
               <LogOut />
@@ -405,27 +385,115 @@ function UserMenu() {
   );
 }
 
-function TopBar() {
+function AppHeader() {
+  const { businesses, activeBusiness } = useBusiness();
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const [dark, setDark] = useState(false);
+
+  const [email, setEmail] = useState("");
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setEmail(data.user?.email ?? ""));
+  }, []);
+
+  async function handleSignOut() {
+    await queryClient.cancelQueries();
+    queryClient.clear();
+    await supabase.auth.signOut();
+    navigate({ to: "/auth", replace: true });
+  }
+
+  useEffect(() => {
+    const stored = window.localStorage.getItem("commerce_ai_theme");
+    const isDark =
+      stored === "dark" ||
+      (stored === null && window.matchMedia?.("(prefers-color-scheme: dark)").matches);
+    setDark(isDark);
+    document.documentElement.classList.toggle("dark", isDark);
+  }, []);
+
+  const toggleTheme = useCallback(() => {
+    const next = !dark;
+    setDark(next);
+    document.documentElement.classList.toggle("dark", next);
+    window.localStorage.setItem("commerce_ai_theme", next ? "dark" : "light");
+  }, [dark]);
+
   return (
-    <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
-      <div className="flex items-center gap-2 px-4">
-        <SidebarTrigger className="-ml-1" />
-        <Separator orientation="vertical" className="mr-2 h-4" />
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem className="hidden md:block">
-              <BreadcrumbLink href="/app">
-                Commerce AI
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator className="hidden md:block" />
-            <BreadcrumbItem>
-              <BreadcrumbPage>Dashboard</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-      </div>
-    </header>
+    <>
+      <header className="sticky top-0 z-30 flex h-12 items-center justify-end gap-2 border-b border-border/40 bg-background/80 backdrop-blur-xl px-4 lg:px-6">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={toggleTheme}
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+              >
+                {dark ? <Sun className="size-4" /> : <Moon className="size-4" />}
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="text-xs">
+              {dark ? "Modo claro" : "Modo oscuro"}
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="relative flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors">
+              <Bell className="size-4" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-80 rounded-xl">
+            <DropdownMenuLabel>
+              <span>Notificaciones</span>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <div className="flex flex-col items-center justify-center gap-1 py-8 text-center">
+              <Bell className="size-5 text-muted-foreground/40" />
+              <p className="text-sm text-muted-foreground">No tienes notificaciones todavía</p>
+            </div>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <div className="mx-2 h-5 w-px bg-border/60" />
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-medium text-foreground hover:bg-muted/60 transition-colors">
+              <Avatar className="h-6 w-6 rounded-md">
+                <AvatarFallback className="rounded-md text-[10px] font-semibold bg-primary/10 text-primary">
+                  {email?.charAt(0)?.toUpperCase() ?? "U"}
+                </AvatarFallback>
+              </Avatar>
+              <span className="hidden lg:inline text-muted-foreground">
+                {email?.split("@")[0] ?? "Usuario"}
+              </span>
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-56 rounded-xl" sideOffset={8}>
+            <DropdownMenuLabel className="font-normal">
+              <div className="flex flex-col">
+                <span className="text-sm font-medium">{email?.split("@")[0] ?? "Usuario"}</span>
+                <span className="text-xs text-muted-foreground">{email || "Cargando..."}</span>
+              </div>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuGroup>
+              <DropdownMenuItem onClick={() => navigate({ to: "/app/settings" })}>
+                <Settings2 className="mr-2 size-4" />
+                <span>Configuración</span>
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleSignOut}>
+              <LogOut className="mr-2 size-4" />
+              <span>Cerrar sesión</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </header>
+    </>
   );
 }
 
@@ -441,12 +509,24 @@ function NewBusinessDialog({ children }: { children: React.ReactNode }) {
     try {
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) throw new Error("No autenticado");
-      const base = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").replace(/-+/g, "-").slice(0, 30);
+      const base = name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "")
+        .replace(/-+/g, "-")
+        .slice(0, 30);
       let slug = base;
       for (let attempt = 0; attempt < 10; attempt++) {
         const testSlug = attempt === 0 ? base : `${base}-${attempt}`;
-        const { data: existing } = await supabase.from("businesses").select("id").eq("slug", testSlug).maybeSingle();
-        if (!existing) { slug = testSlug; break; }
+        const { data: existing } = await supabase
+          .from("businesses")
+          .select("id")
+          .eq("slug", testSlug)
+          .maybeSingle();
+        if (!existing) {
+          slug = testSlug;
+          break;
+        }
       }
       const { data, error } = await supabase
         .from("businesses")
@@ -489,7 +569,9 @@ function NewBusinessDialog({ children }: { children: React.ReactNode }) {
             />
           </div>
           <DialogFooter>
-            <Button type="submit" disabled={busy}>Crear empresa</Button>
+            <Button type="submit" disabled={busy}>
+              Crear empresa
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

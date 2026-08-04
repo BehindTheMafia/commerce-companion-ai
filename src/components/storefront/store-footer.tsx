@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { ExternalLink, Instagram, Facebook, Twitter } from "lucide-react";
 import type { Business } from "@/types/storefront";
 import { useStoreSettings } from "@/hooks/use-store-settings";
+import { APP_NAME, getAppBaseUrl } from "@/lib/config";
 
 type StoreFooterProps = {
   business: Business;
@@ -121,12 +122,12 @@ export function StoreFooter({ business, slug }: StoreFooterProps) {
         <p className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
           Powered by{" "}
           <a
-            href="https://hyperbeecommerce.vercel.app/"
+            href={getAppBaseUrl()}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1 font-semibold text-foreground hover:text-primary transition-colors"
           >
-            Commerce AI <ExternalLink className="size-2.5" />
+            {APP_NAME} <ExternalLink className="size-2.5" />
           </a>
         </p>
       </div>

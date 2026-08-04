@@ -1,14 +1,14 @@
 import { supabase } from "../supabase/client";
 import type { Provider } from "@supabase/supabase-js";
 
-const OAUTH_REDIRECT = window.location.origin + "/auth";
+const oauthRedirect = () => window.location.origin + "/auth";
 
 export const lovable = {
   auth: {
     signInWithOAuth: async (provider: Provider) => {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
-        options: { redirectTo: OAUTH_REDIRECT },
+        options: { redirectTo: oauthRedirect() },
       });
       if (error) return { error };
       if (data?.url) {
@@ -42,26 +42,24 @@ export const lovable = {
       const popup = window.open(
         "about:blank",
         "google-auth-popup",
-        `width=${w},height=${h},top=${top},left=${left},scrollbars=yes,resizable=yes`
+        `width=${w},height=${h},top=${top},left=${left},scrollbars=yes,resizable=yes`,
       );
 
       if (!popup) {
         const { data } = await supabase.auth.signInWithOAuth({
           provider,
-          options: { redirectTo: OAUTH_REDIRECT },
+          options: { redirectTo: oauthRedirect() },
         });
         if (data?.url) window.location.href = data.url;
         return { redirected: true };
       }
 
-      if (popup) {
-        popup.focus();
-      }
+      popup.focus();
 
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: OAUTH_REDIRECT,
+          redirectTo: oauthRedirect(),
           skipBrowserRedirect: true,
         },
       });
@@ -73,7 +71,7 @@ export const lovable = {
 
       if (data?.url) {
         popup.location.href = data.url;
-        return { redirected: true };
+        return { redirected: true, popup };
       }
 
       popup.close();

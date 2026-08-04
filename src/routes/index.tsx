@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { motion, useInView } from "motion/react";
+import { APP_NAME, COMPANY_NAME } from "@/lib/config";
 import {
   ShoppingBag,
   CheckCircle2,
@@ -36,10 +37,10 @@ function Landing() {
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", onScroll, { passive: true });
-    
+
     // Enable smooth scrolling
     document.documentElement.style.scrollBehavior = "smooth";
-    
+
     return () => {
       window.removeEventListener("scroll", onScroll);
       document.documentElement.style.scrollBehavior = "auto";
@@ -48,19 +49,20 @@ function Landing() {
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-[#F8FAFC] text-[#64748B] selection:bg-[#EFF6FF] selection:text-[#1D4ED8] font-sans">
-
       {/* ---- Header ---- */}
       <motion.header
         initial={{ y: 0 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.6, ease: [0.22, 0.61, 0.36, 1] }}
         className={`fixed top-0 left-0 right-0 z-50 h-16 border-b transition-all duration-500 ${
-          scrolled ? "bg-white/80 backdrop-blur-md border-[#E2E8F0] shadow-sm" : "bg-transparent border-transparent"
+          scrolled
+            ? "bg-white/80 backdrop-blur-md border-[#E2E8F0] shadow-sm"
+            : "bg-transparent border-transparent"
         }`}
       >
         <div className="max-w-[1280px] mx-auto px-6 h-full flex items-center justify-between">
           <a href="#" className="flex items-center gap-2 group">
-            <motion.div 
+            <motion.div
               whileHover={{ scale: 1.1, rotate: -10 }}
               whileTap={{ scale: 0.9 }}
               className="w-8 h-8 bg-[#2563EB] rounded-md flex items-center justify-center text-white shadow-sm"
@@ -68,7 +70,7 @@ function Landing() {
               <ShoppingBag size={18} strokeWidth={2.5} />
             </motion.div>
             <span className="text-xl font-bold tracking-[-0.04em] font-display text-[#0B0F19]">
-              HyperBee
+              {APP_NAME}
             </span>
           </a>
 
@@ -76,9 +78,9 @@ function Landing() {
             {[
               { label: "Cómo funciona", href: "#how-it-works" },
               { label: "Beneficios", href: "#features" },
-              { label: "Precios", href: "#pricing" }
+              { label: "Precios", href: "#pricing" },
             ].map((item) => (
-              <a 
+              <a
                 key={item.label}
                 href={item.href}
                 className="relative text-sm font-medium text-[#64748B] hover:text-[#2563EB] transition-colors group py-2"
@@ -113,7 +115,10 @@ function Landing() {
         <div className="absolute inset-0 grid-pattern z-0 opacity-50 pointer-events-none" />
         <div className="absolute top-20 left-1/2 -translate-x-1/2 w-full max-w-4xl h-[400px] z-0 overflow-hidden pointer-events-none">
           <div className="absolute top-10 left-20 w-72 h-72 bg-[#EFF6FF] rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob" />
-          <div className="absolute top-20 right-20 w-72 h-72 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob" style={{ animationDelay: "2s" }} />
+          <div
+            className="absolute top-20 right-20 w-72 h-72 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"
+            style={{ animationDelay: "2s" }}
+          />
         </div>
 
         <div className="max-w-[1280px] mx-auto px-6 relative z-10 pt-16">
@@ -122,46 +127,120 @@ function Landing() {
             animate="visible"
             variants={{
               hidden: { opacity: 0 },
-              visible: { opacity: 1, transition: { staggerChildren: 0.15 } }
+              visible: { opacity: 1, transition: { staggerChildren: 0.15 } },
             }}
             className="text-center max-w-4xl mx-auto space-y-6 mb-12"
           >
-            <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 0.61, 0.36, 1] } } }} className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#2563EB]/20 bg-blue-50/50 backdrop-blur-sm text-xs font-semibold text-[#2563EB] shadow-sm">
+            <motion.div
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                visible: {
+                  opacity: 1,
+                  y: 0,
+                  transition: { duration: 0.6, ease: [0.22, 0.61, 0.36, 1] },
+                },
+              }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#2563EB]/20 bg-blue-50/50 backdrop-blur-sm text-xs font-semibold text-[#2563EB] shadow-sm"
+            >
               {pulseDot}
               La forma más inteligente de vender por WhatsApp 🚀
             </motion.div>
 
-            <motion.h1 variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 0.61, 0.36, 1] } } }} className="text-5xl md:text-6xl lg:text-[72px] font-bold text-[#0B0F19] tracking-[-0.04em] font-display leading-[1.1] text-balance">
-              Tu catálogo online.<br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#2563EB] to-[#38BDF8]">Pedidos listos en WhatsApp.</span>
+            <motion.h1
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                visible: {
+                  opacity: 1,
+                  y: 0,
+                  transition: { duration: 0.6, ease: [0.22, 0.61, 0.36, 1] },
+                },
+              }}
+              className="text-5xl md:text-6xl lg:text-[72px] font-bold text-[#0B0F19] tracking-[-0.04em] font-display leading-[1.1] text-balance"
+            >
+              Tu catálogo online.
+              <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#2563EB] to-[#38BDF8]">
+                Pedidos listos en WhatsApp.
+              </span>
             </motion.h1>
 
-            <motion.p variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 0.61, 0.36, 1] } } }} className="text-lg md:text-xl text-[#64748B] font-sans leading-relaxed max-w-2xl mx-auto font-light">
-              Libérate de responder precios todo el día. Crea tu tienda en 5 minutos, comparte un solo enlace y deja que tus clientes compren solos. <strong className="font-semibold text-[#374151]">Tú solo cobras y despachas.</strong>
+            <motion.p
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                visible: {
+                  opacity: 1,
+                  y: 0,
+                  transition: { duration: 0.6, ease: [0.22, 0.61, 0.36, 1] },
+                },
+              }}
+              className="text-lg md:text-xl text-[#64748B] font-sans leading-relaxed max-w-2xl mx-auto font-light"
+            >
+              Libérate de responder precios todo el día. Crea tu tienda en 5 minutos, comparte un
+              solo enlace y deja que tus clientes compren solos.{" "}
+              <strong className="font-semibold text-[#374151]">Tú solo cobras y despachas.</strong>
             </motion.p>
 
-            <motion.ul variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 0.61, 0.36, 1] } } }} className="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-4 sm:gap-8 text-sm font-medium text-[#374151] mt-8">
-              {["Listo en 5 minutos", "Cero comisiones por venta", "Pedidos automatizados"].map((text) => (
-                <li key={text} className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-[#E2E8F0] shadow-sm">
-                  <CheckCircle2 size={16} className="text-[#2563EB]" />
-                  {text}
-                </li>
-              ))}
+            <motion.ul
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                visible: {
+                  opacity: 1,
+                  y: 0,
+                  transition: { duration: 0.6, ease: [0.22, 0.61, 0.36, 1] },
+                },
+              }}
+              className="flex flex-col sm:flex-row flex-wrap items-center justify-center gap-4 sm:gap-8 text-sm font-medium text-[#374151] mt-8"
+            >
+              {["Listo en 5 minutos", "Cero comisiones por venta", "Pedidos automatizados"].map(
+                (text) => (
+                  <li
+                    key={text}
+                    className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border border-[#E2E8F0] shadow-sm"
+                  >
+                    <CheckCircle2 size={16} className="text-[#2563EB]" />
+                    {text}
+                  </li>
+                ),
+              )}
             </motion.ul>
 
-            <motion.div variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 0.61, 0.36, 1] } } }} className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8">
+            <motion.div
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                visible: {
+                  opacity: 1,
+                  y: 0,
+                  transition: { duration: 0.6, ease: [0.22, 0.61, 0.36, 1] },
+                },
+              }}
+              className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8"
+            >
               <Link to="/auth">
                 <motion.button
-                  whileHover={{ scale: 1.05, y: -2, boxShadow: "0px 10px 30px -5px rgba(37, 99, 235, 0.4)" }}
+                  whileHover={{
+                    scale: 1.05,
+                    y: -2,
+                    boxShadow: "0px 10px 30px -5px rgba(37, 99, 235, 0.4)",
+                  }}
                   whileTap={{ scale: 0.95 }}
                   className="bg-[#2563EB] text-white hover:bg-[#1D4ED8] transition-all duration-300 font-semibold px-8 py-4 rounded-full text-base flex items-center justify-center gap-2 group"
                 >
                   Crear mi tienda gratis
-                  <ArrowRight size={18} strokeWidth={2.5} className="group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight
+                    size={18}
+                    strokeWidth={2.5}
+                    className="group-hover:translate-x-1 transition-transform"
+                  />
                 </motion.button>
               </Link>
             </motion.div>
-            <motion.p variants={{ hidden: { opacity: 0 }, visible: { opacity: 1, transition: { delay: 0.8 } } }} className="text-xs text-[#94A3B8] pt-2">
+            <motion.p
+              variants={{
+                hidden: { opacity: 0 },
+                visible: { opacity: 1, transition: { delay: 0.8 } },
+              }}
+              className="text-xs text-[#94A3B8] pt-2"
+            >
               Prueba gratis 15 días • Sin tarjeta de crédito
             </motion.p>
           </motion.div>
@@ -175,7 +254,7 @@ function Landing() {
             style={{ perspective: 1000 }}
           >
             <div className="absolute -inset-1 bg-gradient-to-r from-[#2563EB]/30 to-blue-400/30 rounded-2xl blur-xl opacity-75 group-hover:opacity-100 group-hover:blur-2xl transition duration-700" />
-            <motion.div 
+            <motion.div
               whileHover={{ rotateX: 2, rotateY: -1 }}
               transition={{ type: "spring", stiffness: 300, damping: 20 }}
               style={{ transformStyle: "preserve-3d" }}
@@ -189,8 +268,10 @@ function Landing() {
                 </div>
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                   <div className="bg-white border border-[#E2E8F0] shadow-sm text-xs text-[#64748B] px-6 py-1.5 rounded-md font-medium flex items-center gap-2">
-                    <span className="w-3 h-3 bg-[#E2E8F0] rounded-sm flex items-center justify-center"><Check size={8} className="text-[#94A3B8]" /></span>
-                    app.hyperbee.co
+                    <span className="w-3 h-3 bg-[#E2E8F0] rounded-sm flex items-center justify-center">
+                      <Check size={8} className="text-[#94A3B8]" />
+                    </span>
+                    mi-tienda.commerceai.app
                   </div>
                 </div>
               </div>
@@ -217,7 +298,10 @@ function Landing() {
           <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
           <div className="flex w-max animate-marquee hover:[animation-play-state:paused]">
             {[0, 1].map((set) => (
-              <div key={set} className="flex items-center gap-16 px-8 grayscale opacity-60 hover:grayscale-0 transition-all duration-300">
+              <div
+                key={set}
+                className="flex items-center gap-16 px-8 grayscale opacity-60 hover:grayscale-0 transition-all duration-300"
+              >
                 <div className="flex items-center gap-2 text-lg font-medium font-display text-[#374151]">
                   <Shirt size={24} /> Moda y Ropa
                 </div>
@@ -243,7 +327,10 @@ function Landing() {
       </section>
 
       {/* ---- How It Works ---- */}
-      <section id="how-it-works" className="py-24 bg-[#F8FAFC] border-b border-[#E2E8F0] overflow-hidden">
+      <section
+        id="how-it-works"
+        className="py-24 bg-[#F8FAFC] border-b border-[#E2E8F0] overflow-hidden"
+      >
         <div className="max-w-[1280px] mx-auto px-6">
           <motion.div
             initial={{ opacity: 1, y: 0 }}
@@ -259,7 +346,8 @@ function Landing() {
               De la idea al pedido en 4 pasos
             </h2>
             <p className="text-[#64748B] text-lg font-sans max-w-2xl mx-auto">
-              Un flujo optimizado paso a paso para eliminar la fricción entre tú y tus ventas. Configuras una vez, vendes en automático siempre.
+              Un flujo optimizado paso a paso para eliminar la fricción entre tú y tus ventas.
+              Configuras una vez, vendes en automático siempre.
             </p>
           </motion.div>
 
@@ -272,13 +360,20 @@ function Landing() {
                 viewport={{ once: true, margin: "-100px" }}
                 variants={{
                   hidden: {},
-                  visible: { transition: { staggerChildren: 0.2 } }
+                  visible: { transition: { staggerChildren: 0.2 } },
                 }}
                 className={`flex flex-col ${i % 2 === 1 ? "md:flex-row-reverse" : "md:flex-row"} items-center gap-12 lg:gap-24`}
               >
                 <div className="w-full md:w-1/2 space-y-6 lg:px-8">
                   <motion.div
-                    variants={{ hidden: { opacity: 0, x: i % 2 === 1 ? 40 : -40 }, visible: { opacity: 1, x: 0, transition: { duration: 0.8, ease: [0.22, 0.61, 0.36, 1] } } }}
+                    variants={{
+                      hidden: { opacity: 0, x: i % 2 === 1 ? 40 : -40 },
+                      visible: {
+                        opacity: 1,
+                        x: 0,
+                        transition: { duration: 0.8, ease: [0.22, 0.61, 0.36, 1] },
+                      },
+                    }}
                     className={`w-14 h-14 rounded-2xl flex items-center justify-center font-display font-bold text-2xl shadow-sm border ${
                       step.isSuccess
                         ? "bg-gradient-to-br from-[#22C55E]/20 to-[#22C55E]/5 text-[#166534] border-[#22C55E]/30"
@@ -287,32 +382,58 @@ function Landing() {
                   >
                     {step.number}
                   </motion.div>
-                  <motion.h3 variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.22, 0.61, 0.36, 1] } } }} className="text-3xl md:text-4xl font-bold text-[#0B0F19] font-display tracking-[-0.04em] leading-tight">
+                  <motion.h3
+                    variants={{
+                      hidden: { opacity: 0, y: 20 },
+                      visible: {
+                        opacity: 1,
+                        y: 0,
+                        transition: { duration: 0.8, ease: [0.22, 0.61, 0.36, 1] },
+                      },
+                    }}
+                    className="text-3xl md:text-4xl font-bold text-[#0B0F19] font-display tracking-[-0.04em] leading-tight"
+                  >
                     {step.title}
                   </motion.h3>
-                  <motion.p variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.22, 0.61, 0.36, 1] } } }} className="text-[#64748B] text-lg leading-relaxed">
+                  <motion.p
+                    variants={{
+                      hidden: { opacity: 0, y: 20 },
+                      visible: {
+                        opacity: 1,
+                        y: 0,
+                        transition: { duration: 0.8, ease: [0.22, 0.61, 0.36, 1] },
+                      },
+                    }}
+                    className="text-[#64748B] text-lg leading-relaxed"
+                  >
                     {step.description}
                   </motion.p>
                 </div>
-                <motion.div 
-                  variants={{ hidden: { opacity: 0, scale: 0.95, rotate: i % 2 === 1 ? -2 : 2 }, visible: { opacity: 1, scale: 1, rotate: 0, transition: { duration: 1, ease: [0.22, 0.61, 0.36, 1] } } }}
+                <motion.div
+                  variants={{
+                    hidden: { opacity: 0, scale: 0.95, rotate: i % 2 === 1 ? -2 : 2 },
+                    visible: {
+                      opacity: 1,
+                      scale: 1,
+                      rotate: 0,
+                      transition: { duration: 1, ease: [0.22, 0.61, 0.36, 1] },
+                    },
+                  }}
                   className="w-full md:w-1/2 relative group"
                   style={{ perspective: 1000 }}
                 >
-                  <motion.div 
+                  <motion.div
                     whileHover={{ rotateY: i % 2 === 1 ? -4 : 4, rotateX: 2, scale: 1.02 }}
                     transition={{ type: "spring", stiffness: 300, damping: 20 }}
                     style={{ transformStyle: "preserve-3d" }}
-                    className={`bg-white border border-[#E2E8F0] rounded-2xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1),0_0_0_1px_#E2E8F0] overflow-hidden relative z-10 ${step.isMobile ? 'max-w-[320px] mx-auto' : ''}`}
+                    className={`bg-white border border-[#E2E8F0] rounded-2xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1),0_0_0_1px_#E2E8F0] overflow-hidden relative z-10 ${step.isMobile ? "max-w-[320px] mx-auto" : ""}`}
                   >
-                    <img
-                      src={step.image}
-                      alt={step.title}
-                      className="w-full h-auto"
-                    />
+                    <img src={step.image} alt={step.title} className="w-full h-auto" />
                     <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/40 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
                   </motion.div>
-                  <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-gradient-to-br ${step.isSuccess ? 'from-green-100 to-emerald-50' : 'from-blue-100 to-indigo-50'} rounded-full blur-3xl opacity-50 z-0 group-hover:opacity-80 transition-opacity duration-700`} />
+                  <div
+                    className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-gradient-to-br ${step.isSuccess ? "from-green-100 to-emerald-50" : "from-blue-100 to-indigo-50"} rounded-full blur-3xl opacity-50 z-0 group-hover:opacity-80 transition-opacity duration-700`}
+                  />
                 </motion.div>
               </motion.div>
             ))}
@@ -338,7 +459,8 @@ function Landing() {
               Todo para profesionalizar tus ventas
             </h2>
             <p className="text-[#64748B] text-lg font-sans max-w-2xl mx-auto">
-              Funciones poderosas diseñadas para maximizar tus conversiones, integradas en una interfaz que aprenderás a usar en minutos.
+              Funciones poderosas diseñadas para maximizar tus conversiones, integradas en una
+              interfaz que aprenderás a usar en minutos.
             </p>
           </motion.div>
 
@@ -356,7 +478,7 @@ function Landing() {
                 } bg-[#F8FAFC] border border-[#E2E8F0] rounded-3xl p-8 shadow-sm hover:shadow-xl transition-all duration-500 relative overflow-hidden flex flex-col justify-between group`}
               >
                 <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-white to-transparent opacity-50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 group-hover:scale-150 transition-transform duration-700" />
-                
+
                 <div className="relative z-10 max-w-lg mb-8">
                   <motion.div
                     whileHover={{ scale: 1.1, rotate: 5 }}
@@ -369,7 +491,7 @@ function Landing() {
                   </h3>
                   <p className="text-[#64748B] text-base leading-relaxed">{feature.description}</p>
                 </div>
-                
+
                 <div className="relative mt-auto w-full rounded-xl overflow-hidden border border-[#E2E8F0] shadow-md transform group-hover:translate-y-2 transition-transform duration-500 bg-white">
                   <div className="absolute inset-0 bg-gradient-to-t from-[#F8FAFC]/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 z-10 transition-opacity duration-300" />
                   <img
@@ -387,7 +509,10 @@ function Landing() {
       </section>
 
       {/* ---- Pricing ---- */}
-      <section id="pricing" className="py-24 bg-[#F8FAFC] border-y border-[#E2E8F0] relative overflow-hidden">
+      <section
+        id="pricing"
+        className="py-24 bg-[#F8FAFC] border-y border-[#E2E8F0] relative overflow-hidden"
+      >
         <div className="absolute inset-0 grid-pattern z-0 opacity-[0.15] pointer-events-none" />
         <div className="absolute top-40 left-1/3 w-96 h-96 bg-[#2563EB]/5 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-20 right-1/4 w-64 h-64 bg-blue-100/50 rounded-full blur-3xl pointer-events-none" />
@@ -407,7 +532,8 @@ function Landing() {
               Planes simples y transparentes
             </h2>
             <p className="text-[#64748B] font-sans max-w-2xl mx-auto">
-              Comienza gratis hoy mismo. Escala a un plan de pago solo cuando estés listo para crecer.
+              Comienza gratis hoy mismo. Escala a un plan de pago solo cuando estés listo para
+              crecer.
             </p>
           </motion.div>
 
@@ -432,19 +558,28 @@ function Landing() {
             {/* Background elements */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] border-[0.5px] border-white/10 rounded-full opacity-30 pointer-events-none" />
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] border-[0.5px] border-white/20 rounded-full opacity-50 pointer-events-none" />
-            
+
             {/* Floating particles */}
-            <motion.div animate={{ y: [0, -30, 0], opacity: [0.3, 0.8, 0.3] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} className="absolute top-1/4 left-1/4 w-3 h-3 bg-blue-400 rounded-full blur-[2px]" />
-            <motion.div animate={{ y: [0, 40, 0], opacity: [0.2, 0.6, 0.2] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }} className="absolute bottom-1/4 right-1/4 w-4 h-4 bg-purple-400 rounded-full blur-[2px]" />
+            <motion.div
+              animate={{ y: [0, -30, 0], opacity: [0.3, 0.8, 0.3] }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute top-1/4 left-1/4 w-3 h-3 bg-blue-400 rounded-full blur-[2px]"
+            />
+            <motion.div
+              animate={{ y: [0, 40, 0], opacity: [0.2, 0.6, 0.2] }}
+              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+              className="absolute bottom-1/4 right-1/4 w-4 h-4 bg-purple-400 rounded-full blur-[2px]"
+            />
 
             <div className="relative z-10 max-w-3xl mx-auto">
               <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-[-0.04em] font-display mb-6 leading-[1.1]">
                 Deja de perder ventas por no responder a tiempo.
               </h2>
               <p className="text-[#94A3B8] text-lg lg:text-xl mb-12 max-w-2xl mx-auto font-light leading-relaxed">
-                Digitaliza tus ventas hoy. Únete a cientos de negocios que ya están vendiendo en automático con HyperBee. Configúralo en 5 minutos.
+                Digitaliza tus ventas hoy. Únete a cientos de negocios que ya están vendiendo en
+                automático con {APP_NAME}. Configúralo en 5 minutos.
               </p>
-              
+
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                 <Link to="/auth" className="w-full sm:w-auto">
                   <motion.button
@@ -453,7 +588,11 @@ function Landing() {
                     className="w-full sm:w-auto bg-[#2563EB] text-white hover:bg-[#3B82F6] transition-all duration-300 font-semibold px-10 py-4 rounded-full text-lg shadow-[0_0_40px_-10px_rgba(37,99,235,0.5)] flex items-center justify-center gap-2 group border border-blue-400/20"
                   >
                     Crear mi tienda gratis
-                    <ArrowRight size={20} strokeWidth={2.5} className="group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight
+                      size={20}
+                      strokeWidth={2.5}
+                      className="group-hover:translate-x-1 transition-transform"
+                    />
                   </motion.button>
                 </Link>
                 <Link to="/auth" className="w-full sm:w-auto">
@@ -467,11 +606,17 @@ function Landing() {
                 </Link>
               </div>
               <p className="mt-8 text-sm text-[#64748B] flex flex-wrap items-center justify-center gap-2">
-                <span className="flex items-center gap-1.5"><Check size={14} className="text-[#22C55E]" /> Prueba de 15 días gratis</span>
+                <span className="flex items-center gap-1.5">
+                  <Check size={14} className="text-[#22C55E]" /> Prueba de 15 días gratis
+                </span>
                 <span className="w-1 h-1 bg-[#475569] rounded-full mx-1 hidden sm:block" />
-                <span className="flex items-center gap-1.5"><Check size={14} className="text-[#22C55E]" /> Sin tarjeta de crédito</span>
+                <span className="flex items-center gap-1.5">
+                  <Check size={14} className="text-[#22C55E]" /> Sin tarjeta de crédito
+                </span>
                 <span className="w-1 h-1 bg-[#475569] rounded-full mx-1 hidden sm:block" />
-                <span className="hidden sm:flex items-center gap-1.5"><Check size={14} className="text-[#22C55E]" /> Cancela cuando quieras</span>
+                <span className="hidden sm:flex items-center gap-1.5">
+                  <Check size={14} className="text-[#22C55E]" /> Cancela cuando quieras
+                </span>
               </p>
             </div>
           </motion.div>
@@ -487,19 +632,27 @@ function Landing() {
                 <div className="w-6 h-6 bg-[#2563EB] rounded flex items-center justify-center text-white">
                   <ShoppingBag size={14} strokeWidth={2.5} />
                 </div>
-                <span className="text-lg font-bold tracking-[-0.04em] font-display text-[#0B0F19]">HyperBee</span>
+                <span className="text-lg font-bold tracking-[-0.04em] font-display text-[#0B0F19]">
+                  {APP_NAME}
+                </span>
               </a>
               <p className="text-sm text-[#64748B] max-w-xs leading-relaxed">
-                El software para que comercios y emprendedores gestionen su catálogo online y cierren ventas en WhatsApp fácilmente.
+                El software para que comercios y emprendedores gestionen su catálogo online y
+                cierren ventas en WhatsApp fácilmente.
               </p>
             </div>
             {footerColumns.map((col) => (
               <div key={col.title}>
-                <h4 className="text-xs font-bold text-[#0B0F19] uppercase tracking-wider mb-4">{col.title}</h4>
+                <h4 className="text-xs font-bold text-[#0B0F19] uppercase tracking-wider mb-4">
+                  {col.title}
+                </h4>
                 <ul className="space-y-3">
                   {col.links.map((link) => (
                     <li key={link.label}>
-                      <a href={link.href} className="text-sm text-[#64748B] hover:text-[#2563EB] transition-colors">
+                      <a
+                        href={link.href}
+                        className="text-sm text-[#64748B] hover:text-[#2563EB] transition-colors"
+                      >
                         {link.label}
                       </a>
                     </li>
@@ -509,10 +662,16 @@ function Landing() {
             ))}
           </div>
           <div className="border-t border-[#E2E8F0] pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-xs text-[#94A3B8]">© 2026 HyperBee Commerce. Todos los derechos reservados.</p>
+            <p className="text-xs text-[#94A3B8]">
+              © 2026 {COMPANY_NAME}. Todos los derechos reservados.
+            </p>
             <div className="flex gap-6">
-              <a href="#" className="text-xs text-[#94A3B8] hover:text-[#0B0F19] transition-colors">Políticas de Privacidad</a>
-              <a href="#" className="text-xs text-[#94A3B8] hover:text-[#0B0F19] transition-colors">Términos del Servicio</a>
+              <a href="#" className="text-xs text-[#94A3B8] hover:text-[#0B0F19] transition-colors">
+                Políticas de Privacidad
+              </a>
+              <a href="#" className="text-xs text-[#94A3B8] hover:text-[#0B0F19] transition-colors">
+                Términos del Servicio
+              </a>
             </div>
           </div>
         </div>
@@ -580,10 +739,14 @@ function PlanCard({ plan, index }: { plan: (typeof plans)[number]; index: number
       )}
 
       <div className="mb-6">
-        <h3 className={`text-xl font-bold font-display mb-2 ${plan.highlighted ? "text-white" : "text-[#0B0F19]"}`}>
+        <h3
+          className={`text-xl font-bold font-display mb-2 ${plan.highlighted ? "text-white" : "text-[#0B0F19]"}`}
+        >
           {plan.name}
         </h3>
-        <p className={`text-sm ${plan.highlighted ? "text-[#94A3B8]" : "text-[#64748B]"}`}>{plan.subtitle}</p>
+        <p className={`text-sm ${plan.highlighted ? "text-[#94A3B8]" : "text-[#64748B]"}`}>
+          {plan.subtitle}
+        </p>
       </div>
 
       <div className="mb-8">
@@ -598,7 +761,9 @@ function PlanCard({ plan, index }: { plan: (typeof plans)[number]; index: number
             {plan.price}
           </motion.span>
           {plan.period && (
-            <span className={`font-medium ${plan.highlighted ? "text-[#94A3B8]" : "text-[#64748B]"}`}>
+            <span
+              className={`font-medium ${plan.highlighted ? "text-[#94A3B8]" : "text-[#64748B]"}`}
+            >
               {plan.period}
             </span>
           )}
@@ -674,8 +839,7 @@ const steps = [
   {
     number: 2,
     title: "2. Comparte tu único enlace",
-    description:
-      "Despídete de enviar fotos sueltas y PDFs pesados por chat. Coloca tu enlace de HyperBee en tu bio de Instagram, TikTok o envíalo directamente a tus clientes por WhatsApp. Tu negocio, siempre disponible.",
+    description: `Despídete de enviar fotos sueltas y PDFs pesados por chat. Coloca tu enlace de ${APP_NAME} en tu bio de Instagram, TikTok o envíalo directamente a tus clientes por WhatsApp. Tu negocio, siempre disponible.`,
     image:
       "https://placehold.co/800x600/F1F5F9/475569?text=Screenshot:+Perfil+de+Instagram/WhatsApp\n(Mostrando+el+link+de+la+tienda)",
     isMobile: false,
@@ -721,8 +885,7 @@ const features = [
     title: "Checkout de alta conversión",
     description:
       "Diseñado obsesivamente para evitar carritos abandonados. Solo pedimos la información estrictamente necesaria para cerrar la venta rápido y fácil.",
-    image:
-      "https://placehold.co/400x300/FFFFFF/475569?text=Screenshot:+Formulario+de+Checkout",
+    image: "https://placehold.co/400x300/FFFFFF/475569?text=Screenshot:+Formulario+de+Checkout",
     spanFull: false,
     tall: false,
     iconBg: "bg-red-100",
@@ -733,8 +896,7 @@ const features = [
     title: "Directo a tu WhatsApp",
     description:
       "Sin intermediarios. Cada pedido se transforma mágicamente en un mensaje claro y ordenado en tu chat de WhatsApp, listo para ser despachado.",
-    image:
-      "https://placehold.co/400x300/F0FDF4/166534?text=Screenshot:+Resumen+en+WhatsApp",
+    image: "https://placehold.co/400x300/F0FDF4/166534?text=Screenshot:+Resumen+en+WhatsApp",
     spanFull: false,
     tall: false,
     iconBg: "bg-emerald-100",

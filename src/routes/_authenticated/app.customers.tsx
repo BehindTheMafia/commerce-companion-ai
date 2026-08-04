@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useBusiness } from "@/lib/business-context";
 import { PageHeader } from "@/components/admin/page-header";
@@ -8,13 +8,35 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import {
-  Users, Plus, Search, Phone, Mail,
-  ChevronRight, X, Package, Tag, FileText, Clock,
-  MessageSquare, PhoneCall,
-  MoreHorizontal, Trash2, Edit3, CreditCard, ArrowUpRight,
+  Users,
+  Plus,
+  Search,
+  Phone,
+  Mail,
+  ChevronRight,
+  X,
+  Package,
+  Tag,
+  FileText,
+  Clock,
+  MessageSquare,
+  PhoneCall,
+  MoreHorizontal,
+  Trash2,
+  Edit3,
+  CreditCard,
+  ArrowUpRight,
+  type LucideIcon,
 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { toast } from "sonner";
@@ -49,6 +71,15 @@ type CustomerWithStats = Customer & {
   stats?: CustomerStats;
 };
 
+type CustomersSummary = {
+  total: number;
+  newMonth: number;
+  returning: number;
+  revenue: number;
+  avgTicket: number;
+  top: CustomerWithStats | undefined;
+};
+
 type Order = {
   id: string;
   order_number: string;
@@ -69,8 +100,13 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 const STATUS_LABELS: Record<string, string> = {
-  pending: "Pendiente", paid: "Pagado", preparing: "Preparando",
-  shipped: "Enviado", delivered: "Entregado", cancelled: "Cancelado", refunded: "Reembolsado",
+  pending: "Pendiente",
+  paid: "Pagado",
+  preparing: "Preparando",
+  shipped: "Enviado",
+  delivered: "Entregado",
+  cancelled: "Cancelado",
+  refunded: "Reembolsado",
 };
 
 const TAG_COLORS = [
@@ -84,10 +120,12 @@ const TAG_COLORS = [
   "bg-teal-100 text-teal-700",
 ];
 
-function tagColor(i: number) { return TAG_COLORS[i % TAG_COLORS.length]; }
+function tagColor(i: number) {
+  return TAG_COLORS[i % TAG_COLORS.length];
+}
 
 function sym(c: string) {
-  return ({ USD: "$", EUR: "€", GBP: "£", MXN: "$", COP: "$", BRL: "R$" }[c] || "$");
+  return { USD: "$", EUR: "€", GBP: "£", MXN: "$", COP: "$", BRL: "R$" }[c] || "$";
 }
 
 function initials(name: string): string {
@@ -167,7 +205,8 @@ function CustomersPage() {
     enabled: !!activeBusiness,
     queryFn: async (): Promise<Customer[]> => {
       const { data, error } = await supabase
-        .from("customers").select("*")
+        .from("customers")
+        .select("*")
         .eq("business_id", activeBusiness!.id)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -211,7 +250,7 @@ function CustomersPage() {
             customer_id: cid,
             order_count: a.count,
             total_spent: a.total,
-            avg_ticket: a.count > 0 ? Math.round(a.total / a.count * 100) / 100 : 0,
+            avg_ticket: a.count > 0 ? Math.round((a.total / a.count) * 100) / 100 : 0,
             last_purchase: lastPurchase.get(cid) ?? null,
           });
         }
@@ -238,19 +277,31 @@ function CustomersPage() {
         const email = (c.email ?? "").toLowerCase();
         const notes = (c.notes ?? "").toLowerCase();
         const tags = (c.tags ?? []).join(" ").toLowerCase();
-        return name.includes(q) || phone.includes(q) || email.includes(q) || notes.includes(q) || tags.includes(q);
+        return (
+          name.includes(q) ||
+          phone.includes(q) ||
+          email.includes(q) ||
+          notes.includes(q) ||
+          tags.includes(q)
+        );
       });
     }
     if (filter !== "all") {
       result = result.filter((c) => {
         const segs = computeSegments(c);
         switch (filter) {
-          case "vip": return segs.includes("VIP");
-          case "returning": return segs.includes("Recurrente");
-          case "new": return segs.includes("Nuevo");
-          case "inactive": return segs.includes("Inactivo");
-          case "no-orders": return segs.includes("Sin compras");
-          default: return true;
+          case "vip":
+            return segs.includes("VIP");
+          case "returning":
+            return segs.includes("Recurrente");
+          case "new":
+            return segs.includes("Nuevo");
+          case "inactive":
+            return segs.includes("Inactivo");
+          case "no-orders":
+            return segs.includes("Sin compras");
+          default:
+            return true;
         }
       });
     }
@@ -263,10 +314,10 @@ function CustomersPage() {
     const returning = enriched.filter((c) => isReturning(c.stats)).length;
     const revenue = enriched.reduce((s, c) => s + (c.stats?.total_spent ?? 0), 0);
     const withOrders = enriched.filter((c) => (c.stats?.order_count ?? 0) > 0).length;
-    const avgTicket = withOrders > 0
-      ? Math.round((revenue / withOrders) * 100) / 100
-      : 0;
-    const top = [...enriched].sort((a, b) => (b.stats?.total_spent ?? 0) - (a.stats?.total_spent ?? 0))[0];
+    const avgTicket = withOrders > 0 ? Math.round((revenue / withOrders) * 100) / 100 : 0;
+    const top = [...enriched].sort(
+      (a, b) => (b.stats?.total_spent ?? 0) - (a.stats?.total_spent ?? 0),
+    )[0];
     return { total, newMonth, returning, revenue, avgTicket, top };
   }, [enriched]);
 
@@ -289,7 +340,10 @@ function CustomersPage() {
 
   const updateTags = async (customerId: string, tags: string[]) => {
     const { error } = await supabase.from("customers").update({ tags }).eq("id", customerId);
-    if (error) { toast.error(error.message); return; }
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     qc.invalidateQueries({ queryKey: ["customers"] });
     toast.success("Tags actualizados");
   };
@@ -332,19 +386,27 @@ function CustomersPage() {
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Clientes</h1>
             <p className="mt-0.5 text-sm text-muted-foreground">
-              {stats.total} cliente{stats.total !== 1 ? "s" : ""} registrado{stats.total !== 1 ? "s" : ""}
+              {stats.total} cliente{stats.total !== 1 ? "s" : ""} registrado
+              {stats.total !== 1 ? "s" : ""}
             </p>
           </div>
           <div className="flex items-center gap-2">
             <NewCustomerDialog open={createOpen} onOpenChange={setCreateOpen}>
-              <Button className="gap-2"><Plus className="size-4" /> Nuevo cliente</Button>
+              <Button className="gap-2">
+                <Plus className="size-4" /> Nuevo cliente
+              </Button>
             </NewCustomerDialog>
           </div>
         </div>
 
         <div className="mt-5 grid grid-cols-2 gap-3">
           <StatCard icon={Users} label="Total" value={stats.total} />
-          <StatCard icon={Users} label="Cliente destacado" value={stats.top?.full_name ?? "—"} truncate />
+          <StatCard
+            icon={Users}
+            label="Cliente destacado"
+            value={stats.top?.full_name ?? "—"}
+            truncate
+          />
         </div>
 
         <div className="mt-5">
@@ -367,10 +429,13 @@ function CustomersPage() {
               </div>
               <h3 className="text-lg font-semibold">Aún no tienes clientes</h3>
               <p className="max-w-xs text-sm text-muted-foreground">
-                Los clientes aparecerán aquí cuando realicen su primer pedido o puedes agregarlos manualmente.
+                Los clientes aparecerán aquí cuando realicen su primer pedido o puedes agregarlos
+                manualmente.
               </p>
               <NewCustomerDialog open={false} onOpenChange={() => {}}>
-                <Button className="mt-2 gap-2"><Plus className="size-4" /> Agregar cliente</Button>
+                <Button className="mt-2 gap-2">
+                  <Plus className="size-4" /> Agregar cliente
+                </Button>
               </NewCustomerDialog>
             </div>
           ) : (
@@ -381,17 +446,14 @@ function CustomersPage() {
                   <th className="px-4 py-3 text-center">Contacto</th>
                   <th className="px-4 py-3 text-center">Pedidos</th>
                   <th className="px-4 py-3 text-right">Total gastado</th>
-                  <th className="px-4 py-3 text-right">Ticket promedio</th>
                   <th className="px-4 py-3 text-center">Última compra</th>
-                  <th className="px-4 py-3 text-center">Segmento</th>
-                  <th className="px-4 py-3 text-center">Tags</th>
                   <th className="w-12 px-4 py-3 text-center"></th>
                 </tr>
               </thead>
               <tbody>
                 {filtered.length === 0 ? (
                   <tr>
-                    <td colSpan={9} className="py-12 text-center text-sm text-muted-foreground">
+                    <td colSpan={6} className="py-12 text-center text-sm text-muted-foreground">
                       No se encontraron clientes para "{search}"
                     </td>
                   </tr>
@@ -408,12 +470,16 @@ function CustomersPage() {
                       >
                         <td className="px-4 py-3.5">
                           <div className="flex items-center gap-3">
-                            <div className={`grid size-9 shrink-0 place-items-center rounded-full text-xs font-semibold ${avatarColor(c.full_name)}`}>
+                            <div
+                              className={`grid size-9 shrink-0 place-items-center rounded-full text-xs font-semibold ${avatarColor(c.full_name)}`}
+                            >
                               {initials(c.full_name)}
                             </div>
                             <div>
                               <p className="text-sm font-medium">{c.full_name}</p>
-                              {c.email && <p className="text-xs text-muted-foreground">{c.email}</p>}
+                              {c.email && (
+                                <p className="text-xs text-muted-foreground">{c.email}</p>
+                              )}
                             </div>
                           </div>
                         </td>
@@ -435,11 +501,9 @@ function CustomersPage() {
                           <span className="text-sm font-medium">{c.stats?.order_count ?? 0}</span>
                         </td>
                         <td className="px-4 py-3.5 text-right tabular-nums">
-                          <span className="text-sm font-medium">{$}{(c.stats?.total_spent ?? 0).toFixed(2)}</span>
-                        </td>
-                        <td className="px-4 py-3.5 text-right tabular-nums">
-                          <span className="text-sm text-muted-foreground">
-                            {$}{(c.stats?.avg_ticket ?? 0).toFixed(2)}
+                          <span className="text-sm font-medium">
+                            {$}
+                            {(c.stats?.total_spent ?? 0).toFixed(2)}
                           </span>
                         </td>
                         <td className="px-4 py-3.5 text-center">
@@ -450,38 +514,6 @@ function CustomersPage() {
                           ) : (
                             <span className="text-sm text-muted-foreground">—</span>
                           )}
-                        </td>
-                        <td className="px-4 py-3.5 text-center">
-                          <div className="flex flex-wrap gap-1">
-                            {segs.slice(0, 2).map((s) => (
-                              <span
-                                key={s}
-                                className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                                  s === "VIP" ? "bg-amber-100 text-amber-700" :
-                                  s === "Nuevo" ? "bg-emerald-100 text-emerald-700" :
-                                  s === "Recurrente" ? "bg-blue-100 text-blue-700" :
-                                  s === "Inactivo" ? "bg-muted text-muted-foreground" :
-                                  "bg-muted text-muted-foreground"
-                                }`}
-                              >
-                                {s}
-                              </span>
-                            ))}
-                          </div>
-                        </td>
-                        <td className="px-4 py-3.5 text-center">
-                          <div className="flex flex-wrap justify-center gap-1">
-                            {(c.tags ?? []).slice(0, 2).map((t, i) => (
-                              <span key={t} className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium ${tagColor(i)}`}>
-                                {t}
-                              </span>
-                            ))}
-                            {(c.tags ?? []).length > 2 && (
-                              <span className="inline-flex rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
-                                +{c.tags!.length - 2}
-                              </span>
-                            )}
-                          </div>
                         </td>
                         <td className="w-12 px-4 py-3.5 text-center">
                           <Button
@@ -503,7 +535,10 @@ function CustomersPage() {
         </Card>
       </div>
 
-      <div className="overflow-hidden border-l" style={{ overflow: selectedCustomer ? undefined : "hidden" }}>
+      <div
+        className="overflow-hidden border-l"
+        style={{ overflow: selectedCustomer ? undefined : "hidden" }}
+      >
         {selectedCustomer && (
           <CustomerPanel
             customer={selectedCustomer}
@@ -520,7 +555,17 @@ function CustomersPage() {
   );
 }
 
-function StatCard({ icon: Icon, label, value, truncate }: { icon: any; label: string; value: string | number; truncate?: boolean }) {
+function StatCard({
+  icon: Icon,
+  label,
+  value,
+  truncate,
+}: {
+  icon: LucideIcon;
+  label: string;
+  value: string | number;
+  truncate?: boolean;
+}) {
   return (
     <div className="flex items-center gap-3 rounded-lg border p-3.5">
       <div className="grid size-9 shrink-0 place-items-center rounded-lg bg-primary/5 text-primary">
@@ -528,7 +573,9 @@ function StatCard({ icon: Icon, label, value, truncate }: { icon: any; label: st
       </div>
       <div className="min-w-0">
         <p className="text-xs text-muted-foreground">{label}</p>
-        <p className={`text-sm font-semibold tabular-nums ${truncate ? "truncate" : ""}`}>{value}</p>
+        <p className={`text-sm font-semibold tabular-nums ${truncate ? "truncate" : ""}`}>
+          {value}
+        </p>
       </div>
     </div>
   );
@@ -540,7 +587,13 @@ function revenue(currency: string, amount: number): string {
 }
 
 function CustomerPanel({
-  customer, orders, onClose, currency, $, onUpdateTags, qc,
+  customer,
+  orders,
+  onClose,
+  currency,
+  $,
+  onUpdateTags,
+  qc,
 }: {
   customer: CustomerWithStats;
   orders: Order[];
@@ -548,7 +601,7 @@ function CustomerPanel({
   currency: string;
   $: string;
   onUpdateTags: (id: string, tags: string[]) => Promise<void>;
-  qc: any;
+  qc: QueryClient;
 }) {
   const [newTag, setNewTag] = useState("");
   const [editNote, setEditNote] = useState(customer.notes ?? "");
@@ -558,7 +611,10 @@ function CustomerPanel({
 
   async function saveNote() {
     setSavingNote(true);
-    const { error } = await supabase.from("customers").update({ notes: editNote || null }).eq("id", customer.id);
+    const { error } = await supabase
+      .from("customers")
+      .update({ notes: editNote || null })
+      .eq("id", customer.id);
     if (error) toast.error(error.message);
     else toast.success("Nota guardada");
     setSavingNote(false);
@@ -568,29 +624,42 @@ function CustomerPanel({
     const tag = newTag.trim();
     if (!tag) return;
     const current = customer.tags ?? [];
-    if (current.includes(tag)) { setNewTag(""); return; }
+    if (current.includes(tag)) {
+      setNewTag("");
+      return;
+    }
     await onUpdateTags(customer.id, [...current, tag]);
     setNewTag("");
   }
 
   async function removeTag(tag: string) {
     const current = customer.tags ?? [];
-    await onUpdateTags(customer.id, current.filter((t) => t !== tag));
+    await onUpdateTags(
+      customer.id,
+      current.filter((t) => t !== tag),
+    );
   }
 
   return (
     <div className="sticky top-0 flex h-screen flex-col">
       <div className="flex items-center justify-between border-b px-5 py-4">
         <div className="flex items-center gap-3">
-          <div className={`grid size-9 place-items-center rounded-full text-xs font-semibold ${avatarColor(customer.full_name)}`}>
+          <div
+            className={`grid size-9 place-items-center rounded-full text-xs font-semibold ${avatarColor(customer.full_name)}`}
+          >
             {initials(customer.full_name)}
           </div>
           <div>
             <p className="text-sm font-medium">{customer.full_name}</p>
-            <p className="text-xs text-muted-foreground">Cliente desde {format(new Date(customer.created_at), "MMM yyyy")}</p>
+            <p className="text-xs text-muted-foreground">
+              Cliente desde {format(new Date(customer.created_at), "MMM yyyy")}
+            </p>
           </div>
         </div>
-        <button onClick={onClose} className="grid size-8 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
+        <button
+          onClick={onClose}
+          className="grid size-8 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+        >
           <X className="size-4" />
         </button>
       </div>
@@ -598,13 +667,22 @@ function CustomerPanel({
       <div className="flex-1 overflow-y-auto p-5 space-y-5">
         <div className="flex flex-wrap gap-1.5">
           {segs.map((s) => (
-            <span key={s} className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-medium ${
-              s === "VIP" ? "bg-amber-100 text-amber-700" :
-              s === "Nuevo" ? "bg-emerald-100 text-emerald-700" :
-              s === "Recurrente" ? "bg-blue-100 text-blue-700" :
-              s === "Inactivo" ? "bg-muted text-muted-foreground" :
-              "bg-muted text-muted-foreground"
-            }`}>{s}</span>
+            <span
+              key={s}
+              className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-medium ${
+                s === "VIP"
+                  ? "bg-amber-100 text-amber-700"
+                  : s === "Nuevo"
+                    ? "bg-emerald-100 text-emerald-700"
+                    : s === "Recurrente"
+                      ? "bg-blue-100 text-blue-700"
+                      : s === "Inactivo"
+                        ? "bg-muted text-muted-foreground"
+                        : "bg-muted text-muted-foreground"
+              }`}
+            >
+              {s}
+            </span>
           ))}
         </div>
 
@@ -615,11 +693,17 @@ function CustomerPanel({
           </div>
           <div className="space-y-0.5 rounded-lg border p-3 text-center">
             <p className="text-xs text-muted-foreground">Total gastado</p>
-            <p className="text-xl font-bold tabular-nums">{$}{(customer.stats?.total_spent ?? 0).toFixed(2)}</p>
+            <p className="text-xl font-bold tabular-nums">
+              {$}
+              {(customer.stats?.total_spent ?? 0).toFixed(2)}
+            </p>
           </div>
           <div className="space-y-0.5 rounded-lg border p-3 text-center">
             <p className="text-xs text-muted-foreground">Ticket promedio</p>
-            <p className="text-lg font-semibold tabular-nums">{$}{(customer.stats?.avg_ticket ?? 0).toFixed(2)}</p>
+            <p className="text-lg font-semibold tabular-nums">
+              {$}
+              {(customer.stats?.avg_ticket ?? 0).toFixed(2)}
+            </p>
           </div>
           <div className="space-y-0.5 rounded-lg border p-3 text-center">
             <p className="text-xs text-muted-foreground">Última compra</p>
@@ -655,7 +739,9 @@ function CustomerPanel({
             {customer.email && (
               <div className="flex items-center gap-2.5">
                 <Mail className="size-4 shrink-0 text-muted-foreground" />
-                <a href={`mailto:${customer.email}`} className="hover:underline">{customer.email}</a>
+                <a href={`mailto:${customer.email}`} className="hover:underline">
+                  {customer.email}
+                </a>
               </div>
             )}
           </div>
@@ -668,20 +754,33 @@ function CustomerPanel({
           <div className="space-y-2">
             <div className="flex flex-wrap gap-1.5">
               {(customer.tags ?? []).map((t, i) => (
-                <span key={t} className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${tagColor(i)}`}>
+                <span
+                  key={t}
+                  className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${tagColor(i)}`}
+                >
                   {t}
-                  <button onClick={() => removeTag(t)} className="hover:text-foreground/60">×</button>
+                  <button onClick={() => removeTag(t)} className="hover:text-foreground/60">
+                    ×
+                  </button>
                 </span>
               ))}
             </div>
-            <form onSubmit={(e) => { e.preventDefault(); addTag(); }} className="flex gap-2">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                addTag();
+              }}
+              className="flex gap-2"
+            >
               <Input
                 value={newTag}
                 onChange={(e) => setNewTag(e.target.value)}
                 placeholder="Agregar tag..."
                 className="h-8 text-xs"
               />
-              <Button type="submit" size="sm" variant="outline" className="h-8 shrink-0">+</Button>
+              <Button type="submit" size="sm" variant="outline" className="h-8 shrink-0">
+                +
+              </Button>
             </form>
           </div>
         </div>
@@ -691,7 +790,13 @@ function CustomerPanel({
             <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               <FileText className="size-3" /> Notas
             </div>
-            <Button size="sm" variant="ghost" className="h-6 text-xs" onClick={saveNote} disabled={savingNote}>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="h-6 text-xs"
+              onClick={saveNote}
+              disabled={savingNote}
+            >
               Guardar
             </Button>
           </div>
@@ -717,7 +822,9 @@ function CustomerPanel({
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="font-mono text-xs">{o.order_number}</span>
-                      <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium ${STATUS_COLORS[o.status] ?? ""}`}>
+                      <span
+                        className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium ${STATUS_COLORS[o.status] ?? ""}`}
+                      >
                         {STATUS_LABELS[o.status] ?? o.status}
                       </span>
                     </div>
@@ -726,7 +833,8 @@ function CustomerPanel({
                     </p>
                   </div>
                   <span className="text-sm tabular-nums font-semibold">
-                    {$}{Number(o.total).toFixed(2)}
+                    {$}
+                    {Number(o.total).toFixed(2)}
                   </span>
                 </div>
               ))}
@@ -738,7 +846,9 @@ function CustomerPanel({
       <div className="border-t p-4">
         <div className="flex gap-2">
           <Button variant="outline" className="flex-1 gap-2" asChild>
-            <a href={`tel:${customer.phone}`}><PhoneCall className="size-4" /> Llamar</a>
+            <a href={`tel:${customer.phone}`}>
+              <PhoneCall className="size-4" /> Llamar
+            </a>
           </Button>
           <Button variant="outline" className="flex-1 gap-2" asChild>
             <a
@@ -756,9 +866,25 @@ function CustomerPanel({
 }
 
 function MobileCustomers({
-  customers, filtered, search, setSearch, filter, setFilter, FILTERS,
-  selectedCustomer, setSelectedCustomer, stats, customerOrders, currency, $,
-  createOpen, setCreateOpen, computeSegments, initials, avatarColor, tagColor,
+  customers,
+  filtered,
+  search,
+  setSearch,
+  filter,
+  setFilter,
+  FILTERS,
+  selectedCustomer,
+  setSelectedCustomer,
+  stats,
+  customerOrders,
+  currency,
+  $,
+  createOpen,
+  setCreateOpen,
+  computeSegments,
+  initials,
+  avatarColor,
+  tagColor,
 }: {
   customers: CustomerWithStats[];
   filtered: CustomerWithStats[];
@@ -769,7 +895,7 @@ function MobileCustomers({
   FILTERS: { value: string; label: string }[];
   selectedCustomer: CustomerWithStats | null;
   setSelectedCustomer: (v: CustomerWithStats | null) => void;
-  stats: any;
+  stats: CustomersSummary;
   customerOrders: Order[];
   currency: string;
   $: string;
@@ -785,14 +911,21 @@ function MobileCustomers({
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold">Clientes</h1>
         <NewCustomerDialog open={false} onOpenChange={() => {}}>
-          <Button size="sm" className="gap-2"><Plus className="size-4" /> Nuevo</Button>
+          <Button size="sm" className="gap-2">
+            <Plus className="size-4" /> Nuevo
+          </Button>
         </NewCustomerDialog>
       </div>
 
       <div className="mt-3">
         <div className="relative">
           <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground/60" />
-          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar..." className="w-full pl-9" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Buscar..."
+            className="w-full pl-9"
+          />
         </div>
       </div>
 
@@ -805,7 +938,9 @@ function MobileCustomers({
         ) : (
           <div className="divide-y">
             {filtered.length === 0 ? (
-              <p className="p-8 text-center text-sm text-muted-foreground">No se encontraron clientes</p>
+              <p className="p-8 text-center text-sm text-muted-foreground">
+                No se encontraron clientes
+              </p>
             ) : (
               filtered.map((c) => {
                 const segs = computeSegments(c);
@@ -815,7 +950,9 @@ function MobileCustomers({
                     className="flex items-center gap-3 px-4 py-3.5 transition-colors hover:bg-muted/50"
                     onClick={() => setSelectedCustomer(c)}
                   >
-                    <div className={`grid size-10 shrink-0 place-items-center rounded-full text-xs font-semibold ${avatarColor(c.full_name)}`}>
+                    <div
+                      className={`grid size-10 shrink-0 place-items-center rounded-full text-xs font-semibold ${avatarColor(c.full_name)}`}
+                    >
                       {initials(c.full_name)}
                     </div>
                     <div className="min-w-0 flex-1">
@@ -823,17 +960,29 @@ function MobileCustomers({
                       <p className="text-xs text-muted-foreground">{c.phone || c.email || "—"}</p>
                       <div className="mt-0.5 flex flex-wrap gap-1">
                         {segs.slice(0, 2).map((s) => (
-                          <span key={s} className={`inline-flex rounded-full px-1.5 py-0.5 text-[9px] font-medium ${
-                            s === "VIP" ? "bg-amber-100 text-amber-700" :
-                            s === "Nuevo" ? "bg-emerald-100 text-emerald-700" :
-                            "bg-muted text-muted-foreground"
-                          }`}>{s}</span>
+                          <span
+                            key={s}
+                            className={`inline-flex rounded-full px-1.5 py-0.5 text-[9px] font-medium ${
+                              s === "VIP"
+                                ? "bg-amber-100 text-amber-700"
+                                : s === "Nuevo"
+                                  ? "bg-emerald-100 text-emerald-700"
+                                  : "bg-muted text-muted-foreground"
+                            }`}
+                          >
+                            {s}
+                          </span>
                         ))}
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm tabular-nums font-semibold">{$}{(c.stats?.total_spent ?? 0).toFixed(2)}</p>
-                      <p className="text-xs text-muted-foreground">{c.stats?.order_count ?? 0} pedidos</p>
+                      <p className="text-sm tabular-nums font-semibold">
+                        {$}
+                        {(c.stats?.total_spent ?? 0).toFixed(2)}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {c.stats?.order_count ?? 0} pedidos
+                      </p>
                     </div>
                   </div>
                 );
@@ -845,35 +994,63 @@ function MobileCustomers({
 
       {selectedCustomer && (
         <>
-          <div className="fixed inset-0 z-50 bg-black/40 transition-opacity duration-300" onClick={() => setSelectedCustomer(null)} />
+          <div
+            className="fixed inset-0 z-50 bg-black/40 transition-opacity duration-300"
+            onClick={() => setSelectedCustomer(null)}
+          />
           <div className="fixed right-0 top-0 z-50 flex h-full w-full max-w-md flex-col bg-white shadow-xl transition-transform duration-300 ease-out translate-x-0">
             <div className="flex items-center justify-between border-b px-5 py-4">
               <div className="flex items-center gap-3">
-                <div className={`grid size-9 place-items-center rounded-full text-xs font-semibold ${avatarColor(selectedCustomer.full_name)}`}>
+                <div
+                  className={`grid size-9 place-items-center rounded-full text-xs font-semibold ${avatarColor(selectedCustomer.full_name)}`}
+                >
                   {initials(selectedCustomer.full_name)}
                 </div>
                 <p className="text-sm font-medium">{selectedCustomer.full_name}</p>
               </div>
-              <button onClick={() => setSelectedCustomer(null)} className="grid size-8 place-items-center rounded-lg text-muted-foreground hover:bg-accent">
+              <button
+                onClick={() => setSelectedCustomer(null)}
+                className="grid size-8 place-items-center rounded-lg text-muted-foreground hover:bg-accent"
+              >
                 <X className="size-4" />
               </button>
             </div>
             <div className="flex-1 overflow-y-auto p-5 space-y-5">
               <div className="flex flex-wrap gap-1.5">
                 {computeSegments(selectedCustomer).map((s) => (
-                  <span key={s} className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-medium ${
-                    s === "VIP" ? "bg-amber-100 text-amber-700" :
-                    s === "Nuevo" ? "bg-emerald-100 text-emerald-700" :
-                    "bg-muted text-muted-foreground"
-                  }`}>{s}</span>
+                  <span
+                    key={s}
+                    className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-medium ${
+                      s === "VIP"
+                        ? "bg-amber-100 text-amber-700"
+                        : s === "Nuevo"
+                          ? "bg-emerald-100 text-emerald-700"
+                          : "bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    {s}
+                  </span>
                 ))}
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-lg border p-3 text-center"><p className="text-xs text-muted-foreground">Pedidos</p><p className="text-xl font-bold tabular-nums">{selectedCustomer.stats?.order_count ?? 0}</p></div>
-                <div className="rounded-lg border p-3 text-center"><p className="text-xs text-muted-foreground">Total</p><p className="text-xl font-bold tabular-nums">{$}{(selectedCustomer.stats?.total_spent ?? 0).toFixed(2)}</p></div>
+                <div className="rounded-lg border p-3 text-center">
+                  <p className="text-xs text-muted-foreground">Pedidos</p>
+                  <p className="text-xl font-bold tabular-nums">
+                    {selectedCustomer.stats?.order_count ?? 0}
+                  </p>
+                </div>
+                <div className="rounded-lg border p-3 text-center">
+                  <p className="text-xs text-muted-foreground">Total</p>
+                  <p className="text-xl font-bold tabular-nums">
+                    {$}
+                    {(selectedCustomer.stats?.total_spent ?? 0).toFixed(2)}
+                  </p>
+                </div>
               </div>
               <div>
-                <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Contacto</p>
+                <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Contacto
+                </p>
                 <div className="space-y-2 rounded-lg border p-3.5 text-sm">
                   {selectedCustomer.phone && <p>📞 {selectedCustomer.phone}</p>}
                   {selectedCustomer.email && <p>✉️ {selectedCustomer.email}</p>}
@@ -887,7 +1064,15 @@ function MobileCustomers({
   );
 }
 
-function NewCustomerDialog({ open, onOpenChange, children }: { open: boolean; onOpenChange: (v: boolean) => void; children: React.ReactNode }) {
+function NewCustomerDialog({
+  open,
+  onOpenChange,
+  children,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+  children: React.ReactNode;
+}) {
   const { activeBusiness } = useBusiness();
   const qc = useQueryClient();
   const [fullName, setFullName] = useState("");
@@ -903,31 +1088,57 @@ function NewCustomerDialog({ open, onOpenChange, children }: { open: boolean; on
     try {
       const { error } = await supabase.from("customers").insert({
         business_id: activeBusiness.id,
-        full_name: fullName, email: email || null, phone: phone || null, notes: notes || null,
+        full_name: fullName,
+        email: email || null,
+        phone: phone || null,
+        notes: notes || null,
       });
       if (error) throw error;
       toast.success("Cliente agregado");
-      setFullName(""); setEmail(""); setPhone(""); setNotes("");
+      setFullName("");
+      setEmail("");
+      setPhone("");
+      setNotes("");
       onOpenChange(false);
       qc.invalidateQueries({ queryKey: ["customers"] });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Error");
-    } finally { setBusy(false); }
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent>
-        <DialogHeader><DialogTitle>Nuevo cliente</DialogTitle></DialogHeader>
+        <DialogHeader>
+          <DialogTitle>Nuevo cliente</DialogTitle>
+        </DialogHeader>
         <form onSubmit={create} className="space-y-4">
-          <div className="space-y-1.5"><Label>Nombre completo</Label><Input value={fullName} onChange={(e) => setFullName(e.target.value)} required /></div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5"><Label>Email</Label><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} /></div>
-            <div className="space-y-1.5"><Label>Teléfono</Label><Input value={phone} onChange={(e) => setPhone(e.target.value)} /></div>
+          <div className="space-y-1.5">
+            <Label>Nombre completo</Label>
+            <Input value={fullName} onChange={(e) => setFullName(e.target.value)} required />
           </div>
-          <div className="space-y-1.5"><Label>Notas</Label><Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} /></div>
-          <DialogFooter><Button type="submit" disabled={busy}>Guardar</Button></DialogFooter>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label>Email</Label>
+              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Teléfono</Label>
+              <Input value={phone} onChange={(e) => setPhone(e.target.value)} />
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label>Notas</Label>
+            <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} />
+          </div>
+          <DialogFooter>
+            <Button type="submit" disabled={busy}>
+              Guardar
+            </Button>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

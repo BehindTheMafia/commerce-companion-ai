@@ -3,8 +3,9 @@ import { createHmac, randomUUID } from "node:crypto";
 
 export const getImageKitAuth = createServerFn({ method: "GET" }).handler(async () => {
   const privateKey = process.env.IMAGEKIT_PRIVATE_KEY;
-  if (!privateKey) {
-    throw new Error("IMAGEKIT_PRIVATE_KEY not set on server");
+  const publicKey = process.env.VITE_IMAGEKIT_PUBLIC_KEY;
+  if (!privateKey || !publicKey) {
+    throw new Error("ImageKit keys not set on server");
   }
 
   const token = randomUUID();
@@ -14,5 +15,5 @@ export const getImageKitAuth = createServerFn({ method: "GET" }).handler(async (
     .update(token + expire)
     .digest("hex");
 
-  return { token, expire, signature };
+  return { publicKey, token, expire, signature };
 });

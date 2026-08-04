@@ -28,7 +28,7 @@ export function ProductBreadcrumbs({ items }: ProductBreadcrumbsProps) {
               <span
                 className={
                   isLast
-                    ? "text-foreground font-medium truncate max-w-[180px]"
+                    ? "text-foreground font-medium truncate max-w-[120px] sm:max-w-[200px] lg:max-w-[300px]"
                     : "text-muted-foreground"
                 }
               >

@@ -10,6 +10,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Globe, Copy, Check, ExternalLink } from "lucide-react";
+import { getStoreUrl } from "@/lib/config";
+import { CURRENCY_OPTIONS, getCurrencyLabel } from "@/lib/currency";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export const Route = createFileRoute("/_authenticated/app/settings")({
   component: SettingsPage,
@@ -40,14 +49,21 @@ function SettingsPage() {
     try {
       const { error } = await supabase
         .from("businesses")
-        .update({ name, currency, logo_url: logoUrl || null, whatsapp_phone: whatsappPhone || null })
+        .update({
+          name,
+          currency,
+          logo_url: logoUrl || null,
+          whatsapp_phone: whatsappPhone || null,
+        })
         .eq("id", activeBusiness.id);
       if (error) throw error;
       toast.success("Guardado");
       refetch();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Error");
-    } finally { setBusy(false); }
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
@@ -69,7 +85,7 @@ function SettingsPage() {
                   rel="noopener noreferrer"
                   className="flex items-center gap-1 text-xs text-muted-foreground underline transition-colors hover:text-foreground"
                 >
-                  hyperbeecommerce.vercel.app/go/{activeBusiness.slug}
+                  {getStoreUrl(activeBusiness.slug)}
                   <ExternalLink className="size-3" />
                 </a>
               </div>
@@ -77,7 +93,7 @@ function SettingsPage() {
             <button
               type="button"
               onClick={() => {
-                navigator.clipboard.writeText(`https://hyperbeecommerce.vercel.app/go/${activeBusiness.slug}`);
+                navigator.clipboard.writeText(getStoreUrl(activeBusiness.slug));
                 setCopied(true);
                 setTimeout(() => setCopied(false), 2000);
               }}
@@ -101,14 +117,34 @@ function SettingsPage() {
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="s-currency">Moneda</Label>
-            <Input id="s-currency" value={currency} onChange={(e) => setCurrency(e.target.value.toUpperCase())} maxLength={3} />
+            <Select value={currency} onValueChange={setCurrency}>
+              <SelectTrigger id="s-currency" className="w-full">
+                <SelectValue placeholder="Selecciona una moneda" />
+              </SelectTrigger>
+              <SelectContent>
+                {CURRENCY_OPTIONS.map((code) => (
+                  <SelectItem key={code} value={code}>
+                    {getCurrencyLabel(code)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="s-whatsapp">Teléfono WhatsApp (para recibir pedidos)</Label>
-            <Input id="s-whatsapp" value={whatsappPhone} onChange={(e) => setWhatsappPhone(e.target.value)} placeholder="+541112345678" />
-            <p className="text-xs text-muted-foreground">Los pedidos de clientes se enviarán a este número.</p>
+            <Input
+              id="s-whatsapp"
+              value={whatsappPhone}
+              onChange={(e) => setWhatsappPhone(e.target.value)}
+              placeholder="+541112345678"
+            />
+            <p className="text-xs text-muted-foreground">
+              Los pedidos de clientes se enviarán a este número.
+            </p>
           </div>
-          <Button type="submit" disabled={busy}>Guardar cambios</Button>
+          <Button type="submit" disabled={busy}>
+            Guardar cambios
+          </Button>
         </form>
       </Card>
     </div>

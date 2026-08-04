@@ -66,7 +66,7 @@ export function ProductGallery({
   return (
     <>
       <div className="relative" role="region" aria-label="Galería del producto">
-        <div className="lg:sticky lg:top-[110px]">
+        <div className="lg:sticky lg:top-24">
           {/* Desktop: vertical thumbs + main image side by side */}
           <div className="flex flex-col-reverse lg:flex-row gap-6">
             {/* Thumbnails - vertical on desktop, horizontal on mobile */}
@@ -116,9 +116,7 @@ export function ProductGallery({
             >
               {currentImage && !imgError ? (
                 <>
-                  {!imgLoaded && (
-                    <div className="absolute inset-0 bg-[#FAFAFA] animate-pulse" />
-                  )}
+                  {!imgLoaded && <div className="absolute inset-0 bg-[#FAFAFA] animate-pulse" />}
                   {allImages.map((img, idx) => (
                     <img
                       key={img.id}
@@ -171,7 +169,7 @@ export function ProductGallery({
                       e.stopPropagation();
                       goTo(activeIndex - 1);
                     }}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 z-10 size-9 rounded-full bg-background/80 backdrop-blur-md border border-border/40 flex items-center justify-center text-foreground/60 hover:text-foreground hover:bg-background transition-all"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 z-10 size-10 lg:size-9 rounded-full bg-background/80 backdrop-blur-md border border-border/40 flex items-center justify-center text-foreground/60 hover:text-foreground hover:bg-background transition-all"
                     aria-label="Imagen anterior"
                   >
                     <ChevronLeft className="size-4" />
@@ -181,7 +179,7 @@ export function ProductGallery({
                       e.stopPropagation();
                       goTo(activeIndex + 1);
                     }}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 z-10 size-9 rounded-full bg-background/80 backdrop-blur-md border border-border/40 flex items-center justify-center text-foreground/60 hover:text-foreground hover:bg-background transition-all"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 z-10 size-10 lg:size-9 rounded-full bg-background/80 backdrop-blur-md border border-border/40 flex items-center justify-center text-foreground/60 hover:text-foreground hover:bg-background transition-all"
                     aria-label="Imagen siguiente"
                   >
                     <ChevronRight className="size-4" />

@@ -40,7 +40,7 @@ export function ProductAccordion({ sections }: ProductAccordionProps) {
           <div
             className={cn(
               "overflow-hidden transition-all duration-300 ease-in-out",
-              openIndex === i ? "max-h-[500px] opacity-100 pb-5" : "max-h-0 opacity-0",
+              openIndex === i ? "max-h-[2000px] opacity-100 pb-5" : "max-h-0 opacity-0",
             )}
           >
             <div className="text-[#6B7280] text-[14px] leading-relaxed">{section.content}</div>

@@ -27,7 +27,17 @@ import { RelatedProducts } from "@/components/storefront/related-products";
 import { SkeletonProductPage } from "@/components/storefront/skeleton-product-page";
 import { CartDrawerV2 } from "@/components/storefront/cart-drawer-v2";
 import { toast } from "sonner";
-import { AlertCircle, ArrowRight, ShoppingBag, Heart, Share2, MessageCircle, Box, Star, Lock } from "lucide-react";
+import {
+  AlertCircle,
+  ArrowRight,
+  ShoppingBag,
+  Heart,
+  Share2,
+  MessageCircle,
+  Box,
+  Star,
+  Lock,
+} from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import type { Product, ProductVariant } from "@/types/storefront";
 
@@ -168,9 +178,16 @@ function ProductDetailPage() {
 
   const stockStatus = useMemo(() => {
     if (product?.stock == null) return null;
-    if (product.stock <= 0) return { label: "Out of Stock", dot: "#DC2626", text: "#DC2626", bg: "bg-red-50/80" };
-    if (product.stock <= 5) return { label: `Only ${product.stock} left`, dot: "#D97706", text: "#D97706", bg: "bg-amber-50/80" };
-    return { label: "In Stock", dot: "#16A34A", text: "#16A34A", bg: "bg-green-50/80" };
+    if (product.stock <= 0)
+      return { label: "Agotado", dot: "#DC2626", text: "#DC2626", bg: "bg-red-50/80" };
+    if (product.stock <= 5)
+      return {
+        label: `Solo ${product.stock} restantes`,
+        dot: "#D97706",
+        text: "#D97706",
+        bg: "bg-amber-50/80",
+      };
+    return { label: "En Stock", dot: "#16A34A", text: "#16A34A", bg: "bg-green-50/80" };
   }, [product?.stock]);
 
   const deliveryDates = useMemo(() => {
@@ -261,16 +278,62 @@ function ProductDetailPage() {
   }, [product, pricingMode, quantity, notes, canAddToCart, addItem]);
 
   const handleShare = useCallback(async () => {
+    const text = product?.name
+      ? `✨ Descubre ${product.name} de ${business?.name ?? slug}!\n\n${window.location.href}`
+      : `✨ Descubre los productos de ${business?.name ?? slug}!\n\n${window.location.href}`;
     if (navigator.share) {
       await navigator.share({
-        title: product?.name ?? "",
+        title: product?.name ?? business?.name ?? slug,
+        text,
         url: window.location.href,
       });
     } else {
-      await navigator.clipboard.writeText(window.location.href);
-      toast("Link copied to clipboard", { duration: 2000 });
+      await navigator.clipboard.writeText(text);
+      toast("Enlace copiado al portapapeles", { duration: 2000 });
     }
-  }, [product?.name]);
+  }, [product?.name, business?.name, slug]);
+
+  const accordionSections = useMemo(() => {
+    if (!product) return [];
+    const sections: { title: string; content: ReactNode }[] = [];
+    if (product.description) {
+      sections.push({ title: "Descripción", content: product.description });
+    }
+    if (product.specifications?.length) {
+      sections.push({
+        title: "Especificaciones",
+        content: (
+          <ul className="flex flex-col gap-3">
+            {product.specifications.map((spec, idx) => (
+              <li
+                key={idx}
+                className="flex justify-between items-center border-b border-gray-100 pb-2 last:border-0"
+              >
+                <span className="text-[#6B7280]">{spec.label}</span>
+                <span className="font-semibold text-[#111827]">{spec.value}</span>
+              </li>
+            ))}
+          </ul>
+        ),
+      });
+    }
+    const shippingText =
+      product.shipping_info || (settings.shipping.enabled ? settings.shipping.banner_text : null);
+    if (shippingText) {
+      sections.push({ title: "Información de Envío", content: shippingText });
+    }
+    if (product.warranty_info) {
+      sections.push({ title: "Devoluciones y Cambios", content: product.warranty_info });
+    }
+    const wholesaleMode = product.pricing_modes?.find(
+      (m) => m.name.toLowerCase().includes("wholesale") && m.description,
+    );
+    const wholesaleInfo = product.wholesale_info || wholesaleMode?.description || null;
+    if (wholesaleInfo) {
+      sections.push({ title: "Información al por Mayor", content: wholesaleInfo });
+    }
+    return sections;
+  }, [product, settings.shipping.enabled, settings.shipping.banner_text]);
 
   if (bizLoading || productLoading) {
     return <SkeletonProductPage />;
@@ -301,90 +364,61 @@ function ProductDetailPage() {
 
   const brandName = product.brand?.name ?? business.name;
 
-  const accordionSections: { title: string; content: ReactNode }[] = [];
-  if (product.description) {
-    accordionSections.push({ title: "Description", content: product.description });
-  }
-  if (product.specifications && product.specifications.length > 0) {
-    accordionSections.push({
-      title: "Specifications",
-      content: (
-        <ul className="flex flex-col gap-3">
-          {product.specifications.map((spec, idx) => (
-            <li key={idx} className="flex justify-between items-center border-b border-gray-100 pb-2 last:border-0">
-              <span className="text-[#6B7280]">{spec.label}</span>
-              <span className="font-semibold text-[#111827]">{spec.value}</span>
-            </li>
-          ))}
-        </ul>
-      ),
-    });
-  }
-  const shippingText = product.shipping_info || (settings.shipping.enabled ? settings.shipping.banner_text : null);
-  if (shippingText) {
-    accordionSections.push({ title: "Shipping Information", content: shippingText });
-  }
-  if (product.warranty_info) {
-    accordionSections.push({ title: "Returns & Exchanges", content: product.warranty_info });
-  }
-  const wholesaleMode = product.pricing_modes?.find(
-    (m) => m.name.toLowerCase().includes("wholesale") && m.description,
-  );
-  const wholesaleInfo = product.wholesale_info || wholesaleMode?.description || null;
-  if (wholesaleInfo) {
-    accordionSections.push({ title: "Wholesale Information", content: wholesaleInfo });
-  }
-
   return (
     <div className="min-h-screen bg-white text-[#111827] antialiased font-sans">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-white focus:text-[#111827] focus:rounded-xl focus:shadow-lg focus:ring-2 focus:ring-[#111827] focus:text-sm focus:font-semibold"
+      >
+        Saltar al contenido principal
+      </a>
+
       <StoreHeader business={business} slug={slug} onCartOpen={() => setCartOpen(true)} />
 
-      <main className="flex-1">
-        <div className="mx-auto w-full max-w-[1440px] px-5 md:px-8 lg:px-12 py-8 lg:py-16">
+      <main id="main-content" className="flex-1">
+        <div className="mx-auto w-full max-w-[1600px] px-[clamp(1.25rem,5vw,4rem)] py-6 md:py-10 lg:py-16">
           <ProductBreadcrumbs
             items={[
-              { label: "Home", to: "/go/$slug", params: { slug } },
+              { label: "Inicio", to: "/go/$slug", params: { slug } },
               ...(product.category ? [{ label: product.category.name }] : []),
               { label: product.name },
             ]}
           />
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16">
+          <div className="mt-6 md:mt-8 flex flex-col lg:grid lg:grid-cols-2 gap-6 md:gap-8 lg:gap-10 xl:gap-12">
             {/* Left: Gallery */}
-            <div className="lg:col-span-7">
-              <ProductGallery
-                images={images}
-                mainImageUrl={product.image_url}
-                productName={product.name}
-                discountPercent={discountPercent}
-                badges={
-                  <ProductBadges
-                    createdAt={product.created_at}
-                    price={product.price}
-                    salePrice={product.sale_price}
-                  />
-                }
-              />
-            </div>
+            <ProductGallery
+              images={images}
+              mainImageUrl={product.image_url}
+              productName={product.name}
+              discountPercent={discountPercent}
+              badges={
+                <ProductBadges
+                  createdAt={product.created_at}
+                  price={product.price}
+                  salePrice={product.sale_price}
+                />
+              }
+            />
 
             {/* Right: Product Information */}
-            <div className="lg:col-span-5">
-              <div className="lg:sticky lg:top-8 flex flex-col gap-8 pb-24 lg:pb-0">
+            <div>
+              <div className="lg:sticky lg:top-12 flex flex-col gap-6 md:gap-8 pb-28 lg:pb-0">
                 {/* HEADER SECTION */}
-                <div className="flex flex-col gap-3 border-b border-[#E5E7EB] pb-6">
-                  <span className="uppercase tracking-[0.15em] text-[12px] font-bold text-[#6B7280]">
+                <div className="flex flex-col gap-3 md:gap-4 border-b border-[#E5E7EB] pb-5 md:pb-6">
+                  <span className="text-[11px] md:text-[12px] font-bold text-[#6B7280]">
                     {brandName}
                   </span>
 
-                  <h1 className="text-4xl lg:text-[42px] font-extrabold leading-[1.1] tracking-tight text-[#111827]">
+                  <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-[40px] font-extrabold leading-[1.1] tracking-tight text-[#111827]">
                     {product.name}
                   </h1>
 
                   {settings.reviews.enabled && (
                     <div className="flex items-center gap-4 mt-1">
-                      <div className="flex text-[#111827] text-sm gap-[2px]">
+                      <div className="flex text-[#9CA3AF] text-sm gap-[2px]">
                         {[1, 2, 3, 4, 5].map((i) => (
-                          <Star key={i} className="size-[18px] fill-current" strokeWidth={0} />
+                          <Star key={i} className="size-[18px]" strokeWidth={1.5} />
                         ))}
                       </div>
                     </div>
@@ -393,21 +427,21 @@ function ProductDetailPage() {
 
                 {/* PRICE & STOCK SECTION */}
                 <div className="flex flex-col gap-4">
-                  <div className="flex items-end gap-4">
-                    <span className="text-3xl font-extrabold">
+                  <div className="flex items-end gap-3 md:gap-4">
+                    <span className="text-3xl md:text-4xl font-extrabold">
                       {pricingMode
                         ? `${$}${pricingMode.price.toFixed(2)}`
                         : `${$}${displayPrice.toFixed(2)}`}
                     </span>
                     {onSale && !pricingMode && (
-                      <span className="text-lg text-[#6B7280] line-through font-medium mb-1">
+                      <span className="text-base sm:text-lg md:text-xl text-[#6B7280] line-through font-medium mb-1 md:mb-1.5">
                         {$}
                         {product.price.toFixed(2)}
                       </span>
                     )}
                   </div>
 
-                  <div className="flex items-center gap-6 text-sm flex-wrap">
+                  <div className="flex items-center gap-4 md:gap-6 text-sm flex-wrap">
                     {stockStatus && (
                       <div
                         className="flex items-center gap-2 px-3 py-1.5 rounded-full font-bold"
@@ -426,12 +460,6 @@ function ProductDetailPage() {
                       </span>
                     )}
                   </div>
-
-                  {product.description && (
-                    <p className="text-[15px] leading-relaxed text-[#6B7280] mt-2">
-                      {product.description}
-                    </p>
-                  )}
                 </div>
 
                 {/* PRICING SELECTOR */}
@@ -460,28 +488,28 @@ function ProductDetailPage() {
                     htmlFor="pd-notes"
                     className="text-[13px] font-bold uppercase tracking-wider text-[#111827] block mb-3"
                   >
-                    Notes (optional)
+                    Notas (opcional)
                   </label>
                   <input
                     id="pd-notes"
                     type="text"
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    placeholder="Additional details for your order..."
+                    placeholder="Detalles adicionales para tu pedido..."
                     className="w-full bg-[#FAFAFA] border border-[#E5E7EB] rounded-[14px] px-[18px] h-[52px] text-sm text-[#111827] placeholder:text-[#9CA3AF] transition-all duration-200 focus:outline-none focus:border-[#111827] focus:ring-2 focus:ring-[#111827]/10"
                   />
                 </div>
 
                 {/* PURCHASE ACTIONS */}
                 <div className="flex flex-col gap-4">
-                  <div className="flex gap-4">
+                  <div className="flex flex-col sm:flex-row gap-3">
                     <ProductQuantity
                       quantity={quantity}
                       onChange={setQuantity}
                       min={minimumQuantity}
                     />
                     <ProductCTA
-                      label="Add to Cart"
+                      label="Agregar al Carrito"
                       totalPrice={`${$}${(unitPrice * quantity).toFixed(2)}`}
                       onClick={handleAddToCart}
                       disabled={!canAddToCart}
@@ -498,23 +526,29 @@ function ProductDetailPage() {
                     className="w-full bg-[#25D366] text-white rounded-[14px] h-[56px] font-bold text-[15px] flex items-center justify-center gap-3 hover:bg-[#20bd5a] hover:shadow-[0_8px_20px_rgba(37,211,102,0.3)] active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <MessageCircle className="size-5" strokeWidth={1.5} />
-                    Order via WhatsApp
+                    Pedir por WhatsApp
                   </button>
 
                   {/* Tertiary Actions */}
                   <div className="flex justify-center gap-8 mt-2 py-2">
                     {settings.wishlist.enabled && (
                       <button className="flex items-center gap-2 text-sm font-semibold text-[#6B7280] hover:text-[#111827] transition-colors group">
-                        <Heart className="size-[18px] group-hover:text-[#DC2626] transition-colors" strokeWidth={1.5} />
-                        Add to Wishlist
+                        <Heart
+                          className="size-[18px] group-hover:text-[#DC2626] transition-colors"
+                          strokeWidth={1.5}
+                        />
+                        Agregar a Favoritos
                       </button>
                     )}
                     <button
                       onClick={handleShare}
                       className="flex items-center gap-2 text-sm font-semibold text-[#6B7280] hover:text-[#111827] transition-colors group"
                     >
-                      <Share2 className="size-[18px] group-hover:text-blue-500 transition-colors" strokeWidth={1.5} />
-                      Share Product
+                      <Share2
+                        className="size-[18px] group-hover:text-blue-500 transition-colors"
+                        strokeWidth={1.5}
+                      />
+                      Compartir Producto
                     </button>
                   </div>
                 </div>
@@ -525,10 +559,10 @@ function ProductDetailPage() {
                     <Box className="size-5 text-[#111827]" strokeWidth={1.5} />
                   </div>
                   <div>
-                    <h4 className="font-bold text-[14px] text-[#111827]">Estimated Delivery</h4>
+                    <h4 className="font-bold text-[14px] text-[#111827]">Entrega Estimada</h4>
                     <p className="text-[#6B7280] text-[14px] mt-1">
-                      Order now and receive it between{" "}
-                      <strong className="text-[#111827]">{deliveryDates.start}</strong> and{" "}
+                      Pide ahora y recíbelo entre el{" "}
+                      <strong className="text-[#111827]">{deliveryDates.start}</strong> y el{" "}
                       <strong className="text-[#111827]">{deliveryDates.end}</strong>.
                     </p>
                   </div>
@@ -547,13 +581,11 @@ function ProductDetailPage() {
                 )}
 
                 {/* ACCORDION */}
-                {accordionSections.length > 0 && (
-                  <ProductAccordion sections={accordionSections} />
-                )}
+                {accordionSections.length > 0 && <ProductAccordion sections={accordionSections} />}
 
                 {/* SECURITY NOTE */}
                 <div className="flex items-center justify-center gap-2 text-[#6B7280] text-xs font-medium">
-                  <Lock className="size-3.5" strokeWidth={1.5} /> Guaranteed safe & secure checkout
+                  <Lock className="size-3.5" strokeWidth={1.5} /> Pago seguro garantizado
                 </div>
               </div>
             </div>
@@ -583,10 +615,12 @@ function ProductDetailPage() {
       />
 
       {/* MOBILE STICKY PURCHASE BAR */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-[#E5E7EB] p-4 z-50 shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
-        <div className="flex items-center justify-between gap-4 max-w-md mx-auto">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t border-[#E5E7EB] px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] z-50 shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
+        <div className="flex items-center justify-between gap-3 max-w-md mx-auto">
           <div className="flex flex-col">
-            <span className="text-xs text-[#6B7280] font-semibold">{variantLabel || (showSelector ? pricingMode?.name ?? "" : "")}</span>
+            <span className="text-xs text-[#6B7280] font-semibold">
+              {variantLabel || (showSelector ? (pricingMode?.name ?? "") : "")}
+            </span>
             <span className="text-lg font-extrabold text-[#111827]">
               {pricingMode
                 ? `${$}${(pricingMode.price * quantity).toFixed(2)}`
@@ -599,7 +633,7 @@ function ProductDetailPage() {
             className="flex-1 bg-[#111827] text-white rounded-[12px] h-[48px] font-bold text-[14px] flex items-center justify-center gap-2 hover:bg-black active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <ShoppingBag className="size-[18px]" strokeWidth={1.5} />
-            Add to Cart
+            Agregar al Carrito
           </button>
         </div>
       </div>

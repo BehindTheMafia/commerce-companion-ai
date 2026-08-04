@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-const sb = supabase as any;
+const sb = supabase;
 
 export type InboxConversation = {
   id: string;
@@ -14,7 +14,7 @@ export type InboxConversation = {
   last_message_at: string | null;
   last_message_text: string | null;
   last_message_sender: "customer" | "agent" | "system" | null;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
   created_at: string;
   updated_at: string;
   customer?: {
@@ -36,11 +36,12 @@ export type InboxMessage = {
   sender_id: string | null;
   sender_type: "customer" | "agent" | "system" | "ai";
   content: string | null;
-  message_type: "text" | "image" | "audio" | "video" | "document" | "location" | "contact" | "template";
+  message_type:
+    "text" | "image" | "audio" | "video" | "document" | "location" | "contact" | "template";
   media_url: string | null;
   media_type: string | null;
   external_id: string | null;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
   status: "sent" | "delivered" | "read" | "failed";
   created_at: string;
 };
@@ -64,7 +65,7 @@ export type InboxAI = {
   intent: string | null;
   urgency: "low" | "medium" | "high" | "critical" | null;
   suggested_reply: string | null;
-  suggested_products: any[];
+  suggested_products: unknown[];
   recommended_discount: number | null;
   conversion_probability: number | null;
 };
@@ -117,12 +118,14 @@ export function getTagColor(tag: string): string {
 export async function fetchConversations(businessId: string, filter: FilterValue, search: string) {
   let query = sb
     .from("inbox_conversations")
-    .select(`
+    .select(
+      `
       *,
       customer:customers(id, full_name, email, phone, tags, notes, created_at),
       tags:inbox_conversation_tags(tag),
       ai:inbox_conversation_ai(summary, sentiment, intent, urgency, suggested_reply, suggested_products, recommended_discount, conversion_probability)
-    `)
+    `,
+    )
     .eq("business_id", businessId)
     .order("last_message_at", { ascending: false, nullsFirst: false });
 
@@ -131,12 +134,16 @@ export async function fetchConversations(businessId: string, filter: FilterValue
   else if (filter === "resolved") query = query.eq("status", "resolved");
   else if (filter === "archived") query = query.eq("status", "archived");
   else if (filter === "vip") query = query.contains("metadata", { tag: "VIP" });
-  else if (filter === "needs_reply") query = query.eq("last_message_sender", "customer").eq("status", "open");
+  else if (filter === "needs_reply")
+    query = query.eq("last_message_sender", "customer").eq("status", "open");
+  else if (filter === "mine") {
+    const membershipId = await getMyMembershipId(businessId);
+    if (!membershipId) return [];
+    query = query.eq("assigned_to", membershipId);
+  }
 
   if (search) {
-    query = query.or(
-      `customer_name.ilike.%${search}%,customer_phone.ilike.%${search}%`
-    );
+    query = query.or(`customer_name.ilike.%${search}%,customer_phone.ilike.%${search}%`);
   }
 
   const { data, error } = await query;
@@ -144,13 +151,26 @@ export async function fetchConversations(businessId: string, filter: FilterValue
   return (data ?? []) as InboxConversation[];
 }
 
+async function getMyMembershipId(businessId: string): Promise<string | null> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+  const { data } = await sb
+    .from("memberships")
+    .select("id")
+    .eq("user_id", user.id)
+    .eq("business_id", businessId)
+    .maybeSingle();
+  return data?.id ?? null;
+}
+
 export async function fetchMessages(conversationId: string) {
-  const { data, error } = await sb
-    .rpc("get_conversation_messages", {
-      p_conversation_id: conversationId,
-      p_limit: 100,
-      p_offset: 0,
-    });
+  const { data, error } = await sb.rpc("get_conversation_messages", {
+    p_conversation_id: conversationId,
+    p_limit: 100,
+    p_offset: 0,
+  });
 
   if (error) throw error;
   return (data ?? []) as InboxMessage[];
