@@ -27,22 +27,14 @@ import {
   Plus,
   Receipt,
   ShoppingCart,
-  Sparkles,
   Users,
   Percent,
   Check,
-  AlertTriangle,
   Bell,
   Moon,
   Sun,
-  Copy,
-  CheckCircle2,
   Settings2,
   LogOut,
-  TrendingUp,
-  CreditCard,
-  Truck,
-  Globe,
   Share2,
   ChevronRight,
 } from "lucide-react";
@@ -117,32 +109,6 @@ function Dashboard() {
   const navigate = useNavigate();
 
   const [timeRange, setTimeRange] = useState<TimeRange>("30d");
-
-  // Goals checklist state stored in local storage per business
-  const storageKey = `commerce_ai_goals_${businessId || "default"}`;
-  const [userGoals, setUserGoals] = useState<Record<string, boolean>>(() => {
-    if (typeof window === "undefined") return {};
-    try {
-      const saved = localStorage.getItem(storageKey);
-      return saved ? JSON.parse(saved) : {};
-    } catch {
-      return {};
-    }
-  });
-
-  useEffect(() => {
-    if (typeof window !== "undefined" && businessId) {
-      try {
-        localStorage.setItem(storageKey, JSON.stringify(userGoals));
-      } catch (e) {
-        console.error("Could not save goals", e);
-      }
-    }
-  }, [userGoals, storageKey, businessId]);
-
-  const toggleGoal = (id: string) => {
-    setUserGoals((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
 
   const { data: rawData, isLoading } = useQuery({
     queryKey: ["dashboard-raw-data", businessId],
@@ -303,20 +269,6 @@ function Dashboard() {
       .sort((a, b) => b.revenue - a.revenue || b.sales_count - a.sales_count)
       .slice(0, 5);
 
-    // Business Health calculation
-    const hasProfile = !!activeBusiness?.name;
-    const hasCatalog = productsCount > 0;
-    const hasPayment = !!activeBusiness?.whatsapp_phone || !!userGoals["payment"];
-    const hasShipping = !!userGoals["shipping"];
-    const hasCustomDomain = !!userGoals["domain"] || activeBusiness?.slug !== "default";
-
-    let healthScore = 0;
-    if (hasProfile) healthScore += 20;
-    if (hasCatalog) healthScore += 25;
-    if (hasPayment) healthScore += 20;
-    if (hasShipping) healthScore += 20;
-    if (hasCustomDomain) healthScore += 15;
-
     return {
       revenue,
       revenueChange,
@@ -329,16 +281,8 @@ function Dashboard() {
       chartData,
       recentOrders,
       featuredProducts,
-      healthScore,
-      healthChecklist: [
-        { label: "Perfil completo", ok: hasProfile },
-        { label: "Catálogo creado", ok: hasCatalog },
-        { label: "Métodos de pago", ok: hasPayment },
-        { label: "Envíos", ok: hasShipping },
-        { label: "Dominio personalizado", ok: hasCustomDomain },
-      ],
     };
-  }, [rawData, timeRange, activeBusiness, userGoals]);
+  }, [rawData, timeRange, activeBusiness]);
 
   if (isLoading) return <DashboardSkeleton />;
 
@@ -347,31 +291,17 @@ function Dashboard() {
       <DashboardHeader activeBusiness={activeBusiness} />
 
       <main className="mx-auto w-full max-w-[1400px] space-y-[56px] px-6 lg:px-10 py-10 pb-24">
-        {/* PRIMERA SECCIÓN: Business Health */}
-        <BusinessHealthCard stats={stats} />
-
-        {/* SEGUNDA SECCIÓN: KPIs */}
+        {/* PRIMERA SECCIÓN: KPIs */}
         <KPISection stats={stats} />
 
         {/* TERCERA SECCIÓN: Gráficos */}
         <ChartsSection stats={stats} timeRange={timeRange} setTimeRange={setTimeRange} />
 
-        {/* CUARTA SECCIÓN: Objetivos del negocio */}
-        <BusinessGoalsSection
-          stats={stats}
-          userGoals={userGoals}
-          toggleGoal={toggleGoal}
-          storeSlug={activeBusiness?.slug}
-        />
-
-        {/* QUINTA SECCIÓN: Pedidos recientes */}
+        {/* CUARTA SECCIÓN: Pedidos recientes */}
         <RecentOrdersSection recentOrders={stats?.recentOrders ?? []} storeSlug={activeBusiness?.slug} />
 
-        {/* SEXTA SECCIÓN: Productos destacados */}
+        {/* QUINTA SECCIÓN: Productos destacados */}
         <FeaturedProductsSection products={stats?.featuredProducts ?? []} navigate={navigate} />
-
-        {/* SÉPTIMA SECCIÓN: Insights automáticos */}
-        <AutomaticInsightsSection stats={stats} />
       </main>
     </div>
   );
@@ -556,85 +486,6 @@ function DashboardHeader({ activeBusiness }: { activeBusiness: any }) {
         </div>
       </div>
     </header>
-  );
-}
-
-// ----------------------------------------------------------------------
-// PRIMERA SECCIÓN: Business Health
-// ----------------------------------------------------------------------
-function BusinessHealthCard({ stats }: { stats: any }) {
-  const score = stats?.healthScore ?? 0;
-  const checklist = stats?.healthChecklist ?? [];
-
-  const scrollToGoals = () => {
-    const el = document.getElementById("business-goals-section");
-    if (el) el.scrollIntoView({ behavior: "smooth" });
-  };
-
-  return (
-    <motion.section
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, ease: [0.22, 0.61, 0.36, 1] }}
-      className="w-full"
-    >
-      <div className="relative overflow-hidden rounded-[20px] border border-[#EEF2F6] dark:border-slate-800 bg-white dark:bg-slate-900 p-8 shadow-[0_2px_12px_-2px_rgba(0,0,0,0.04)] transition-all duration-300">
-        <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-[#2563EB]/[0.03] blur-3xl" />
-
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          <div className="space-y-3 max-w-2xl">
-            <div className="flex items-center gap-3">
-              <span className="text-xs font-bold uppercase tracking-wider text-[#6B7280] dark:text-slate-400">
-                Estado del negocio
-              </span>
-              <span className="inline-flex items-center rounded-full bg-[#2563EB]/10 px-3 py-1 text-xs font-bold text-[#2563EB]">
-                {score} / 100
-              </span>
-            </div>
-
-            <h2 className="text-xl lg:text-2xl font-bold tracking-tight text-[#111827] dark:text-[#F9FAFB]">
-              {score >= 80
-                ? "Tu tienda está casi lista para comenzar a vender."
-                : score >= 50
-                  ? "Vas por buen camino, completa algunos pasos clave."
-                  : "Comienza a configurar tu tienda para recibir clientes."}
-            </h2>
-
-            {/* Checklist Badges */}
-            <div className="flex flex-wrap items-center gap-2.5 pt-1">
-              {checklist.map((item: { label: string; ok: boolean }, i: number) => (
-                <div
-                  key={i}
-                  className={cn(
-                    "inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-semibold transition-all",
-                    item.ok
-                      ? "border-[#16A34A]/20 bg-[#16A34A]/5 text-[#16A34A]"
-                      : "border-amber-500/20 bg-amber-500/5 text-amber-600 dark:text-amber-400",
-                  )}
-                >
-                  {item.ok ? (
-                    <Check className="size-3.5 stroke-[2.5]" />
-                  ) : (
-                    <AlertTriangle className="size-3.5 stroke-[2.5]" />
-                  )}
-                  <span>{item.label}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="shrink-0 pt-2 lg:pt-0">
-            <Button
-              onClick={scrollToGoals}
-              size="lg"
-              className="h-11 rounded-xl bg-[#111827] hover:bg-[#1F2937] dark:bg-white dark:hover:bg-slate-100 text-white dark:text-[#111827] px-6 text-xs font-bold shadow-xs transition-all hover:scale-[1.01]"
-            >
-              Completar configuración
-            </Button>
-          </div>
-        </div>
-      </div>
-    </motion.section>
   );
 }
 
@@ -1021,169 +872,6 @@ function ChartsSection({
 }
 
 // ----------------------------------------------------------------------
-// CUARTA SECCIÓN: Objetivos del negocio
-// ----------------------------------------------------------------------
-function BusinessGoalsSection({
-  stats,
-  userGoals,
-  toggleGoal,
-  storeSlug,
-}: {
-  stats: any;
-  userGoals: Record<string, boolean>;
-  toggleGoal: (id: string) => void;
-  storeSlug?: string;
-}) {
-  const productsCount = stats?.productsCount ?? 0;
-
-  const tasks = [
-    {
-      id: "products",
-      label: "Agrega 10 productos",
-      auto: productsCount >= 10,
-      link: "/app/products/new",
-      linkText: "Agregar producto",
-    },
-    {
-      id: "payment",
-      label: "Configura métodos de pago",
-      auto: false,
-      link: "/app/settings",
-      linkText: "Configurar pagos",
-    },
-    {
-      id: "shipping",
-      label: "Configura envíos",
-      auto: false,
-      link: "/app/settings",
-      linkText: "Configurar envíos",
-    },
-    {
-      id: "customize",
-      label: "Personaliza tu tienda",
-      auto: false,
-      link: "/app/settings",
-      linkText: "Personalizar",
-    },
-    {
-      id: "share",
-      label: "Comparte tu tienda",
-      auto: false,
-      action: () => {
-        const url = storeSlug
-          ? `${window.location.origin}/go/${storeSlug}`
-          : window.location.origin;
-        navigator.clipboard.writeText(url);
-        toast.success("Enlace de tienda copiado al portapapeles");
-      },
-      actionText: "Copiar enlace",
-    },
-  ];
-
-  const completedCount = tasks.filter((t) => t.auto || userGoals[t.id]).length;
-  const progressPercent = Math.round((completedCount / tasks.length) * 100);
-
-  return (
-    <motion.section
-      id="business-goals-section"
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.15, ease: [0.22, 0.61, 0.36, 1] }}
-      className="space-y-6"
-    >
-      <div className="rounded-[20px] border border-[#EEF2F6] dark:border-slate-800 bg-white dark:bg-slate-900 p-8 shadow-[0_2px_12px_-2px_rgba(0,0,0,0.04)]">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-[#EEF2F6] dark:border-slate-800 pb-6">
-          <div>
-            <h2 className="text-lg font-bold tracking-tight text-[#111827] dark:text-[#F9FAFB]">
-              Objetivos del negocio
-            </h2>
-            <p className="text-xs font-medium text-[#6B7280] dark:text-slate-400 mt-1">
-              Completa estos pasos para comenzar a vender.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <div className="w-36 lg:w-48 bg-[#FAFBFC] dark:bg-slate-800 rounded-full h-3 overflow-hidden border border-[#EEF2F6] dark:border-slate-700">
-              <div
-                className="bg-[#2563EB] h-full rounded-full transition-all duration-500 ease-out"
-                style={{ width: `${progressPercent}%` }}
-              />
-            </div>
-            <span className="text-sm font-bold text-[#2563EB]">{progressPercent}%</span>
-          </div>
-        </div>
-
-        <div className="mt-6 space-y-3">
-          {tasks.map((task) => {
-            const isChecked = task.auto || !!userGoals[task.id];
-
-            return (
-              <div
-                key={task.id}
-                onClick={() => !task.auto && toggleGoal(task.id)}
-                className={cn(
-                  "flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border p-4 transition-all duration-150 cursor-pointer",
-                  isChecked
-                    ? "border-[#16A34A]/20 bg-[#16A34A]/5 dark:bg-[#16A34A]/10"
-                    : "border-[#EEF2F6] dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-[#2563EB]/40",
-                )}
-              >
-                <div className="flex items-center gap-3.5">
-                  <div
-                    className={cn(
-                      "flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border transition-colors",
-                      isChecked
-                        ? "border-[#16A34A] bg-[#16A34A] text-white"
-                        : "border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-transparent",
-                    )}
-                  >
-                    <Check className="size-4 stroke-[3]" />
-                  </div>
-                  <span
-                    className={cn(
-                      "text-sm font-semibold transition-all",
-                      isChecked
-                        ? "line-through text-[#6B7280] dark:text-slate-400"
-                        : "text-[#111827] dark:text-slate-100",
-                    )}
-                  >
-                    {task.label}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-2 self-end sm:self-auto" onClick={(e) => e.stopPropagation()}>
-                  {task.link && (
-                    <Link to={task.link as any}>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-8 text-xs font-semibold text-[#2563EB] hover:text-[#1D4ED8] hover:bg-[#2563EB]/10"
-                      >
-                        {task.linkText} <ChevronRight className="size-3.5 ml-1" />
-                      </Button>
-                    </Link>
-                  )}
-                  {task.action && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={task.action}
-                      className="h-8 text-xs font-semibold text-[#2563EB] hover:text-[#1D4ED8] hover:bg-[#2563EB]/10"
-                    >
-                      {task.actionText} <Copy className="size-3.5 ml-1" />
-                    </Button>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </motion.section>
-  );
-}
-
-// ----------------------------------------------------------------------
 // QUINTA SECCIÓN: Pedidos recientes
 // ----------------------------------------------------------------------
 function RecentOrdersSection({
@@ -1460,106 +1148,6 @@ function FeaturedProductsSection({
               <Plus className="size-4" />
               Agregar producto
             </Button>
-          </div>
-        )}
-      </div>
-    </motion.section>
-  );
-}
-
-// ----------------------------------------------------------------------
-// SÉPTIMA SECCIÓN: Insights automáticos
-// ----------------------------------------------------------------------
-function AutomaticInsightsSection({ stats }: { stats: any }) {
-  const insights = useMemo(() => {
-    const items: { text: string; category: string }[] = [];
-    if (!stats) return items;
-
-    if (stats.revenueChange !== 0) {
-      items.push({
-        text: `Los ingresos ${stats.revenueChange > 0 ? "crecieron" : "disminuyeron"} un ${Math.abs(stats.revenueChange).toFixed(1)}% en este período.`,
-        category: "Facturación",
-      });
-    }
-
-    if (stats.conversionRate > 0) {
-      items.push({
-        text: `Tu tasa de conversión actual es del ${stats.conversionRate.toFixed(1)}%.`,
-        category: "Conversión",
-      });
-    }
-
-    if (stats.avgOrder > 0) {
-      items.push({
-        text: `El ticket promedio es de $${stats.avgOrder.toFixed(2)}.`,
-        category: "Ventas",
-      });
-    }
-
-    if (stats.customersCount > 0) {
-      items.push({
-        text: `Tienes ${stats.customersCount} cliente${stats.customersCount > 1 ? "s" : ""} registrado${stats.customersCount > 1 ? "s" : ""}.`,
-        category: "Retención",
-      });
-    }
-
-    return items;
-  }, [stats]);
-
-  return (
-    <motion.section
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.3, ease: [0.22, 0.61, 0.36, 1] }}
-      className="space-y-6"
-    >
-      <div className="rounded-[20px] border border-[#EEF2F6] dark:border-slate-800 bg-white dark:bg-slate-900 p-8 shadow-[0_2px_12px_-2px_rgba(0,0,0,0.04)]">
-        <div className="flex items-center gap-3 border-b border-[#EEF2F6] dark:border-slate-800 pb-6 mb-6">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#2563EB]/10 text-[#2563EB]">
-            <Sparkles className="size-5" />
-          </div>
-          <div>
-            <h2 className="text-lg font-bold tracking-tight text-[#111827] dark:text-[#F9FAFB]">
-              Insights automáticos
-            </h2>
-            <p className="text-xs font-medium text-[#6B7280] dark:text-slate-400">
-              Observaciones inteligentes sobre el comportamiento de tu negocio
-            </p>
-          </div>
-        </div>
-
-        {insights.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {insights.map((item, i) => (
-              <div
-                key={i}
-                className="flex items-start gap-3.5 rounded-2xl border border-[#EEF2F6] dark:border-slate-800 bg-[#FAFBFC] dark:bg-slate-800/40 p-4 transition-all"
-              >
-                <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white dark:bg-slate-800 text-[#2563EB] shadow-xs border border-[#EEF2F6] dark:border-slate-700">
-                  <TrendingUp className="size-3.5 stroke-[2.5]" />
-                </div>
-                <div className="space-y-1">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#2563EB]">
-                    {item.category}
-                  </span>
-                  <p className="text-xs font-medium text-[#111827] dark:text-slate-200 leading-relaxed">
-                    {item.text}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center py-10 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#FAFBFC] dark:bg-slate-800 text-[#6B7280]">
-              <Sparkles className="size-5" />
-            </div>
-            <h3 className="mt-3 text-sm font-bold text-[#111827] dark:text-[#F9FAFB]">
-              Aún no tenemos suficientes datos
-            </h3>
-            <p className="mt-1 max-w-sm text-xs font-medium text-[#6B7280] dark:text-slate-400">
-              Continúa vendiendo para generar análisis inteligentes en tiempo real.
-            </p>
           </div>
         )}
       </div>
