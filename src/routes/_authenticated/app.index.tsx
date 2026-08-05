@@ -7,32 +7,31 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 import {
-  TrendingUp,
-  ShoppingCart,
-  Users,
-  Package,
-  MessageSquare,
-  DollarSign,
-  Percent,
-  Clock,
+  ArrowRight,
   ArrowUpRight,
   ArrowDownRight,
-  Sparkles,
-  Bot,
-  BarChart3,
-  PieChart,
   Activity,
-  Settings2,
+  Bot,
+  CalendarDays,
+  DollarSign,
   ExternalLink,
   Inbox,
+  MessageSquare,
+  Package,
+  Plus,
+  Receipt,
+  Settings2,
+  ShoppingCart,
+  Sparkles,
+  Users,
   Wallet,
+  Percent,
   ChevronRight,
 } from "lucide-react";
-import { useEffect, useRef, useState, useMemo, useCallback, useId } from "react";
+import { useEffect, useRef, useState, useMemo, useId } from "react";
 import {
-  LineChart,
-  Line,
   BarChart,
   Bar,
   XAxis,
@@ -218,14 +217,19 @@ function Dashboard() {
   if (isLoading) return <DashboardSkeleton />;
 
   return (
-    <div className="mx-auto w-full max-w-[1600px] space-y-8 p-6 pb-12">
-      <GreetingSection greeting={greeting} name={profile.name} business={activeBusiness?.name} />
+    <div className="mx-auto w-full max-w-[1400px] space-y-6 p-4 sm:p-6 lg:p-8 pb-16">
+      <PageHeader
+        greeting={greeting}
+        name={profile.name}
+        business={activeBusiness?.name}
+        storeSlug={activeBusiness?.slug}
+      />
 
-      <AIHeroSection stats={stats} />
+      <InsightCard stats={stats} />
 
-      <KPIRow stats={stats} />
+      <MetricsGrid stats={stats} />
 
-      <MainGrid stats={stats} storeSlug={activeBusiness?.slug} />
+      <ChartsGrid stats={stats} />
 
       <BottomSection stats={stats} />
     </div>
@@ -234,15 +238,21 @@ function Dashboard() {
 
 function DashboardSkeleton() {
   return (
-    <div className="mx-auto w-full max-w-[1600px] space-y-8 p-6 pb-12">
-      <div className="space-y-2">
-        <Skeleton className="h-9 w-72" />
-        <Skeleton className="h-5 w-96" />
+    <div className="mx-auto w-full max-w-[1400px] space-y-6 p-4 sm:p-6 lg:p-8 pb-16">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-72" />
+          <Skeleton className="h-4 w-44" />
+        </div>
+        <div className="flex gap-2">
+          <Skeleton className="h-9 w-28 rounded-lg" />
+          <Skeleton className="h-9 w-36 rounded-lg" />
+        </div>
       </div>
-      <Skeleton className="h-48 w-full rounded-2xl" />
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-8">
-        {Array.from({ length: 8 }).map((_, i) => (
-          <Skeleton key={i} className="h-28 rounded-xl" />
+      <Skeleton className="h-40 w-full rounded-2xl" />
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <Skeleton key={i} className="h-32 rounded-xl" />
         ))}
       </div>
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -253,83 +263,106 @@ function DashboardSkeleton() {
   );
 }
 
-function GreetingSection({
+function PageHeader({
   greeting,
   name,
   business,
+  storeSlug,
 }: {
   greeting: string;
   name: string;
   business?: string;
+  storeSlug?: string;
 }) {
+  const today = new Intl.DateTimeFormat("es-ES", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  }).format(new Date());
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: [0.22, 0.61, 0.36, 1] }}
     >
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight text-foreground lg:text-3xl">
-          {greeting}, {name} <span className="inline-block">👋</span>
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          {business
-            ? `Aquí está todo lo que pasa en ${business} hoy.`
-            : "Aquí está todo lo que pasa en tu negocio hoy."}
-        </p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-1.5">
+          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground capitalize">
+            <CalendarDays className="size-3.5" />
+            {today}
+          </span>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground lg:text-[1.75rem]">
+            {greeting}, {name}.
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            {business ? `Resumen de ${business}` : "Resumen de tu negocio"}
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {storeSlug && (
+            <Link to="/go/$slug" params={{ slug: storeSlug }}>
+              <Button variant="outline" size="sm" className="h-9 gap-1.5 text-sm">
+                <ExternalLink className="size-3.5" />
+                Ver tienda
+              </Button>
+            </Link>
+          )}
+          <Link to="/app/products/new">
+            <Button size="sm" className="h-9 gap-1.5 text-sm shadow-sm">
+              <Plus className="size-4" />
+              Nuevo producto
+            </Button>
+          </Link>
+        </div>
       </div>
     </motion.div>
   );
 }
 
-function AIHeroSection({ stats }: { stats: DashboardStats | undefined }) {
+function InsightCard({ stats }: { stats: DashboardStats | undefined }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-40px" });
 
   const insights = useMemo(() => {
-    const items: { icon: LucideIcon; color: string; text: string }[] = [];
+    const items: { icon: LucideIcon; text: string }[] = [];
     if (!stats) return items;
 
     if (stats.todayRevenue > 0) {
       items.push({
-        icon: TrendingUp,
-        color: "text-emerald-500",
-        text: `Los ingresos de hoy ($${stats.todayRevenue.toFixed(2)}) ya representan el ${stats.revenue > 0 ? ((stats.todayRevenue / stats.revenue) * 100).toFixed(0) : 0}% del total.`,
+        icon: DollarSign,
+        text: `Hoy ya facturaste $${stats.todayRevenue.toFixed(2)} — ${stats.revenue > 0 ? ((stats.todayRevenue / stats.revenue) * 100).toFixed(0) : 0}% del total acumulado.`,
       });
     }
     if (stats.customers > 0) {
       items.push({
         icon: Users,
-        color: "text-blue-500",
-        text: `Tienes ${stats.customers} cliente${stats.customers !== 1 ? "s" : ""} registrado${stats.customers !== 1 ? "s" : ""}. ${stats.customers > 5 ? "Excelente base para campañas." : "Intenta importar más contactos."}`,
+        text: `Tienes ${stats.customers} cliente${stats.customers !== 1 ? "s" : ""} registrado${stats.customers !== 1 ? "s" : ""}. ${stats.customers > 5 ? "Excelente base para campañas." : "Suma más contactos para crecer."}`,
       });
     }
     if (stats.avgOrder > 0) {
       items.push({
-        icon: DollarSign,
-        color: "text-amber-500",
-        text: `El ticket promedio es $${stats.avgOrder.toFixed(2)}. ${stats.avgOrder > 20 ? "Tus clientes compran con confianza." : "Considera upselling para aumentar el valor."}`,
+        icon: Wallet,
+        text: `El ticket promedio es $${stats.avgOrder.toFixed(2)}. ${stats.avgOrder > 20 ? "Tus clientes compran con confianza." : "Un upselling podría aumentar el valor."}`,
       });
     }
     if (stats.products > 0 && stats.products < 5) {
       items.push({
         icon: Package,
-        color: "text-violet-500",
-        text: `Tienes solo ${stats.products} producto${stats.products !== 1 ? "s" : ""}. Un catálogo más amplio podría aumentar las ventas hasta un 30%.`,
+        text: `Tienes solo ${stats.products} producto${stats.products !== 1 ? "s" : ""}. Un catálogo más amplio puede incrementar las ventas hasta un 30%.`,
       });
     }
     if (stats.orders === 0 && stats.products > 0) {
       items.push({
         icon: ShoppingCart,
-        color: "text-rose-500",
-        text: "Tus productos están listos pero no has recibido pedidos. Comparte tu enlace de tienda en WhatsApp y redes sociales.",
+        text: "Tu catálogo está listo pero aún no recibes pedidos. Comparte tu tienda en WhatsApp y redes.",
       });
     }
     if (items.length === 0) {
       items.push({
         icon: Sparkles,
-        color: "text-primary",
-        text: "Tu negocio está configurado. Sigue agregando productos y promocionando tu tienda para empezar a recibir pedidos.",
+        text: "Tu negocio está configurado. Agrega productos y promociona tu tienda para empezar a vender.",
       });
     }
     return items;
@@ -340,34 +373,38 @@ function AIHeroSection({ stats }: { stats: DashboardStats | undefined }) {
       ref={ref}
       initial={{ opacity: 0, y: 16 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.6, ease: [0.22, 0.61, 0.36, 1], delay: 0.1 }}
+      transition={{ duration: 0.6, ease: [0.22, 0.61, 0.36, 1], delay: 0.05 }}
     >
-      <Card className="relative overflow-hidden border-primary/10 bg-gradient-to-br from-primary/5 via-background to-accent/10 p-6 lg:p-8">
-        <div className="absolute -right-20 -top-20 h-40 w-40 rounded-full bg-primary/5 blur-3xl" />
-        <div className="absolute -bottom-10 -left-10 h-32 w-32 rounded-full bg-accent/10 blur-3xl" />
+      <Card className="relative overflow-hidden border-border/60 bg-card">
+        <div className="pointer-events-none absolute -right-24 -top-24 h-56 w-56 rounded-full bg-primary/[0.04] blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-16 -left-16 h-40 w-40 rounded-full bg-accent/20 blur-3xl" />
 
-        <div className="relative">
+        <div className="relative p-5 sm:p-6">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
               <Sparkles className="size-5" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold tracking-tight">Commerce AI Assistant</h2>
-              <p className="text-xs text-muted-foreground">Resumen inteligente de tu negocio</p>
+              <h2 className="text-sm font-semibold tracking-tight text-foreground">
+                Asistente de negocios
+              </h2>
+              <p className="text-xs text-muted-foreground">
+                Insights en tiempo real de tu operación
+              </p>
             </div>
           </div>
 
-          <div className="mt-6 grid gap-3 sm:grid-cols-2">
+          <div className="mt-5 grid gap-2.5 sm:grid-cols-2">
             {insights.map((item, i) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, x: -8 }}
                 animate={isInView ? { opacity: 1, x: 0 } : {}}
-                transition={{ duration: 0.4, delay: 0.2 + i * 0.1 }}
-                className="flex items-start gap-3 rounded-xl border border-border/50 bg-background/60 p-3 backdrop-blur-sm"
+                transition={{ duration: 0.4, delay: 0.15 + i * 0.07 }}
+                className="flex items-start gap-3 rounded-xl border border-border/60 bg-muted/30 p-3"
               >
-                <div className={`mt-0.5 shrink-0 ${item.color}`}>
-                  <item.icon className="size-4" />
+                <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-background text-primary shadow-xs ring-1 ring-border">
+                  <item.icon className="size-3.5" />
                 </div>
                 <p className="text-sm leading-relaxed text-foreground/80">{item.text}</p>
               </motion.div>
@@ -414,10 +451,28 @@ function AnimatedCounter({
   }, [isInView, value]);
 
   return (
-    <span ref={ref}>
+    <span ref={ref} className="tabular-nums">
       {prefix}
       {display.toFixed(decimals)}
       {suffix}
+    </span>
+  );
+}
+
+function TrendChip({ value }: { value: number }) {
+  const up = value >= 0;
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[11px] font-medium",
+        up
+          ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+          : "bg-rose-500/10 text-rose-600 dark:text-rose-400",
+      )}
+    >
+      {up ? <ArrowUpRight className="size-3" /> : <ArrowDownRight className="size-3" />}
+      {Math.abs(value).toFixed(1)}%
+      <span className="text-[10px] font-normal text-muted-foreground">vs 7 días</span>
     </span>
   );
 }
@@ -432,11 +487,11 @@ function SparklineChart({
   const gradientId = useId();
   const chartData = data.length > 0 ? data : Array.from({ length: 7 }, () => ({ value: 0 }));
   return (
-    <ResponsiveContainer width="100%" height={40}>
+    <ResponsiveContainer width="100%" height={36}>
       <AreaChart data={chartData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
         <defs>
           <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={color} stopOpacity={0.15} />
+            <stop offset="0%" stopColor={color} stopOpacity={0.12} />
             <stop offset="100%" stopColor={color} stopOpacity={0} />
           </linearGradient>
         </defs>
@@ -444,7 +499,7 @@ function SparklineChart({
           type="monotone"
           dataKey="value"
           stroke={color}
-          strokeWidth={2}
+          strokeWidth={1.5}
           fill={`url(#${gradientId})`}
           dot={false}
         />
@@ -453,13 +508,22 @@ function SparklineChart({
   );
 }
 
-function KPIRow({ stats }: { stats: DashboardStats | undefined }) {
+function MetricsGrid({ stats }: { stats: DashboardStats | undefined }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-40px" });
 
   if (!stats) return null;
 
-  const kpis = [
+  const metrics: {
+    label: string;
+    value: number;
+    prefix?: string;
+    suffix?: string;
+    decimals?: number;
+    icon: LucideIcon;
+    trend?: number;
+    spark?: { value: number }[];
+  }[] = [
     {
       label: "Ingresos",
       value: stats.revenue,
@@ -467,34 +531,31 @@ function KPIRow({ stats }: { stats: DashboardStats | undefined }) {
       decimals: 2,
       icon: DollarSign,
       trend: stats.revenueChange,
-      color: "text-emerald-500",
-      bgColor: "bg-emerald-500/10",
-      sparkColor: "var(--color-chart-2)",
-      sparkData: stats.chartData.map((d) => ({ value: d.revenue })),
+      spark: stats.chartData.map((d) => ({ value: d.revenue })),
     },
     {
       label: "Pedidos",
       value: stats.orders,
       icon: ShoppingCart,
       trend: stats.ordersChange,
-      color: "text-blue-500",
-      bgColor: "bg-blue-500/10",
-      sparkColor: "var(--color-chart-3)",
-      sparkData: stats.chartData.map((d) => ({ value: d.orders })),
+      spark: stats.chartData.map((d) => ({ value: d.orders })),
     },
     {
       label: "Clientes",
       value: stats.customers,
       icon: Users,
-      color: "text-violet-500",
-      bgColor: "bg-violet-500/10",
     },
     {
       label: "Productos",
       value: stats.products,
       icon: Package,
-      color: "text-amber-500",
-      bgColor: "bg-amber-500/10",
+    },
+    {
+      label: "Ticket promedio",
+      value: stats.avgOrder,
+      prefix: "$",
+      decimals: 2,
+      icon: Receipt,
     },
     {
       label: "Conversión",
@@ -502,75 +563,48 @@ function KPIRow({ stats }: { stats: DashboardStats | undefined }) {
       suffix: "%",
       decimals: 1,
       icon: Percent,
-      color: "text-cyan-500",
-      bgColor: "bg-cyan-500/10",
-    },
-    {
-      label: "Ticket Promedio",
-      value: stats.avgOrder,
-      prefix: "$",
-      decimals: 2,
-      icon: Wallet,
-      color: "text-indigo-500",
-      bgColor: "bg-indigo-500/10",
-    },
-    {
-      label: "Hoy",
-      value: stats.todayRevenue,
-      prefix: "$",
-      decimals: 2,
-      icon: Clock,
-      color: "text-orange-500",
-      bgColor: "bg-orange-500/10",
     },
   ];
 
   return (
-    <div ref={ref} className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
-      {kpis.map((kpi, i) => (
+    <div ref={ref} className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+      {metrics.map((metric, i) => (
         <motion.div
-          key={kpi.label}
+          key={metric.label}
           initial={{ opacity: 0, y: 12 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.4, delay: 0.05 * i, ease: [0.22, 0.61, 0.36, 1] }}
         >
-          <Card className="group relative overflow-hidden border-border/40 p-3 transition-all duration-300 hover:border-border/80 hover:shadow-sm">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground/70">
-                {kpi.label}
+          <Card className="group relative h-full overflow-hidden border-border/60 p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-border hover:shadow-[0_2px_12px_-2px_rgba(0,0,0,0.08)]">
+            <div className="flex items-center justify-between gap-2">
+              <span className="truncate text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                {metric.label}
               </span>
-              <div className={`flex h-5 w-5 items-center justify-center rounded-md ${kpi.bgColor}`}>
-                <kpi.icon className={`size-3 ${kpi.color}`} />
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <metric.icon className="size-3.5" />
               </div>
             </div>
-            <div className="mt-1.5 text-lg font-semibold tracking-tight text-foreground">
+
+            <div className="mt-1.5 text-2xl font-semibold tracking-tight text-foreground">
               <AnimatedCounter
-                value={kpi.value}
-                prefix={kpi.prefix ?? ""}
-                suffix={kpi.suffix ?? ""}
-                decimals={kpi.decimals ?? 0}
+                value={metric.value}
+                prefix={metric.prefix ?? ""}
+                suffix={metric.suffix ?? ""}
+                decimals={metric.decimals ?? 0}
               />
             </div>
-            {kpi.trend != null ? (
-              <div className="mt-1 flex items-center gap-1">
-                {kpi.trend > 0 ? (
-                  <ArrowUpRight className="size-3 text-emerald-500" />
-                ) : (
-                  <ArrowDownRight className="size-3 text-rose-500" />
-                )}
-                <span
-                  className={`text-[10px] font-medium ${kpi.trend > 0 ? "text-emerald-500" : "text-rose-500"}`}
-                >
-                  {Math.abs(kpi.trend).toFixed(1)}%
-                </span>
-                <span className="text-[9px] text-muted-foreground/50">vs 7 días</span>
+
+            {metric.trend != null ? (
+              <div className="mt-2">
+                <TrendChip value={metric.trend} />
               </div>
             ) : (
-              <div className="mt-1 h-[18px]" />
+              <div className="mt-2 h-[22px]" />
             )}
-            {kpi.sparkData && (
-              <div className="mt-2 opacity-50 group-hover:opacity-100 transition-opacity">
-                <SparklineChart data={kpi.sparkData} color={kpi.sparkColor} />
+
+            {metric.spark && (
+              <div className="mt-2 opacity-40 transition-opacity group-hover:opacity-100">
+                <SparklineChart data={metric.spark} />
               </div>
             )}
           </Card>
@@ -596,7 +630,15 @@ const statusLabels: Record<string, { label: string; color: string }> = {
   refunded: { label: "Reembolsados", color: "var(--color-muted-foreground)" },
 };
 
-function MainGrid({ stats, storeSlug }: { stats: DashboardStats | undefined; storeSlug?: string }) {
+const tooltipStyle = {
+  backgroundColor: "var(--color-card)",
+  border: "1px solid var(--color-border)",
+  borderRadius: "var(--radius-lg)",
+  fontSize: "12px",
+  boxShadow: "0 4px 16px -4px rgba(0,0,0,0.12)",
+};
+
+function ChartsGrid({ stats }: { stats: DashboardStats | undefined }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-40px" });
 
@@ -608,20 +650,24 @@ function MainGrid({ stats, storeSlug }: { stats: DashboardStats | undefined; sto
         transition={{ duration: 0.5, delay: 0.1 }}
         className="lg:col-span-2"
       >
-        <Card className="overflow-hidden border-border/40 p-5 lg:p-6">
-          <div className="flex items-center justify-between mb-4">
+        <Card className="h-full overflow-hidden border-border/60 p-5 lg:p-6">
+          <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
             <div>
               <h3 className="text-sm font-semibold text-foreground">Ingresos</h3>
-              <p className="text-xs text-muted-foreground">Últimos 30 días</p>
+              <div className="mt-1 flex items-baseline gap-2">
+                <AnimatedCounter value={stats?.revenue ?? 0} prefix="$" decimals={2} />
+                <span className="text-xs text-muted-foreground">· últimos 30 días</span>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="text-[10px] font-normal">
-                {stats && stats.revenueChange > 0 ? "+" : ""}
-                {(stats?.revenueChange ?? 0).toFixed(1)}% vs período anterior
-              </Badge>
-            </div>
+            <Badge
+              variant="outline"
+              className="text-[11px] font-normal text-muted-foreground ring-1 ring-border"
+            >
+              {stats && stats.revenueChange > 0 ? "+" : ""}
+              {(stats?.revenueChange ?? 0).toFixed(1)}% vs período anterior
+            </Badge>
           </div>
-          <div className="h-64">
+          <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart
                 data={stats?.chartData ?? []}
@@ -629,7 +675,7 @@ function MainGrid({ stats, storeSlug }: { stats: DashboardStats | undefined; sto
               >
                 <defs>
                   <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="var(--color-primary)" stopOpacity={0.15} />
+                    <stop offset="0%" stopColor="var(--color-primary)" stopOpacity={0.14} />
                     <stop offset="100%" stopColor="var(--color-primary)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
@@ -644,6 +690,7 @@ function MainGrid({ stats, storeSlug }: { stats: DashboardStats | undefined; sto
                   tick={{ fontSize: 10, fill: "var(--color-muted-foreground)" }}
                   axisLine={false}
                   tickLine={false}
+                  minTickGap={24}
                 />
                 <YAxis
                   tick={{ fontSize: 10, fill: "var(--color-muted-foreground)" }}
@@ -652,12 +699,7 @@ function MainGrid({ stats, storeSlug }: { stats: DashboardStats | undefined; sto
                   tickFormatter={(v) => `$${v}`}
                 />
                 <ReTooltip
-                  contentStyle={{
-                    backgroundColor: "var(--color-card)",
-                    border: "1px solid var(--color-border)",
-                    borderRadius: "var(--radius-lg)",
-                    fontSize: "12px",
-                  }}
+                  contentStyle={tooltipStyle}
                   formatter={(value: number) => [`$${value.toFixed(2)}`, "Ingresos"]}
                 />
                 <Area
@@ -678,11 +720,11 @@ function MainGrid({ stats, storeSlug }: { stats: DashboardStats | undefined; sto
         animate={isInView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.5, delay: 0.2 }}
       >
-        <Card className="overflow-hidden border-border/40 p-5 lg:p-6">
-          <div className="flex items-center justify-between mb-4">
+        <Card className="h-full overflow-hidden border-border/60 p-5 lg:p-6">
+          <div className="mb-5 flex items-center justify-between">
             <div>
               <h3 className="text-sm font-semibold text-foreground">Pedidos por día</h3>
-              <p className="text-xs text-muted-foreground">Últimos 30 días</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">Últimos 30 días</p>
             </div>
           </div>
           <div className="h-64">
@@ -702,6 +744,7 @@ function MainGrid({ stats, storeSlug }: { stats: DashboardStats | undefined; sto
                   tick={{ fontSize: 10, fill: "var(--color-muted-foreground)" }}
                   axisLine={false}
                   tickLine={false}
+                  minTickGap={24}
                 />
                 <YAxis
                   tick={{ fontSize: 10, fill: "var(--color-muted-foreground)" }}
@@ -709,14 +752,7 @@ function MainGrid({ stats, storeSlug }: { stats: DashboardStats | undefined; sto
                   tickLine={false}
                   allowDecimals={false}
                 />
-                <ReTooltip
-                  contentStyle={{
-                    backgroundColor: "var(--color-card)",
-                    border: "1px solid var(--color-border)",
-                    borderRadius: "var(--radius-lg)",
-                    fontSize: "12px",
-                  }}
-                />
+                <ReTooltip contentStyle={tooltipStyle} />
                 <Bar
                   dataKey="orders"
                   fill="var(--color-chart-2)"
@@ -734,11 +770,11 @@ function MainGrid({ stats, storeSlug }: { stats: DashboardStats | undefined; sto
         animate={isInView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.5, delay: 0.3 }}
       >
-        <Card className="overflow-hidden border-border/40 p-5 lg:p-6">
-          <div className="flex items-center justify-between mb-4">
+        <Card className="h-full overflow-hidden border-border/60 p-5 lg:p-6">
+          <div className="mb-5 flex items-center justify-between">
             <div>
               <h3 className="text-sm font-semibold text-foreground">Distribución</h3>
-              <p className="text-xs text-muted-foreground">Estado de pedidos</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">Estado de pedidos</p>
             </div>
           </div>
           <div className="flex items-center justify-center h-64">
@@ -756,7 +792,7 @@ function MainGrid({ stats, storeSlug }: { stats: DashboardStats | undefined; sto
                     cx="50%"
                     cy="50%"
                     innerRadius={60}
-                    outerRadius={90}
+                    outerRadius={88}
                     paddingAngle={4}
                     dataKey="value"
                   >
@@ -769,25 +805,20 @@ function MainGrid({ stats, storeSlug }: { stats: DashboardStats | undefined; sto
                         />
                       ))}
                   </Pie>
-                  <ReTooltip
-                    contentStyle={{
-                      backgroundColor: "var(--color-card)",
-                      border: "1px solid var(--color-border)",
-                      borderRadius: "var(--radius-lg)",
-                      fontSize: "12px",
-                    }}
-                  />
+                  <ReTooltip contentStyle={tooltipStyle} />
                 </RePieChart>
               </ResponsiveContainer>
             ) : (
               <div className="flex flex-col items-center gap-2 text-center">
-                <PieChart className="size-8 text-muted-foreground/40" />
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted/40">
+                  <Package className="size-5 text-muted-foreground/40" />
+                </div>
                 <p className="text-xs text-muted-foreground">Sin pedidos todavía</p>
               </div>
             )}
           </div>
           {stats?.statusDistribution?.some((s: StatusDistribution) => s.value > 0) && (
-            <div className="flex flex-wrap justify-center gap-4 text-xs text-muted-foreground">
+            <div className="mt-2 flex flex-wrap justify-center gap-4 text-xs text-muted-foreground">
               {stats.statusDistribution
                 .filter((s: StatusDistribution) => s.value > 0)
                 .map((s: StatusDistribution) => (
@@ -807,18 +838,35 @@ function MainGrid({ stats, storeSlug }: { stats: DashboardStats | undefined; sto
         </Card>
       </motion.div>
 
-      <RecentOrders stats={stats} storeSlug={storeSlug} />
+      <RecentOrders stats={stats} />
     </div>
   );
 }
 
-function RecentOrders({
-  stats,
-  storeSlug,
-}: {
-  stats: DashboardStats | undefined;
-  storeSlug?: string;
-}) {
+function statusBadgeTone(status?: string | null) {
+  if (status === "completed" || status === "paid") return "success";
+  if (status === "cancelled" || status === "refunded") return "danger";
+  return "neutral";
+}
+
+function statusLabel(status?: string | null) {
+  switch (status) {
+    case "paid":
+      return "Pagado";
+    case "completed":
+      return "Completado";
+    case "pending":
+      return "Pendiente";
+    case "cancelled":
+      return "Cancelado";
+    case "refunded":
+      return "Reembolsado";
+    default:
+      return status ?? "Pendiente";
+  }
+}
+
+function RecentOrders({ stats }: { stats: DashboardStats | undefined }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
@@ -826,17 +874,17 @@ function RecentOrders({
       transition={{ duration: 0.5, delay: 0.4 }}
       className="lg:col-span-2"
     >
-      <Card className="overflow-hidden border-border/40 p-5 lg:p-6">
-        <div className="flex items-center justify-between mb-4">
+      <Card className="h-full overflow-hidden border-border/60 p-5 lg:p-6">
+        <div className="mb-4 flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-semibold text-foreground">Pedidos Recientes</h3>
-            <p className="text-xs text-muted-foreground">Últimos 10 pedidos</p>
+            <h3 className="text-sm font-semibold text-foreground">Pedidos recientes</h3>
+            <p className="mt-0.5 text-xs text-muted-foreground">Últimos 10 pedidos</p>
           </div>
           <Link to="/app/orders">
             <Button
               variant="ghost"
               size="sm"
-              className="h-7 text-xs gap-1 text-muted-foreground hover:text-foreground"
+              className="h-7 gap-1 text-xs text-muted-foreground hover:text-foreground"
             >
               Ver todos <ChevronRight className="size-3" />
             </Button>
@@ -844,71 +892,69 @@ function RecentOrders({
         </div>
 
         {stats?.recentOrders && stats.recentOrders.length > 0 ? (
-          <ul className="divide-y divide-border/20">
-            {stats.recentOrders.map((order: RecentOrder, i: number) => (
-              <motion.li
-                key={order.id}
-                initial={{ opacity: 0, x: -8 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.5 + i * 0.03, duration: 0.3 }}
-                className="flex items-center gap-3 py-2.5"
-              >
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                  <ShoppingCart className="size-4" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-xs font-medium text-foreground">
-                    {order.customer_name ?? "Cliente"} ·{" "}
-                    <span className="font-mono text-muted-foreground">
-                      #{order.id?.toString().slice(0, 6) ?? "---"}
+          <div className="-mx-2">
+            <ul className="divide-y divide-border/30">
+              {stats.recentOrders.map((order: RecentOrder, i: number) => (
+                <motion.li
+                  key={order.id}
+                  initial={{ opacity: 0, x: -8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.5 + i * 0.03, duration: 0.3 }}
+                  className="flex items-center gap-3 rounded-lg px-2 py-2.5 transition-colors hover:bg-muted/40"
+                >
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <ShoppingCart className="size-4" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <p className="truncate text-xs font-medium text-foreground">
+                        {order.customer_name ?? "Cliente"}
+                      </p>
+                      <span className="shrink-0 font-mono text-[10px] text-muted-foreground">
+                        #{order.id?.toString().slice(0, 8) ?? "---"}
+                      </span>
+                    </div>
+                    <p className="mt-0.5 text-[11px] text-muted-foreground">
+                      {order.created_at
+                        ? new Date(order.created_at).toLocaleDateString("es-ES", {
+                            day: "numeric",
+                            month: "short",
+                          })
+                        : "---"}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Badge
+                      variant="secondary"
+                      className={cn(
+                        "border-transparent text-[10px] font-medium uppercase tracking-wider px-2 py-0.5",
+                        statusBadgeTone(order.status) === "success" &&
+                          "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+                        statusBadgeTone(order.status) === "danger" &&
+                          "bg-rose-500/10 text-rose-600 dark:text-rose-400",
+                        statusBadgeTone(order.status) === "neutral" &&
+                          "bg-muted text-muted-foreground",
+                      )}
+                    >
+                      {statusLabel(order.status)}
+                    </Badge>
+                    <span className="w-16 text-right text-xs font-semibold tabular-nums text-foreground">
+                      ${Number(order.total ?? 0).toFixed(2)}
                     </span>
-                  </p>
-                  <p className="text-[10px] text-muted-foreground">
-                    {order.created_at
-                      ? new Date(order.created_at).toLocaleDateString("es-ES", {
-                          day: "numeric",
-                          month: "short",
-                        })
-                      : "---"}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge
-                    variant={
-                      order.status === "completed" || order.status === "paid"
-                        ? "default"
-                        : order.status === "cancelled"
-                          ? "destructive"
-                          : "secondary"
-                    }
-                    className="text-[9px] font-medium uppercase tracking-wider px-1.5 py-0.5"
-                  >
-                    {order.status ?? "pending"}
-                  </Badge>
-                  <span className="text-xs font-semibold text-foreground">
-                    ${Number(order.total ?? 0).toFixed(2)}
-                  </span>
-                </div>
-              </motion.li>
-            ))}
-          </ul>
+                  </div>
+                </motion.li>
+              ))}
+            </ul>
+          </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-10 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted/50">
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted/40">
               <ShoppingCart className="size-5 text-muted-foreground/50" />
             </div>
             <p className="mt-3 text-sm font-medium text-foreground/80">Aún no hay pedidos</p>
             <p className="mt-1 text-xs text-muted-foreground">
               Comparte tu tienda para recibir tu primer pedido.
             </p>
-            {storeSlug && (
-              <Link to="/go/$slug" params={{ slug: storeSlug }}>
-                <Button size="sm" variant="outline" className="mt-4 h-8 gap-1.5 text-xs">
-                  <ExternalLink className="size-3.5" />
-                  Ir a mi tienda
-                </Button>
-              </Link>
-            )}
           </div>
         )}
       </Card>
@@ -935,35 +981,25 @@ function QuickActions() {
     {
       label: "Nuevo producto",
       icon: Package,
-      color: "bg-blue-500/10 text-blue-500",
       desc: "Agregar al catálogo",
       to: "/app/products/new" as const,
     },
     {
       label: "Ver pedidos",
       icon: ShoppingCart,
-      color: "bg-emerald-500/10 text-emerald-500",
       desc: "Lista de pedidos",
       to: "/app/orders" as const,
     },
     {
       label: "Ver clientes",
       icon: Users,
-      color: "bg-amber-500/10 text-amber-500",
       desc: "Tu base de contactos",
       to: "/app/customers" as const,
     },
-    {
-      label: "Ver inbox",
-      icon: Inbox,
-      color: "bg-rose-500/10 text-rose-500",
-      desc: "Mensajes entrantes",
-      to: "/app/inbox" as const,
-    },
+    { label: "Ver inbox", icon: Inbox, desc: "Mensajes entrantes", to: "/app/inbox" as const },
     {
       label: "Configurar tienda",
       icon: Settings2,
-      color: "bg-cyan-500/10 text-cyan-500",
       desc: "Personalizar",
       to: "/app/settings" as const,
     },
@@ -976,28 +1012,32 @@ function QuickActions() {
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.5, delay: 0.1 }}
     >
-      <Card className="overflow-hidden border-border/40 p-5 lg:p-6">
-        <h3 className="text-sm font-semibold text-foreground mb-3">Acciones Rápidas</h3>
-        <div className="grid grid-cols-2 gap-2">
+      <Card className="h-full overflow-hidden border-border/60 p-5 lg:p-6">
+        <div className="mb-3 flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-foreground">Acciones rápidas</h3>
+          <ArrowRight className="size-4 text-muted-foreground/40" />
+        </div>
+        <div className="grid grid-cols-1 gap-2">
           {actions.map((action, i) => (
             <motion.button
               key={action.label}
               type="button"
               onClick={() => navigate({ to: action.to })}
-              initial={{ opacity: 0, scale: 0.95 }}
+              initial={{ opacity: 0, scale: 0.97 }}
               animate={isInView ? { opacity: 1, scale: 1 } : {}}
-              transition={{ duration: 0.3, delay: 0.2 + i * 0.04 }}
-              whileHover={{ y: -2 }}
-              whileTap={{ scale: 0.97 }}
-              className="flex flex-col items-center gap-1.5 rounded-xl border border-border/40 bg-background p-3 text-center transition-colors hover:border-border/80 hover:bg-muted/30"
+              transition={{ duration: 0.3, delay: 0.15 + i * 0.04 }}
+              whileHover={{ x: 2 }}
+              whileTap={{ scale: 0.98 }}
+              className="group flex items-center gap-3 rounded-xl border border-border/50 bg-card px-3 py-2.5 text-left transition-colors hover:border-border hover:bg-muted/40"
             >
-              <div
-                className={`flex h-8 w-8 items-center justify-center rounded-lg ${action.color}`}
-              >
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                 <action.icon className="size-4" />
               </div>
-              <span className="text-xs font-medium text-foreground/80">{action.label}</span>
-              <span className="text-[9px] text-muted-foreground/60">{action.desc}</span>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-medium text-foreground">{action.label}</p>
+                <p className="text-[10px] text-muted-foreground">{action.desc}</p>
+              </div>
+              <ChevronRight className="size-3.5 text-muted-foreground/40 transition-transform group-hover:translate-x-0.5 group-hover:text-foreground" />
             </motion.button>
           ))}
         </div>
@@ -1031,7 +1071,7 @@ function ModuleStatus({ stats }: { stats: DashboardStats | undefined }) {
       usage: `${stats?.customers ?? 0} cliente${(stats?.customers ?? 0) !== 1 ? "s" : ""}`,
     },
     { name: "AI", icon: Bot, status: "coming", usage: "Próximamente" },
-    { name: "Analytics", icon: BarChart3, status: "coming", usage: "Próximamente" },
+    { name: "Analytics", icon: Activity, status: "coming", usage: "Próximamente" },
   ];
 
   return (
@@ -1041,28 +1081,29 @@ function ModuleStatus({ stats }: { stats: DashboardStats | undefined }) {
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.5, delay: 0.2 }}
     >
-      <Card className="overflow-hidden border-border/40 p-5 lg:p-6">
-        <div className="flex items-center justify-between mb-3">
+      <Card className="h-full overflow-hidden border-border/60 p-5 lg:p-6">
+        <div className="mb-3 flex items-center justify-between">
           <h3 className="text-sm font-semibold text-foreground">Módulos</h3>
-          <Badge variant="outline" className="text-[9px] font-normal text-muted-foreground">
+          <Badge variant="outline" className="text-[10px] font-normal text-muted-foreground">
             {modules.filter((m) => m.status === "active").length} activos
           </Badge>
         </div>
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           {modules.map((mod, i) => (
             <motion.div
               key={mod.name}
               initial={{ opacity: 0, x: -8 }}
               animate={isInView ? { opacity: 1, x: 0 } : {}}
-              transition={{ duration: 0.3, delay: 0.3 + i * 0.05 }}
-              className="flex items-center gap-3 rounded-lg border border-border/30 p-2.5 transition-colors hover:bg-muted/30"
+              transition={{ duration: 0.3, delay: 0.15 + i * 0.05 }}
+              className="flex items-center gap-3 rounded-lg px-1 py-1.5 transition-colors hover:bg-muted/30"
             >
               <div
-                className={`flex h-8 w-8 items-center justify-center rounded-lg ${
+                className={cn(
+                  "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg",
                   mod.status === "active"
                     ? "bg-primary/10 text-primary"
-                    : "bg-muted/50 text-muted-foreground/50"
-                }`}
+                    : "bg-muted/60 text-muted-foreground/50",
+                )}
               >
                 <mod.icon className="size-4" />
               </div>
@@ -1113,7 +1154,6 @@ function ActivityFeed({ stats }: { stats: DashboardStats | undefined }) {
     detail: `${order.customer_name ?? "Cliente"} · $${Number(order.total ?? 0).toFixed(2)}`,
     time: timeAgo(order.created_at),
     icon: ShoppingCart,
-    color: "text-emerald-500 bg-emerald-500/10",
   }));
 
   return (
@@ -1123,9 +1163,9 @@ function ActivityFeed({ stats }: { stats: DashboardStats | undefined }) {
       animate={isInView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.5, delay: 0.3 }}
     >
-      <Card className="overflow-hidden border-border/40 p-5 lg:p-6">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold text-foreground">Actividad Reciente</h3>
+      <Card className="h-full overflow-hidden border-border/60 p-5 lg:p-6">
+        <div className="mb-3 flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-foreground">Actividad reciente</h3>
         </div>
         {activities.length > 0 ? (
           <div className="space-y-0">
@@ -1134,25 +1174,23 @@ function ActivityFeed({ stats }: { stats: DashboardStats | undefined }) {
                 key={i}
                 initial={{ opacity: 0, x: -8 }}
                 animate={isInView ? { opacity: 1, x: 0 } : {}}
-                transition={{ duration: 0.3, delay: 0.3 + i * 0.06 }}
+                transition={{ duration: 0.3, delay: 0.15 + i * 0.06 }}
                 className="flex items-start gap-3 border-b border-border/20 py-2.5 last:border-0"
               >
-                <div
-                  className={`mt-0.5 flex h-7 w-7 items-center justify-center rounded-lg shrink-0 ${act.color}`}
-                >
+                <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                   <act.icon className="size-3.5" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-medium text-foreground">{act.text}</p>
                   <p className="text-[10px] text-muted-foreground/70 truncate">{act.detail}</p>
                 </div>
-                <span className="text-[9px] text-muted-foreground/50 shrink-0">{act.time}</span>
+                <span className="shrink-0 text-[10px] text-muted-foreground/50">{act.time}</span>
               </motion.div>
             ))}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-10 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted/50">
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted/40">
               <Activity className="size-5 text-muted-foreground/50" />
             </div>
             <p className="mt-3 text-sm font-medium text-foreground/80">Sin actividad todavía</p>
