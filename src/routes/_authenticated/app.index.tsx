@@ -785,27 +785,30 @@ function KPISection({ stats }: { stats: any }) {
   ];
 
   return (
-    <section className="space-y-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-6">
-        {kpis.map((kpi, i) => (
-          <motion.div
-            key={kpi.label}
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.04 * i, ease: [0.22, 0.61, 0.36, 1] }}
-          >
-            <div className="group relative flex flex-col justify-between rounded-[20px] border border-[#EEF2F6] dark:border-slate-800 bg-white dark:bg-slate-900 p-8 shadow-[0_2px_12px_-2px_rgba(0,0,0,0.04)] transition-all duration-180 hover:-translate-y-[3px] hover:scale-[1.01] hover:shadow-[0_8px_24px_-4px_rgba(0,0,0,0.08)]">
+    <motion.section 
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: [0.22, 0.61, 0.36, 1] }}
+      className="w-full"
+    >
+      <div className="overflow-hidden rounded-[20px] border border-[#EEF2F6] dark:border-slate-800 shadow-[0_2px_12px_-2px_rgba(0,0,0,0.04)]">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-px bg-[#EEF2F6] dark:bg-slate-800">
+          {kpis.map((kpi, i) => (
+            <div
+              key={kpi.label}
+              className="group relative flex flex-col justify-between bg-white dark:bg-slate-900 p-6 sm:p-8 transition-colors duration-200 hover:bg-[#FAFBFC] dark:hover:bg-slate-800/50"
+            >
               <div>
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-[#6B7280] dark:text-slate-400">
+                  <span className="text-xs font-bold uppercase tracking-wider text-[#6B7280] dark:text-slate-400 group-hover:text-[#111827] dark:group-hover:text-slate-200 transition-colors">
                     {kpi.label}
                   </span>
-                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#FAFBFC] dark:bg-slate-800 text-[#2563EB] group-hover:bg-[#2563EB] group-hover:text-white transition-colors duration-200">
-                    <kpi.icon className="size-4 stroke-[2]" />
+                  <div className="flex h-8 w-8 items-center justify-center rounded-xl text-[#6B7280] dark:text-slate-400 group-hover:text-[#2563EB] group-hover:bg-[#2563EB]/10 transition-colors duration-200">
+                    <kpi.icon className="size-4 stroke-[2.5]" />
                   </div>
                 </div>
 
-                <div className="mt-3 text-2xl font-bold tracking-tight text-[#111827] dark:text-[#F9FAFB]">
+                <div className="mt-4 text-2xl lg:text-[1.75rem] font-bold tracking-tight text-[#111827] dark:text-[#F9FAFB]">
                   <AnimatedCounter
                     value={kpi.value}
                     prefix={kpi.prefix}
@@ -815,9 +818,9 @@ function KPISection({ stats }: { stats: any }) {
                 </div>
               </div>
 
-              <div className="mt-4 pt-3 border-t border-[#EEF2F6]/60 dark:border-slate-800/60">
+              <div className="mt-6">
                 {kpi.trend != null ? (
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
                     <TrendChip value={kpi.trend} />
                     <span className="text-[11px] font-medium text-[#6B7280] dark:text-slate-500">
                       vs anterior
@@ -830,16 +833,19 @@ function KPISection({ stats }: { stats: any }) {
                 )}
 
                 {kpi.spark && (
-                  <div className="mt-3 opacity-60 group-hover:opacity-100 transition-opacity">
-                    <MiniSparkline data={kpi.spark} />
+                  <div className="mt-4 opacity-50 group-hover:opacity-100 transition-opacity duration-300">
+                    <MiniSparkline 
+                      data={kpi.spark} 
+                      color={kpi.trend != null && kpi.trend < 0 ? "#E11D48" : "#2563EB"} 
+                    />
                   </div>
                 )}
               </div>
             </div>
-          </motion.div>
-        ))}
+          ))}
+        </div>
       </div>
-    </section>
+    </motion.section>
   );
 }
 
