@@ -18,6 +18,7 @@ import {
   SidebarMenuSubItem,
   SidebarProvider,
   SidebarRail,
+  SidebarTrigger,
 } from "@/components/animate-ui/components/radix/sidebar";
 import {
   Bell,
@@ -389,9 +390,11 @@ function UserMenu() {
 }
 
 function AppHeader() {
-  const { businesses, activeBusiness } = useBusiness();
+  const { activeBusiness } = useBusiness();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isDashboard = pathname === "/app" || pathname === "/app/";
   const [dark, setDark] = useState(false);
 
   const [email, setEmail] = useState("");
@@ -422,9 +425,19 @@ function AppHeader() {
     window.localStorage.setItem("commerce_ai_theme", next ? "dark" : "light");
   }, [dark]);
 
+  if (isDashboard) {
+    return (
+      <header className="sticky top-0 z-40 flex h-12 items-center border-b border-[#EEF2F6]/60 dark:border-slate-800/60 bg-[#FAFBFC]/80 dark:bg-[#0B0F17]/80 backdrop-blur-xl px-4 lg:px-6">
+        <SidebarTrigger className="h-8 w-8 text-[#6B7280] hover:text-[#111827] dark:text-slate-400 dark:hover:text-slate-100" />
+      </header>
+    );
+  }
+
   return (
     <>
-      <header className="sticky top-0 z-30 flex h-12 items-center justify-end gap-2 border-b border-border/40 bg-background/80 backdrop-blur-xl px-4 lg:px-6">
+      <header className="sticky top-0 z-30 flex h-12 items-center justify-between gap-2 border-b border-border/40 bg-background/80 backdrop-blur-xl px-4 lg:px-6">
+        <SidebarTrigger className="h-8 w-8 text-muted-foreground hover:text-foreground" />
+        <div className="flex items-center gap-2 ml-auto">
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -495,6 +508,7 @@ function AppHeader() {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+        </div>
       </header>
     </>
   );
