@@ -293,22 +293,14 @@ function StorefrontPage() {
                     rápido y pago seguro.
                   </p>
 
-                  {(shippingEnabled || waPhone) && (
+                  {shippingEnabled && (
                     <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-sm font-medium text-muted-foreground md:justify-start">
-                      {shippingEnabled && (
-                        <span className="flex items-center gap-1.5">
-                          <Truck className="size-4.5 text-foreground/40" strokeWidth={2} />
-                          {freeThreshold
-                            ? `Envío gratis desde ${$}${freeThreshold.toFixed(2)}`
-                            : "Envío a todo el país"}
-                        </span>
-                      )}
-                      {waPhone && (
-                        <span className="flex items-center gap-1.5">
-                          <MessageCircle className="size-4.5 text-[#25D366]" strokeWidth={2} />
-                          Pedidos por WhatsApp
-                        </span>
-                      )}
+                      <span className="flex items-center gap-1.5">
+                        <Truck className="size-4.5 text-foreground/40" strokeWidth={2} />
+                        {freeThreshold
+                          ? `Envío gratis desde ${$}${freeThreshold.toFixed(2)}`
+                          : "Envío a todo el país"}
+                      </span>
                     </div>
                   )}
 

@@ -76,7 +76,6 @@ function Landing() {
 
           <nav className="hidden md:flex items-center gap-8">
             {[
-              { label: "Cómo funciona", href: "#how-it-works" },
               { label: "Beneficios", href: "#features" },
               { label: "Precios", href: "#pricing" },
             ].map((item) => (
@@ -276,8 +275,8 @@ function Landing() {
                 </div>
               </div>
               <img
-                src="https://placehold.co/1200x675/F8FAFC/64748B?text=Screenshot:+Dashboard+Principal\n(Muestra+métricas+y+vista+previa+del+catálogo)"
-                alt="Dashboard Screenshot"
+                src={APP_DASHBOARD_CAPTURE}
+                alt="Vista real del dashboard de Commerce AI"
                 className="w-full h-auto object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/20 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
@@ -326,117 +325,141 @@ function Landing() {
         </div>
       </section>
 
-      {/* ---- How It Works ---- */}
-      <section
-        id="how-it-works"
-        className="py-24 bg-[#F8FAFC] border-b border-[#E2E8F0] overflow-hidden"
-      >
+      {/* ---- Product Proof ---- */}
+      <section className="bg-[#F8FAFC] py-24 border-b border-[#E2E8F0]">
+        <div className="max-w-[1280px] mx-auto px-6">
+          <div className="grid lg:grid-cols-[0.85fr_1.15fr] gap-12 items-center">
+            <motion.div
+              initial={{ opacity: 1, y: 0 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-60px" }}
+              transition={{ duration: 0.6, ease: [0.22, 0.61, 0.36, 1] }}
+              className="space-y-6"
+            >
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#2563EB]/20 bg-[#EFF6FF] text-xs font-semibold text-[#2563EB]">
+                Capturas reales del sistema
+              </div>
+              <h2 className="text-4xl md:text-5xl font-bold text-[#0B0F19] tracking-[-0.04em] font-display leading-tight">
+                Del primer ajuste al panel de ventas, todo se siente conectado.
+              </h2>
+              <p className="text-[#64748B] text-lg leading-relaxed">
+                El sistema combina onboarding guiado, métricas de negocio y acciones rápidas en una
+                interfaz clara para que el comercio sepa qué hacer después.
+              </p>
+              <div className="grid sm:grid-cols-3 gap-3 pt-2">
+                {["Dashboard ejecutivo", "Métricas visibles", "Onboarding guiado"].map((item) => (
+                  <div
+                    key={item}
+                    className="flex items-center gap-2 rounded-xl border border-[#E2E8F0] bg-white px-4 py-3 text-sm font-medium text-[#374151] shadow-sm"
+                  >
+                    <CheckCircle2 size={16} className="text-[#2563EB] shrink-0" />
+                    {item}
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 1, y: 0, scale: 1 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 0.8, ease: [0.22, 0.61, 0.36, 1] }}
+              className="grid gap-4"
+            >
+              <div className="relative overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white shadow-[0_24px_60px_-24px_rgba(15,23,42,0.35)]">
+                <img
+                  src={APP_DASHBOARD_CAPTURE}
+                  alt="Dashboard administrativo de Commerce AI"
+                  className="w-full h-auto object-cover"
+                />
+              </div>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white shadow-sm">
+                  <img
+                    src={APP_DASHBOARD_METRICS_CAPTURE}
+                    alt="Tarjetas de métricas del dashboard"
+                    className="h-56 w-full object-cover object-left-top"
+                  />
+                </div>
+                <div className="overflow-hidden rounded-2xl border border-[#E2E8F0] bg-white shadow-sm">
+                  <img
+                    src={ONBOARDING_CAPTURE_FORM}
+                    alt="Formulario inicial del onboarding"
+                    className="h-56 w-full object-cover object-left-top"
+                  />
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* ---- Public Store Proof ---- */}
+      <section className="bg-white py-24 border-b border-[#E2E8F0] overflow-hidden">
         <div className="max-w-[1280px] mx-auto px-6">
           <motion.div
             initial={{ opacity: 1, y: 0 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-60px" }}
             transition={{ duration: 0.6, ease: [0.22, 0.61, 0.36, 1] }}
-            className="text-center mb-24"
+            className="mx-auto mb-14 max-w-3xl text-center"
           >
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#2563EB]/20 bg-[#EFF6FF] text-xs font-semibold text-[#2563EB] mb-6">
-              Tan simple que parece magia ✨
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#22C55E]/20 bg-[#F0FDF4] px-3 py-1 text-xs font-semibold text-[#15803D]">
+              Tienda pública con productos reales
             </div>
-            <h2 className="text-4xl md:text-5xl font-bold text-[#0B0F19] tracking-[-0.04em] font-display mb-6">
-              De la idea al pedido en 4 pasos
+            <h2 className="font-display text-4xl font-bold leading-tight tracking-[-0.04em] text-[#0B0F19] md:text-5xl">
+              Así se ve una tienda lista para compartir con clientes.
             </h2>
-            <p className="text-[#64748B] text-lg font-sans max-w-2xl mx-auto">
-              Un flujo optimizado paso a paso para eliminar la fricción entre tú y tus ventas.
-              Configuras una vez, vendes en automático siempre.
+            <p className="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-[#64748B]">
+              CellStock muestra categorías, ofertas, carrito y detalle de producto en un catálogo
+              responsive que convierte el inventario en una experiencia de compra directa.
             </p>
           </motion.div>
 
-          <div className="space-y-32">
-            {steps.map((step, i) => (
+          <div className="grid gap-5 lg:grid-cols-[1.25fr_0.75fr]">
+            <motion.div
+              initial={{ opacity: 1, y: 0 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-80px" }}
+              transition={{ duration: 0.75, ease: [0.22, 0.61, 0.36, 1] }}
+              className="overflow-hidden rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] shadow-[0_28px_70px_-30px_rgba(15,23,42,0.35)]"
+            >
+              <img
+                src={STORE_CELLSTOCK_PRODUCTS_CAPTURE}
+                alt="Catálogo público de CellStock con productos de prueba"
+                className="h-full min-h-[360px] w-full object-cover object-left-top"
+              />
+            </motion.div>
+
+            <div className="grid gap-5">
               <motion.div
-                key={step.number}
-                initial="visible"
-                whileInView="visible"
-                viewport={{ once: true, margin: "-100px" }}
-                variants={{
-                  hidden: {},
-                  visible: { transition: { staggerChildren: 0.2 } },
-                }}
-                className={`flex flex-col ${i % 2 === 1 ? "md:flex-row-reverse" : "md:flex-row"} items-center gap-12 lg:gap-24`}
+                initial={{ opacity: 1, x: 0 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{ duration: 0.75, ease: [0.22, 0.61, 0.36, 1], delay: 0.08 }}
+                className="overflow-hidden rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] shadow-sm"
               >
-                <div className="w-full md:w-1/2 space-y-6 lg:px-8">
-                  <motion.div
-                    variants={{
-                      hidden: { opacity: 0, x: i % 2 === 1 ? 40 : -40 },
-                      visible: {
-                        opacity: 1,
-                        x: 0,
-                        transition: { duration: 0.8, ease: [0.22, 0.61, 0.36, 1] },
-                      },
-                    }}
-                    className={`w-14 h-14 rounded-2xl flex items-center justify-center font-display font-bold text-2xl shadow-sm border ${
-                      step.isSuccess
-                        ? "bg-gradient-to-br from-[#22C55E]/20 to-[#22C55E]/5 text-[#166534] border-[#22C55E]/30"
-                        : "bg-gradient-to-br from-[#2563EB]/20 to-[#2563EB]/5 text-[#1E40AF] border-[#2563EB]/30"
-                    }`}
-                  >
-                    {step.number}
-                  </motion.div>
-                  <motion.h3
-                    variants={{
-                      hidden: { opacity: 0, y: 20 },
-                      visible: {
-                        opacity: 1,
-                        y: 0,
-                        transition: { duration: 0.8, ease: [0.22, 0.61, 0.36, 1] },
-                      },
-                    }}
-                    className="text-3xl md:text-4xl font-bold text-[#0B0F19] font-display tracking-[-0.04em] leading-tight"
-                  >
-                    {step.title}
-                  </motion.h3>
-                  <motion.p
-                    variants={{
-                      hidden: { opacity: 0, y: 20 },
-                      visible: {
-                        opacity: 1,
-                        y: 0,
-                        transition: { duration: 0.8, ease: [0.22, 0.61, 0.36, 1] },
-                      },
-                    }}
-                    className="text-[#64748B] text-lg leading-relaxed"
-                  >
-                    {step.description}
-                  </motion.p>
-                </div>
-                <motion.div
-                  variants={{
-                    hidden: { opacity: 0, scale: 0.95, rotate: i % 2 === 1 ? -2 : 2 },
-                    visible: {
-                      opacity: 1,
-                      scale: 1,
-                      rotate: 0,
-                      transition: { duration: 1, ease: [0.22, 0.61, 0.36, 1] },
-                    },
-                  }}
-                  className="w-full md:w-1/2 relative group"
-                  style={{ perspective: 1000 }}
-                >
-                  <motion.div
-                    whileHover={{ rotateY: i % 2 === 1 ? -4 : 4, rotateX: 2, scale: 1.02 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                    style={{ transformStyle: "preserve-3d" }}
-                    className={`bg-white border border-[#E2E8F0] rounded-2xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1),0_0_0_1px_#E2E8F0] overflow-hidden relative z-10 ${step.isMobile ? "max-w-[320px] mx-auto" : ""}`}
-                  >
-                    <img src={step.image} alt={step.title} className="w-full h-auto" />
-                    <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/40 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
-                  </motion.div>
-                  <div
-                    className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-gradient-to-br ${step.isSuccess ? "from-green-100 to-emerald-50" : "from-blue-100 to-indigo-50"} rounded-full blur-3xl opacity-50 z-0 group-hover:opacity-80 transition-opacity duration-700`}
-                  />
-                </motion.div>
+                <img
+                  src={STORE_CELLSTOCK_HERO_CAPTURE}
+                  alt="Portada de la tienda pública CellStock"
+                  className="h-64 w-full object-cover object-left-top"
+                />
               </motion.div>
-            ))}
+
+              <motion.div
+                initial={{ opacity: 1, x: 0 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{ duration: 0.75, ease: [0.22, 0.61, 0.36, 1], delay: 0.16 }}
+                className="overflow-hidden rounded-2xl border border-[#E2E8F0] bg-[#F8FAFC] shadow-sm"
+              >
+                <img
+                  src={STORE_CELLSTOCK_DETAIL_CAPTURE}
+                  alt="Detalle de producto con carrito y WhatsApp en CellStock"
+                  className="h-64 w-full object-cover object-left-top"
+                />
+              </motion.div>
+            </div>
           </div>
         </div>
       </section>
@@ -825,56 +848,22 @@ function PlanCard({ plan, index }: { plan: (typeof plans)[number]; index: number
 
 /* ---- Data ---- */
 
-const steps = [
-  {
-    number: 1,
-    title: "1. Crea tu catálogo en minutos",
-    description:
-      "Sube fotos de tus productos, añade descripciones atractivas y precios. Nuestra plataforma es tan intuitiva que tendrás tu tienda online lista para vender hoy mismo, sin complicaciones técnicas.",
-    image:
-      "https://placehold.co/800x600/F1F5F9/475569?text=Screenshot:+Gesti%C3%B3n+de+Productos\n(Panel+Administrativo)",
-    isMobile: false,
-    isSuccess: false,
-  },
-  {
-    number: 2,
-    title: "2. Comparte tu único enlace",
-    description: `Despídete de enviar fotos sueltas y PDFs pesados por chat. Coloca tu enlace de ${APP_NAME} en tu bio de Instagram, TikTok o envíalo directamente a tus clientes por WhatsApp. Tu negocio, siempre disponible.`,
-    image:
-      "https://placehold.co/800x600/F1F5F9/475569?text=Screenshot:+Perfil+de+Instagram/WhatsApp\n(Mostrando+el+link+de+la+tienda)",
-    isMobile: false,
-    isSuccess: false,
-  },
-  {
-    number: 3,
-    title: "3. Tus clientes compran solos",
-    description:
-      "Ofrece una experiencia de compra premium y sin fricción. Tus clientes pueden navegar desde su celular, elegir productos, seleccionar opciones y llenar su carrito, todo sin crear cuentas molestas ni descargar apps.",
-    image:
-      "https://placehold.co/375x812/FFFFFF/64748B?text=Screenshot:+Checkout+M%C3%B3vil\n(Cat%C3%A1logo+y+Carrito)",
-    isMobile: true,
-    isSuccess: false,
-  },
-  {
-    number: 4,
-    title: "4. Recibe pedidos listos para cobrar",
-    description:
-      "Cuando tu cliente finaliza la compra, recibes instantáneamente un mensaje en WhatsApp estructurado con precisión: qué quieren, cuánto es y a dónde enviarlo. Cero confusiones, 100% ventas cerradas.",
-    image:
-      "https://placehold.co/800x600/F1F5F9/22C55E?text=Screenshot:+Mensaje+generado+en+WhatsApp\n(Lista+de+pedido+estructurada)",
-    isMobile: false,
-    isSuccess: true,
-  },
-];
+const ONBOARDING_CAPTURE_FORM = "/landing-captures/onboarding-form-demo.png";
+const APP_DASHBOARD_CAPTURE = "/landing-captures/app-dashboard-demo.png";
+const APP_DASHBOARD_WIDE_CAPTURE = "/landing-captures/app-dashboard-wide-demo.png";
+const APP_DASHBOARD_METRICS_CAPTURE = "/landing-captures/app-dashboard-metrics-demo.png";
+const APP_DASHBOARD_PERFORMANCE_CAPTURE = "/landing-captures/app-dashboard-performance-demo.png";
+const STORE_CELLSTOCK_HERO_CAPTURE = "/landing-captures/store-cellstock-hero-demo.png";
+const STORE_CELLSTOCK_PRODUCTS_CAPTURE = "/landing-captures/store-cellstock-products-demo.png";
+const STORE_CELLSTOCK_DETAIL_CAPTURE = "/landing-captures/store-cellstock-product-detail-demo.png";
 
 const features = [
   {
     icon: LayoutGrid,
-    title: "Vendedora estrella 24/7",
+    title: "Panel ejecutivo para vender mejor",
     description:
-      "Tu catálogo nunca duerme. Muestra tus productos con fotos impecables y descripciones que venden, permitiendo a tus clientes comprar a cualquier hora, incluso cuando tú descansas.",
-    image:
-      "https://placehold.co/800x400/FFFFFF/475569?text=Screenshot:+Vista+Desktop+del+Cat%C3%A1logo\n(Grid+de+productos)",
+      "Visualiza ingresos, pedidos, clientes, productos, conversión y ticket promedio en una sola vista lista para tomar decisiones rápidas.",
+    image: APP_DASHBOARD_WIDE_CAPTURE,
     spanFull: true,
     tall: true,
     iconBg: "bg-blue-100",
@@ -882,10 +871,10 @@ const features = [
   },
   {
     icon: MousePointerClick,
-    title: "Checkout de alta conversión",
+    title: "Inicio guiado sin fricción",
     description:
-      "Diseñado obsesivamente para evitar carritos abandonados. Solo pedimos la información estrictamente necesaria para cerrar la venta rápido y fácil.",
-    image: "https://placehold.co/400x300/FFFFFF/475569?text=Screenshot:+Formulario+de+Checkout",
+      "El onboarding recopila solo lo esencial para crear el espacio de trabajo y preparar el negocio para publicar su tienda.",
+    image: ONBOARDING_CAPTURE_FORM,
     spanFull: false,
     tall: false,
     iconBg: "bg-red-100",
@@ -893,10 +882,10 @@ const features = [
   },
   {
     icon: MessageSquare,
-    title: "Directo a tu WhatsApp",
+    title: "Métricas listas para revisar",
     description:
-      "Sin intermediarios. Cada pedido se transforma mágicamente en un mensaje claro y ordenado en tu chat de WhatsApp, listo para ser despachado.",
-    image: "https://placehold.co/400x300/F0FDF4/166534?text=Screenshot:+Resumen+en+WhatsApp",
+      "Las tarjetas de desempeño hacen visible qué está pasando con ventas, pedidos y clientes sin obligarte a buscar entre reportes.",
+    image: APP_DASHBOARD_METRICS_CAPTURE,
     spanFull: false,
     tall: false,
     iconBg: "bg-emerald-100",
@@ -906,9 +895,8 @@ const features = [
     icon: SlidersHorizontal,
     title: "Control total de tu negocio",
     description:
-      "Cambia precios en segundos, oculta lo que ya no tienes y lanza promociones. Administrar tu negocio online nunca había sido tan fácil ni tan rápido.",
-    image:
-      "https://placehold.co/800x400/FFFFFF/475569?text=Screenshot:+Dashboard+de+M%C3%A9tricas+y+Gesti%C3%B3n",
+      "Revisa rendimiento, abre tu tienda y crea productos desde el mismo panel administrativo sin romper el flujo de trabajo.",
+    image: APP_DASHBOARD_PERFORMANCE_CAPTURE,
     spanFull: true,
     tall: true,
     iconBg: "bg-purple-100",

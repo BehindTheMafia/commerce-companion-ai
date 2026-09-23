@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "@tanstack/react-router";
-import { Search, ShoppingBag, X, MessageCircle } from "lucide-react";
+import { Search, ShoppingBag, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/lib/cart-context";
 import { getWhatsAppLink } from "@/lib/whatsapp";
+import { WhatsAppIcon } from "@/components/storefront/whatsapp-icon";
 import type { Business } from "@/types/storefront";
 
 type StoreHeaderProps = {
@@ -100,7 +101,7 @@ export function StoreHeader({ business, slug, onCartOpen, actions, search }: Sto
               rel="noopener noreferrer"
               className="hidden items-center gap-2 rounded-xl bg-[#25D366]/10 px-3.5 py-2 text-sm font-semibold text-[#128C7E] transition-colors hover:bg-[#25D366]/20 sm:flex"
             >
-              <MessageCircle className="size-4" strokeWidth={2} />
+              <WhatsAppIcon className="size-4 text-[#25D366]" />
               Soporte
             </a>
           )}
